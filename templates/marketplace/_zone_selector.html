@@ -1,0 +1,31 @@
+{# Zone selector sub-modal. Include once per page. Requires zones_by_group. #}
+<div class="zone-selector-overlay" id="zone-selector-overlay" aria-hidden="true"></div>
+<div class="zone-selector-modal" id="zone-selector-modal" role="dialog" aria-labelledby="zone-selector-title" aria-modal="true">
+  <div class="zone-selector-header">
+    <h2 class="zone-selector-title" id="zone-selector-title">Selectează zone</h2>
+    <button type="button" class="zone-selector-close js-zone-selector-close" aria-label="Închide">×</button>
+  </div>
+  <div class="zone-selector-search-wrap">
+    <input type="text" class="zone-selector-search" id="zone-selector-search" placeholder="Caută sector / cartier / localitate…" autocomplete="off" />
+  </div>
+  <div class="zone-selector-chips" id="zone-selector-chips"></div>
+  <div class="zone-selector-groups" id="zone-selector-groups">
+    {% for group_name, group_zones in zones_by_group %}
+      <div class="zone-selector-group" data-group="{{ group_name }}">
+        <button type="button" class="zone-selector-group-title" aria-expanded="false" data-group-toggle="{{ group_name }}">{{ group_name }}</button>
+        <div class="zone-selector-group-body">
+          {% for z in group_zones %}
+            <label class="zone-selector-option">
+              <input type="checkbox" class="zone-selector-cb" value="{{ z.id }}" data-zone-name="{{ z.name|zone_display_name }}" />
+              <span>{{ z.name|zone_display_name }}</span>
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="zone-selector-actions">
+    <button type="button" class="zone-selector-btn zone-selector-btn-reset js-zone-selector-reset">Resetează zone</button>
+    <button type="button" class="zone-selector-btn zone-selector-btn-done js-zone-selector-done">Gata</button>
+  </div>
+</div>

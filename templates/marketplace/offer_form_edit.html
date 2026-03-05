@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Editează anunț #{{ offer.id }} — Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .form-wrap { max-width: 600px; margin: 0 auto; padding: var(--pad-lg) var(--pad); }
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--r-md); border: 1px solid var(--stroke); background: var(--surface); color: var(--text); text-decoration: none; font-weight: 700; font-size: 14px; margin-bottom: var(--pad-lg); }
+    .back-btn:hover { background: var(--surface2); border-color: var(--primary); }
+    .form-title { font-size: 28px; font-weight: 700; margin: 0 0 var(--pad-lg); }
+    .form-card { background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-lg); padding: var(--pad-lg); margin-bottom: var(--pad); box-shadow: var(--shadow2); }
+    .form-section-title { margin: 0 0 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    label { display: block; margin-top: var(--pad); font-size: 14px; font-weight: 600; color: var(--text); }
+    label:first-of-type { margin-top: 0; }
+    input, select, textarea { width: 100%; padding: 14px 16px; border-radius: var(--r-md); border: 1px solid var(--stroke); background: var(--bg); color: var(--text); font-size: 16px; margin-top: 8px; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(79,140,255,.1); }
+    textarea { min-height: 120px; resize: vertical; }
+    .err { font-size: 12px; color: var(--danger); margin-top: 6px; }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: var(--pad-lg); }
+    .btn { padding: 14px 24px; border-radius: var(--r-md); font-weight: 700; cursor: pointer; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); text-decoration: none; }
+    .btn.primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%); border-color: transparent; color: white; }
+    .flash { margin-bottom: var(--pad); padding: var(--pad); border-radius: var(--r-md); font-weight: 700; font-size: 14px; }
+    .flash.error { border: 1px solid rgba(255,92,124,.35); background: rgba(255,92,124,.1); color: var(--danger); }
+    .zone-trigger-btn { width: 100%; padding: 14px 16px; border-radius: var(--r-md); border: 1px solid var(--stroke); background: var(--bg); color: var(--text); font-size: 15px; font-weight: 600; cursor: pointer; text-align: left; margin-top: 8px; }
+    .zone-trigger-btn:hover { background: var(--surface); border-color: var(--primary); }
+    .zone-chips-wrap { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .zone-chip-tag { padding: 6px 12px; border-radius: 999px; font-size: 13px; background: var(--surface2); border: 1px solid var(--stroke); color: var(--text); }
+    .etaj-wrap { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px; }
+    .etaj-wrap label { margin-top: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+    .etaj-wrap input[type="checkbox"] { width: auto; margin: 0; }
+    .inline-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .inline-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="form-wrap">
+    <a class="back-btn" href="{{ url_for('marketplace.detail_offer', id=offer.id) }}">← Înapoi la anunț</a>
+    <h1 class="form-title">Editează anunț #{{ offer.id }}</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    <form method="post" action="{{ url_for('marketplace.edit_offer', id=offer.id) }}" id="edit-offer-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-card">
+        <p class="form-section-title">Tip anunț & imobil</p>
+        <label>Tip anunț *</label>
+        <input type="hidden" name="request_type" id="request_type" value="{{ form.request_type.data or 'cumparare' }}" />
+        <div class="tip-anunt-toggle">
+          <button type="button" class="tip-anunt-btn {{ 'active' if form.request_type.data == 'cumparare' }}" data-value="cumparare">Vânzare</button>
+          <button type="button" class="tip-anunt-btn {{ 'active' if form.request_type.data == 'inchiriere' }}" data-value="inchiriere">Închiriere</button>
+        </div>
+        <label for="property_type">Tip imobil *</label>
+        <select id="property_type" name="property_type" required>
+          <option value="apartament" {{ 'selected' if form.property_type.data == 'apartament' }}>Apartament</option>
+          <option value="casa" {{ 'selected' if form.property_type.data == 'casa' }}>Casă/Vilă</option>
+          <option value="teren" {{ 'selected' if form.property_type.data == 'teren' }}>Teren</option>
+          <option value="spatiu_comercial" {{ 'selected' if form.property_type.data == 'spatiu_comercial' }}>Spațiu comercial</option>
+          <option value="birou" {{ 'selected' if form.property_type.data == 'birou' }}>Birou</option>
+          <option value="spatiu_industrial" {{ 'selected' if form.property_type.data == 'spatiu_industrial' }}>Spațiu industrial</option>
+        </select>
+        <label for="rooms" id="rooms-label">Număr camere (opțional)</label>
+        <input type="number" id="rooms" name="rooms" value="{{ form.rooms.data or '' }}" min="1" max="20" />
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Preț</p>
+        <label for="price">Preț imobil (€) — opțional</label>
+        <input type="text" id="price" name="price" value="{{ form.price.data|format_budget if form.price.data is not none else '' }}" placeholder="Ex: 120.000" inputmode="numeric" />
+        {% if form.price.errors %}<span class="err">{{ form.price.errors[0] }}</span>{% endif %}
+        <label style="display:flex; align-items:center; gap:10px; margin-top:12px;">
+          <input type="checkbox" name="price_negotiable" value="1" style="width:auto;" {{ 'checked' if form.price_negotiable.data }} />
+          <span>Preț negociabil</span>
+        </label>
+        <label style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+          <input type="checkbox" name="plus_tva" value="1" style="width:auto;" {{ 'checked' if form.plus_tva.data }} />
+          <span>Plus TVA</span>
+        </label>
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Zone *</p>
+        <button type="button" class="zone-trigger-btn js-open-zone-selector" data-form-id="edit-offer-form" data-container-id="edit-zone-inputs" data-input-name="zone_ids" data-count-el="edit-zone-count" data-chips-wrap-id="edit-zone-chips">Zone (<span id="edit-zone-count">{{ (form.zone_ids.data or [])|length }}</span> selectate)</button>
+        <div id="edit-zone-inputs">{% for zid in form.zone_ids.data or [] %}<input type="hidden" name="zone_ids" value="{{ zid }}" />{% endfor %}</div>
+        <div class="zone-chips-wrap" id="edit-zone-chips">{% for zid in form.zone_ids.data or [] %}{% set z = zones|selectattr('id', 'equalto', zid)|first %}{% if z %}<span class="zone-chip-tag">{{ z.name|zone_display_name }}</span>{% endif %}{% endfor %}</div>
+        {% if form.zone_ids.errors %}<span class="err">{{ form.zone_ids.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Suprafețe (m²)</p>
+        <p style="font-size:12px; color:var(--muted); margin:0 0 8px;">Poți folosi virgulă sau punct (ex: 45 sau 45,5)</p>
+        <div class="inline-row">
+          <div><label for="surface_utila">Suprafață utilă</label><input type="text" id="surface_utila" name="surface_utila" value="{{ form.surface_utila.data or '' }}" placeholder="Ex: 45 sau 45,5" inputmode="decimal" /></div>
+          <div><label for="surface_totala">Suprafață totală</label><input type="text" id="surface_totala" name="surface_totala" value="{{ form.surface_totala.data or '' }}" placeholder="Ex: 45 sau 45,5" inputmode="decimal" /></div>
+        </div>
+        <div class="inline-row">
+          <div><label for="surface_balcon">Suprafață balcon</label><input type="text" id="surface_balcon" name="surface_balcon" value="{{ form.surface_balcon.data or '' }}" placeholder="Ex: 45 sau 45,5" inputmode="decimal" /></div>
+          <div><label for="surface_terasa">Suprafață terasă</label><input type="text" id="surface_terasa" name="surface_terasa" value="{{ form.surface_terasa.data or '' }}" placeholder="Ex: 45 sau 45,5" inputmode="decimal" /></div>
+        </div>
+        <label for="surface_curte">Suprafață curte</label>
+        <input type="text" id="surface_curte" name="surface_curte" value="{{ form.surface_curte.data or '' }}" placeholder="Ex: 45 sau 45,5" inputmode="decimal" />
+      </div>
+      <div class="form-card" id="etaj-card">
+        <p class="form-section-title">Etaj — opțional</p>
+        <button type="button" class="zone-trigger-btn js-open-etaj-selector" data-container-id="edit-etaj-inputs" data-count-el="edit-etaj-count" data-chips-wrap-id="edit-etaj-chips">Etaj(e) selectate: <span id="edit-etaj-count">{{ offer_etaj_list|length }}</span></button>
+        <div id="edit-etaj-inputs">{% for e in offer_etaj_list %}<input type="hidden" name="etaj" value="{{ e }}" />{% endfor %}</div>
+        <div class="zone-chips-wrap" id="edit-etaj-chips">{% for e in offer_etaj_list %}<span class="zone-chip-tag">{{ e }}</span>{% endfor %}</div>
+        <label for="nr_etaje_cladire" style="margin-top:14px;">Câte etaje are clădirea</label>
+        <input type="number" id="nr_etaje_cladire" name="nr_etaje_cladire" value="{{ form.nr_etaje_cladire.data or '' }}" min="1" max="30" placeholder="Ex: 5" />
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Alte detalii</p>
+        <div class="inline-row">
+          <div><label for="anul_constructiei">Anul construcției</label><input type="number" id="anul_constructiei" name="anul_constructiei" value="{{ form.anul_constructiei.data or '' }}" min="1900" max="2100" /></div>
+          <div><label for="nr_locuri_parcare">Locuri parcare</label><input type="number" id="nr_locuri_parcare" name="nr_locuri_parcare" value="{{ form.nr_locuri_parcare.data or '' }}" min="0" max="20" /></div>
+        </div>
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Comision</p>
+        <label style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" name="offers_commission" value="1" style="width:auto;" {{ 'checked' if form.offers_commission.data }} />
+          <span>Ofer comision</span>
+        </label>
+        <label for="commission_value">Valoare comision (ex: 3% sau 500 €)</label>
+        <input type="text" id="commission_value" name="commission_value" value="{{ form.commission_value.data or '' }}" placeholder="Ex: 3% sau 500 €" />
+        {% if form.commission_value.errors %}<span class="err">{{ form.commission_value.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Contact</p>
+        <label for="contact_phone">Telefon de contact</label>
+        <input type="tel" id="contact_phone" name="contact_phone" value="{{ form.contact_phone.data or '' }}" placeholder="ex: 07xx xxx xxx" />
+        {% if form.contact_phone.errors %}<span class="err">{{ form.contact_phone.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="form-card">
+        <p class="form-section-title">Descriere</p>
+        <label for="description">Descriere (fără numere de telefon sau linkuri)</label>
+        <textarea id="description" name="description">{{ form.description.data or '' }}</textarea>
+        {% if form.description.errors %}<span class="err">{{ form.description.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="form-card form-card-private">
+        <p class="form-section-title">Doar pentru tine</p>
+        <p class="form-hint" style="font-size:12px; color:var(--muted); margin:0 0 10px;">Vizibil doar pentru tine. Te ajută să știi a cui este proprietatea.</p>
+        <label for="owner_name_private">Numele sau numarul proprietarului</label>
+        <input type="text" id="owner_name_private" name="owner_name_private" value="{{ form.owner_name_private.data or '' }}" placeholder="ex: Ion Popescu 07......" />
+        {% if form.owner_name_private.errors %}<span class="err">{{ form.owner_name_private.errors[0] }}</span>{% endif %}
+      </div>
+      <div class="btn-row">
+        <button type="submit" class="btn primary">Salvează modificările</button>
+        <a class="btn" href="{{ url_for('marketplace.detail_offer', id=offer.id) }}">Anulează</a>
+      </div>
+    </form>
+  </div>
+  {% include 'marketplace/_zone_selector.html' %}
+  {% include 'marketplace/_etaj_selector.html' %}
+  <script src="{{ url_for('static', filename='js/marketplace.js') }}"></script>
+  <script>
+  (function() {
+    var propertyType = document.getElementById('property_type');
+    var roomsLabel = document.getElementById('rooms-label');
+    var roomsInput = document.getElementById('rooms');
+    var etajCard = document.getElementById('etaj-card');
+    var requestTypeInput = document.getElementById('request_type');
+    var tipBtns = document.querySelectorAll('.tip-anunt-btn');
+    tipBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var v = this.getAttribute('data-value');
+        if (requestTypeInput) requestTypeInput.value = v;
+        tipBtns.forEach(function(b) { b.classList.remove('active'); });
+        this.classList.add('active');
+      });
+    });
+    function toggleRoomsAndEtaj() {
+      var isCasa = propertyType && propertyType.value === 'casa';
+      var isTeren = propertyType && propertyType.value === 'teren';
+      var isSpatiu = propertyType && propertyType.value === 'spatiu_comercial';
+      if (roomsLabel) roomsLabel.style.display = (isTeren || isSpatiu) ? 'none' : 'block';
+      if (roomsInput) { roomsInput.style.display = (isTeren || isSpatiu) ? 'none' : 'block'; if (isTeren || isSpatiu) roomsInput.value = ''; }
+      if (etajCard) etajCard.style.display = isCasa ? 'none' : 'block';
+      if (isCasa) {
+        var c = document.getElementById('edit-etaj-inputs');
+        if (c) c.innerHTML = '';
+        var countEl = document.getElementById('edit-etaj-count');
+        if (countEl) countEl.textContent = '0';
+        var chips = document.getElementById('edit-etaj-chips');
+        if (chips) chips.innerHTML = '';
+      }
+    }
+    if (propertyType) { propertyType.addEventListener('change', toggleRoomsAndEtaj); toggleRoomsAndEtaj(); }
+  })();
+  </script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

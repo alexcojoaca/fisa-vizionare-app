@@ -1,0 +1,49 @@
+{% extends "base_premium.html" %}
+{% block title %}Creează cont – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('auth.login') }}" class="topbarAuthBtn">Logare</a>
+{% endblock %}
+
+{% block content %}
+  <div class="wrapCentered" style="margin-top:2rem;">
+    <div class="card">
+      <div class="cardInner">
+        <h2 style="margin-top:0;">Creează cont</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% for _, message in messages %}
+            <div class="flash">{{ message }}</div>
+          {% endfor %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <label for="full_name">Nume complet</label>
+          <input id="full_name" name="full_name" placeholder="Nume Prenume" required>
+
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="email@..." required>
+
+          <label for="password">Parolă</label>
+          <input id="password" name="password" type="password" placeholder="••••••••" required>
+
+          <label style="display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:0.8125rem;color:var(--text-secondary);">
+            <input type="checkbox" name="accept_terms" value="1" required style="width:auto;margin-top:4px;">
+            <span>
+              Sunt de acord cu <a href="/termeni" target="_blank" rel="noopener" style="color:var(--accent);">Termenii</a> și <a href="/confidentialitate" target="_blank" rel="noopener" style="color:var(--accent);">Confidențialitatea</a>.
+            </span>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Creează cont</button>
+            <a class="btn ghost" href="{{ url_for('home') }}">Înapoi</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <p style="margin-top:16px;text-align:center;font-size:0.8125rem;color:var(--text-muted);">
+      Ai deja cont? <a href="{{ url_for('auth.login') }}" style="color:var(--accent);text-decoration:none;">Logare</a>
+    </p>
+  </div>
+{% endblock %}

@@ -1,0 +1,76 @@
+@font-face {
+  font-family: "NotoSans";
+  src: url("Fonts/NotoSans-Regular.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: "NotoSans";
+  src: url("Fonts/NotoSans-Bold.ttf") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+/* PDF defaults */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "NotoSans", sans-serif;
+  font-size: 12pt;
+  color: #111;
+  line-height: 1.35;
+}
+
+h1 {
+  text-align: center;
+  font-weight: bold;
+  font-size: 18pt;
+  margin: 0 0 16px 0;
+}
+
+/* container width so long lines wrap nicely */
+.page {
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+/* Force wrapping for long agency line */
+.wrap {
+  white-space: normal;
+  overflow-wrap: anywhere;   /* modern */
+  word-wrap: break-word;     /* legacy */
+}
+
+/* spacing blocks */
+.block {
+  margin: 10px 0;
+}
+
+.label {
+  font-weight: bold;
+}
+
+/* signatures: left/right on same row */
+.signatures {
+  margin-top: 28px;
+  width: 100%;
+  border-collapse: collapse;
+}
+.signatures td {
+  width: 50%;
+  vertical-align: top;
+}
+.signatures .line {
+  margin-top: 40px;
+  border-top: 1px solid #111;
+  width: 90%;
+}
+.sign-left {
+  text-align: left;
+}
+.sign-right {
+  text-align: right;
+}

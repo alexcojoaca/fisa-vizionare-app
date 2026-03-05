@@ -1,0 +1,33 @@
+{% extends "base_premium.html" %}
+{% block title %}Schimbă email – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('menu.menu_home') }}" class="topbarBtn">Meniu</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Schimbă email</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card">
+    <div class="cardInner">
+      <p style="margin:0 0 16px;color:var(--text-muted);font-size:0.8125rem;">Email curent: <strong>{{ current_user.email }}</strong></p>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <label for="email">Email nou</label>
+        <input id="email" type="email" name="email" placeholder="email@..." required>
+        <label for="password">Confirmă parola</label>
+        <input id="password" type="password" name="password" placeholder="••••••••" required>
+        <div class="actions">
+          <button class="btn primary" type="submit">Salvează</button>
+          <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Înapoi</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

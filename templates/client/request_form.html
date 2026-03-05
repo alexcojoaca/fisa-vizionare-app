@@ -1,0 +1,862 @@
+{% extends "base_premium.html" %}
+{% block title %}{{ 'Editează' if client_request else 'Adaugă' }} cerere – Caut un imobil{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.home') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+</a>
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+<style>
+  .form-wrap {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    transition: all 0.2s;
+  }
+  .back-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-focus);
+  }
+  .form-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+  }
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .form-section-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin: 0 0 1rem;
+  }
+  label {
+    display: block;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+  label:first-of-type {
+    margin-top: 0;
+  }
+  input, select, textarea {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    margin-top: 8px;
+    font-family: inherit;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.1);
+  }
+  textarea {
+    min-height: 120px;
+    resize: vertical;
+  }
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+  .checkbox-label input {
+    width: auto;
+    margin: 0;
+  }
+  .commission-section {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .commission-input {
+    width: 100%;
+    max-width: 200px;
+    margin-top: 8px;
+  }
+  .commission-warning {
+    background: rgba(234, 179, 8, 0.1);
+    border: 1px solid rgba(234, 179, 8, 0.3);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    margin-top: 12px;
+    font-size: 0.875rem;
+    color: var(--text);
+  }
+  .btn-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-focus);
+  }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .btn.primary:hover {
+    background: #fbbf24;
+  }
+  .flash {
+    padding: 12px 16px;
+    border-radius: var(--radius-sm);
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+  }
+  .flash.error {
+    background: rgba(255, 92, 124, 0.1);
+    border: 1px solid rgba(255, 92, 124, 0.3);
+    color: #ff5c7c;
+  }
+  .flash.success {
+    background: rgba(36, 209, 143, 0.1);
+    border: 1px solid rgba(36, 209, 143, 0.3);
+    color: #24d18f;
+  }
+  .zone-trigger-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .zone-trigger-btn:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+  }
+  .zone-chips-wrap {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .zone-chip-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .etaj-trigger-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+  .etaj-trigger-btn:hover {
+    background: var(--surface);
+    border-color: var(--accent);
+  }
+  .completion-indicator {
+    margin-top: 1rem;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+  }
+  .completion-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .completion-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+</style>
+
+<div class="form-wrap">
+  <a class="back-btn" href="{{ url_for('client.home') }}">← Înapoi la cererile mele</a>
+  <h1 class="form-title">{{ 'Editează cerere' if client_request else 'Adaugă cerere nouă' }}</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <form method="post" action="{{ url_for('client.new_request' if not client_request else 'client.edit_request', request_id=client_request.id if client_request else None) }}" id="request-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <div class="form-card">
+      <p class="form-section-title">Tip cerere & imobil</p>
+      <label for="request_type">Tip cerere *</label>
+      <select id="request_type" name="request_type" required>
+        <option value="">Selectează</option>
+        <option value="cumparare" {{ 'selected' if form.request_type.data == 'cumparare' }}>Cumpărare</option>
+        <option value="inchiriere" {{ 'selected' if form.request_type.data == 'inchiriere' }}>Închiriere</option>
+      </select>
+      {% if form.request_type.errors %}<span style="color: #ff5c7c; font-size: 0.875rem; display: block; margin-top: 4px;">{{ form.request_type.errors[0] }}</span>{% endif %}
+
+      <label for="property_type">Tip imobil *</label>
+      <select id="property_type" name="property_type" required>
+        <option value="">Selectează</option>
+        <option value="apartament" {{ 'selected' if form.property_type.data == 'apartament' }}>Apartament</option>
+        <option value="casa" {{ 'selected' if form.property_type.data == 'casa' }}>Casă</option>
+        <option value="teren" {{ 'selected' if form.property_type.data == 'teren' }}>Teren</option>
+        <option value="birou" {{ 'selected' if form.property_type.data == 'birou' }}>Birou</option>
+        <option value="spatiu_industrial" {{ 'selected' if form.property_type.data == 'spatiu_industrial' }}>Spațiu industrial</option>
+      </select>
+      {% if form.property_type.errors %}<span style="color: #ff5c7c; font-size: 0.875rem; display: block; margin-top: 4px;">{{ form.property_type.errors[0] }}</span>{% endif %}
+
+      <label for="rooms" id="rooms-label">Camere</label>
+      <input type="number" id="rooms" name="rooms" value="{{ form.rooms.data or '' }}" min="1" max="20" placeholder="Ex: 3" />
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-title">Buget</p>
+      <label for="budget_min">Buget minim (€)</label>
+      <input type="text" id="budget_min" name="budget_min" value="{{ form.budget_min.data|format_budget if form.budget_min.data is not none else '' }}" placeholder="Ex: 100000" inputmode="numeric" />
+      {% if form.budget_min.errors %}<span style="color: #ff5c7c; font-size: 0.875rem; display: block; margin-top: 4px;">{{ form.budget_min.errors[0] }}</span>{% endif %}
+
+      <label for="budget_max">Buget maxim (€)</label>
+      <input type="text" id="budget_max" name="budget_max" value="{{ form.budget_max.data|format_budget if form.budget_max.data is not none else '' }}" placeholder="Ex: 150000" inputmode="numeric" />
+      {% if form.budget_max.errors %}<span style="color: #ff5c7c; font-size: 0.875rem; display: block; margin-top: 4px;">{{ form.budget_max.errors[0] }}</span>{% endif %}
+
+      <label class="checkbox-label">
+        <input type="checkbox" name="plus_tva" value="1" {{ 'checked' if form.plus_tva.data }} />
+        <span>Buget plus TVA</span>
+      </label>
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-title">Zone * — selectează cel puțin una</p>
+      <button type="button" class="zone-trigger-btn js-open-zone-selector"
+        data-form-id="request-form"
+        data-container-id="zone-inputs"
+        data-input-name="zone_ids"
+        data-count-el="zone-count"
+        data-chips-wrap-id="zone-chips">
+        Zone <span id="zone-count">{{ (form.zone_ids.data or [])|length }}</span>
+      </button>
+      <div id="zone-inputs">
+        {% for zid in form.zone_ids.data or [] %}
+          <input type="hidden" name="zone_ids" value="{{ zid }}" />
+        {% endfor %}
+      </div>
+      <div class="zone-chips-wrap" id="zone-chips">
+        {% for zid in form.zone_ids.data or [] %}
+          {% set z = zones|selectattr('id', 'equalto', zid)|first %}
+          {% if z %}<span class="zone-chip-tag">{{ z.name|zone_display_name }}</span>{% endif %}
+        {% endfor %}
+      </div>
+      {% if form.zone_ids.errors %}<span style="color: #ff5c7c; font-size: 0.875rem; display: block; margin-top: 8px;">{{ form.zone_ids.errors[0] }}</span>{% endif %}
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-title">Detalii suplimentare</p>
+      <label for="year_min">An construcție minim</label>
+      <input type="number" id="year_min" name="year_min" value="{{ form.year_min.data or '' }}" min="1900" max="2100" placeholder="Ex: 2000" />
+
+      <label for="etaj">Etaj preferat (opțional)</label>
+      <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-bottom: 8px;">
+        Poți selecta etaje specifice sau opțiuni precum "Toate etajele" sau "Toate în afară de demisol".
+      </small>
+      <button type="button" class="etaj-trigger-btn js-open-etaj-selector"
+        data-form-id="request-form"
+        data-container-id="etaj-inputs"
+        data-input-name="etaj_values"
+        data-count-el="etaj-count"
+        data-chips-wrap-id="etaj-chips">
+        Etaje <span id="etaj-count">{% if client_request and client_request.etaj %}{{ client_request.etaj.split(',')|length }}{% else %}0{% endif %}</span>
+      </button>
+      <div id="etaj-inputs">
+        {% if client_request and client_request.etaj %}
+          {% for e in client_request.etaj.split(',') %}
+            <input type="hidden" name="etaj_values" value="{{ e.strip() }}" />
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="zone-chips-wrap" id="etaj-chips">
+        {% if client_request and client_request.etaj %}
+          {% for e in client_request.etaj.split(',') %}
+            <span class="zone-chip-tag">{{ e.strip() }}</span>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <label for="description">Descriere</label>
+      <textarea id="description" name="description" placeholder="Descrie cât mai detaliat ce cauți pentru a primi oferte relevante...">{{ form.description.data or '' }}</textarea>
+      <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-top: 4px;">
+        Cu cât descrii mai detaliat, cu atât vei primi oferte mai relevante de la agenți.
+      </small>
+
+      <label class="checkbox-label">
+        <input type="checkbox" name="urgent" value="1" {{ 'checked' if form.urgent.data }} />
+        <span>Cerere urgentă</span>
+      </label>
+    </div>
+
+    <div class="form-card">
+      <p class="form-section-title">Comision</p>
+      <p style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 1rem;">
+        Specifică dacă oferi comision agentului sau nu. Agenții vor vedea această informație înainte să te contacteze.
+      </p>
+
+      <label class="checkbox-label">
+        <input type="radio" name="commission_option" value="offers" id="commission_offers" {{ 'checked' if (client_request and client_request.client_offers_commission) or (not client_request) }} />
+        <span>Ofer comision</span>
+      </label>
+      <div id="commission_value_wrap" style="margin-left: 28px; margin-top: 8px;">
+        <input type="text" id="client_commission_value" name="client_commission_value" 
+               value="{{ client_request.client_commission_value if client_request else '' }}" 
+               placeholder="Ex: 3% sau 500 €" 
+               class="commission-input" />
+        <input type="hidden" name="client_offers_commission" id="client_offers_commission" value="0" />
+      </div>
+
+      <label class="checkbox-label" style="margin-top: 1rem;">
+        <input type="radio" name="commission_option" value="none" id="commission_none" {{ 'checked' if client_request and client_request.client_no_commission }} />
+        <span>Nu ofer comision</span>
+      </label>
+      <div class="commission-warning" id="no_commission_warning" style="display: none;">
+        ⚠️ Agenților le va apărea clar mesajul: "Clientul nu oferă comision. Nu contacta dacă dorești comision."
+      </div>
+      <input type="hidden" name="client_no_commission" id="client_no_commission" value="0" />
+    </div>
+
+    <div class="completion-indicator">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span id="completion_text">0% ti-ai descris cererea</span>
+        <span id="completion_percent">0%</span>
+      </div>
+      <div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 8px;">
+        Apropie-te cât mai mult de 100% pentru a primi oferte cât mai relevante.
+      </div>
+      <div class="completion-bar">
+        <div class="completion-fill" id="completion_fill" style="width: 0%;"></div>
+      </div>
+      <div style="margin-top: 12px; padding: 10px; background: rgba(79, 140, 255, 0.1); border-radius: var(--radius-sm); font-size: 0.8125rem; color: var(--text);">
+        📞 <strong>Important:</strong> Vei fi contactat pe numărul de telefon cu care ți-ai făcut contul (<strong>{{ current_user.phone or 'nesetat' }}</strong>). 
+        {% if not current_user.phone %}
+        <a href="{{ url_for('client.account_settings') }}" style="color: var(--accent); text-decoration: underline;">Adaugă numărul acum</a>
+        {% else %}
+        <a href="{{ url_for('client.account_settings') }}" style="color: var(--accent); text-decoration: underline;">Verifică sau modifică numărul</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button type="submit" class="btn primary">{{ 'Actualizează cererea' if client_request else 'Publică cererea' }}</button>
+      <a class="btn" href="{{ url_for('client.home') }}">Anulează</a>
+    </div>
+  </form>
+</div>
+
+{% include 'marketplace/_zone_selector.html' %}
+{% include 'client/_etaj_selector.html' %}
+<script src="{{ url_for('static', filename='js/marketplace.js') }}"></script>
+<script>
+(function() {
+  // Commission options handling
+  var commissionOffers = document.getElementById('commission_offers');
+  var commissionNone = document.getElementById('commission_none');
+  var commissionValueWrap = document.getElementById('commission_value_wrap');
+  var commissionValueInput = document.getElementById('client_commission_value');
+  var clientOffersCommission = document.getElementById('client_offers_commission');
+  var clientNoCommission = document.getElementById('client_no_commission');
+  var noCommissionWarning = document.getElementById('no_commission_warning');
+
+  function updateCommissionFields() {
+    if (commissionOffers.checked) {
+      clientOffersCommission.value = '1';
+      clientNoCommission.value = '0';
+      commissionValueWrap.style.display = 'block';
+      noCommissionWarning.style.display = 'none';
+    } else if (commissionNone.checked) {
+      clientOffersCommission.value = '0';
+      clientNoCommission.value = '1';
+      commissionValueWrap.style.display = 'none';
+      commissionValueInput.value = '';
+      noCommissionWarning.style.display = 'block';
+    }
+  }
+
+  commissionOffers.addEventListener('change', updateCommissionFields);
+  commissionNone.addEventListener('change', updateCommissionFields);
+  updateCommissionFields();
+
+  // Asigură-te că valorile sunt setate corect la submit
+  var form = document.getElementById('request-form');
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      updateCommissionFields(); // Actualizează înainte de submit
+    });
+  }
+
+  // Completion indicator
+  function updateCompletion() {
+    var form = document.getElementById('request-form');
+    
+    // Câmpuri obligatorii (exclude zone_ids hidden inputs)
+    var requiredFields = form.querySelectorAll('input[required]:not([name="zone_ids"]), select[required], textarea[required]');
+    var requiredFilled = 0;
+    var requiredTotal = requiredFields.length;
+    
+    requiredFields.forEach(function(field) {
+      if (field.type === 'checkbox' || field.type === 'radio') {
+        if (field.checked) requiredFilled++;
+      } else if (field.value.trim() !== '') {
+        requiredFilled++;
+      }
+    });
+    
+    // Verifică zonele (cel puțin una selectată)
+    var zoneInputs = form.querySelectorAll('input[name="zone_ids"]');
+    var hasZones = zoneInputs.length > 0;
+    if (hasZones) requiredFilled++;
+    requiredTotal++; // Adaugă zonele la total
+    
+    // Câmpuri opționale relevante (EXCLUDE: urgent, plus_tva, commission checkboxes)
+    var optionalFields = form.querySelectorAll('input:not([required]):not([name="urgent"]):not([name="plus_tva"]):not([name="commission_option"]):not([name="client_offers_commission"]):not([name="client_no_commission"]):not([name="zone_ids"]):not([name="etaj_values"]), select:not([required]), textarea:not([required])');
+    var optionalFilled = 0;
+    var optionalTotal = 0;
+    
+    optionalFields.forEach(function(field) {
+      // Skip hidden inputs except etaj_values
+      if (field.type === 'hidden' && field.name !== 'etaj_values') return;
+      
+      optionalTotal++;
+      if (field.type === 'checkbox' || field.type === 'radio') {
+        if (field.checked) optionalFilled++;
+      } else if (field.value.trim() !== '') {
+        optionalFilled++;
+      }
+    });
+    
+    // Verifică etajele (opțional)
+    var etajInputs = form.querySelectorAll('input[name="etaj_values"]');
+    if (etajInputs.length > 0) {
+      optionalTotal++;
+      optionalFilled++;
+    }
+    
+    // Calcul procent: 60% câmpuri obligatorii + 40% câmpuri opționale relevante
+    var requiredPercent = requiredTotal > 0 ? (requiredFilled / requiredTotal) * 60 : 0;
+    var optionalPercent = optionalTotal > 0 ? (optionalFilled / optionalTotal) * 40 : 0;
+    var percent = Math.min(100, Math.round(requiredPercent + optionalPercent));
+    
+    document.getElementById('completion_percent').textContent = percent + '%';
+    document.getElementById('completion_text').textContent = percent + '% ti-ai descris cererea';
+    document.getElementById('completion_fill').style.width = percent + '%';
+  }
+
+  var formInputs = document.querySelectorAll('#request-form input, #request-form select, #request-form textarea');
+  formInputs.forEach(function(input) {
+    input.addEventListener('input', updateCompletion);
+    input.addEventListener('change', updateCompletion);
+  });
+  updateCompletion();
+
+  // Hide rooms when property_type = teren
+  var propertyType = document.getElementById('property_type');
+  var roomsLabel = document.getElementById('rooms-label');
+  var roomsInput = document.getElementById('rooms');
+
+  function toggleRooms() {
+    if (propertyType.value === 'teren') {
+      roomsLabel.style.display = 'none';
+      roomsInput.style.display = 'none';
+      roomsInput.value = '';
+    } else {
+      roomsLabel.style.display = 'block';
+      roomsInput.style.display = 'block';
+    }
+  }
+
+  propertyType.addEventListener('change', toggleRooms);
+  toggleRooms();
+
+  // Etaj selector handling (similar to zone selector)
+  var etajSelectorModal = document.getElementById('etaj-selector-modal');
+  var etajSelectorOverlay = document.getElementById('etaj-selector-overlay');
+  var etajTriggerBtns = document.querySelectorAll('.js-open-etaj-selector');
+  var etajDoneBtn = document.querySelector('.js-etaj-selector-done');
+  var etajCloseBtn = document.querySelector('.js-etaj-selector-close');
+  var etajResetBtn = document.querySelector('.js-etaj-selector-reset');
+
+  var etajContext = {
+    formId: null,
+    containerId: null,
+    inputName: null,
+    countElId: null,
+    chipsWrapId: null
+  };
+
+  function openEtajSelector() {
+    var btn = this;
+    etajContext.formId = btn.getAttribute('data-form-id');
+    etajContext.containerId = btn.getAttribute('data-container-id');
+    etajContext.inputName = btn.getAttribute('data-input-name');
+    etajContext.countElId = btn.getAttribute('data-count-el');
+    etajContext.chipsWrapId = btn.getAttribute('data-chips-wrap-id') || null;
+
+    var container = etajContext.containerId ? document.getElementById(etajContext.containerId) : null;
+    var selected = [];
+    if (container) {
+      var inputs = container.querySelectorAll('input[name="' + etajContext.inputName + '"]');
+      for (var i = 0; i < inputs.length; i++) {
+        selected.push(inputs[i].value);
+      }
+    }
+
+    var checkboxes = etajSelectorModal ? etajSelectorModal.querySelectorAll('.etaj-selector-cb') : [];
+    var allEtajCb = etajSelectorModal ? etajSelectorModal.querySelector('.etaj-all') : null;
+    var allExceptDemisolCb = etajSelectorModal ? etajSelectorModal.querySelector('.etaj-all-except') : null;
+    
+    // Reset all checkboxes first
+    for (var j = 0; j < checkboxes.length; j++) {
+      checkboxes[j].checked = false;
+    }
+    
+    // Check individual floors
+    var individualFloors = [];
+    for (var k = 0; k < checkboxes.length; k++) {
+      var cb = checkboxes[k];
+      if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+        if (selected.indexOf(cb.value) >= 0) {
+          cb.checked = true;
+          individualFloors.push(cb.value);
+        }
+      }
+    }
+    
+    // Check "all" options based on selected floors
+    var allFloors = ['Demisol', 'Parter'];
+    for (var n = 1; n <= 18; n++) {
+      allFloors.push(String(n));
+    }
+    
+    var allSelected = allFloors.every(function(floor) {
+      return individualFloors.indexOf(floor) >= 0;
+    });
+    
+    var allExceptDemisolSelected = allFloors.filter(function(f) { return f !== 'Demisol'; }).every(function(floor) {
+      return individualFloors.indexOf(floor) >= 0;
+    }) && individualFloors.indexOf('Demisol') === -1;
+    
+    if (allSelected && allEtajCb) {
+      allEtajCb.checked = true;
+    } else if (allExceptDemisolSelected && allExceptDemisolCb) {
+      allExceptDemisolCb.checked = true;
+    }
+
+    renderEtajChips();
+
+    if (etajSelectorOverlay) {
+      etajSelectorOverlay.classList.add('open');
+      etajSelectorOverlay.setAttribute('aria-hidden', 'false');
+    }
+    if (etajSelectorModal) {
+      etajSelectorModal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeEtajSelector() {
+    if (etajSelectorOverlay) {
+      etajSelectorOverlay.classList.remove('open');
+      etajSelectorOverlay.setAttribute('aria-hidden', 'true');
+    }
+    if (etajSelectorModal) {
+      etajSelectorModal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+  }
+
+  function renderEtajChips() {
+    var chipsWrap = etajContext.chipsWrapId ? document.getElementById(etajContext.chipsWrapId) : null;
+    var chipsContainer = etajSelectorModal ? etajSelectorModal.querySelector('.etaj-selector-chips') : null;
+    if (!chipsContainer) return;
+
+    var selected = [];
+    var checkboxes = etajSelectorModal.querySelectorAll('.etaj-selector-cb:checked');
+    for (var i = 0; i < checkboxes.length; i++) {
+      var label = checkboxes[i].getAttribute('data-etaj-label');
+      selected.push({value: checkboxes[i].value, label: label});
+    }
+
+    chipsContainer.innerHTML = '';
+    if (selected.length > 0) {
+      selected.forEach(function(item) {
+        var chip = document.createElement('span');
+        chip.className = 'zone-chip-tag';
+        chip.textContent = item.label;
+        chipsContainer.appendChild(chip);
+      });
+    }
+  }
+
+  function saveEtajSelection() {
+    var container = etajContext.containerId ? document.getElementById(etajContext.containerId) : null;
+    var chipsWrap = etajContext.chipsWrapId ? document.getElementById(etajContext.chipsWrapId) : null;
+    var countEl = etajContext.countElId ? document.getElementById(etajContext.countElId) : null;
+
+    if (container) {
+      container.innerHTML = '';
+      // Save only individual floors, not the "all" options
+      var checkboxes = etajSelectorModal.querySelectorAll('.etaj-selector-cb:checked');
+      for (var i = 0; i < checkboxes.length; i++) {
+        var cb = checkboxes[i];
+        // Skip "all" options - we only save individual floors
+        if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+          var input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = etajContext.inputName;
+          input.value = cb.value;
+          container.appendChild(input);
+        }
+      }
+    }
+
+    if (chipsWrap) {
+      chipsWrap.innerHTML = '';
+      var selected = etajSelectorModal.querySelectorAll('.etaj-selector-cb:checked');
+      for (var j = 0; j < selected.length; j++) {
+        var cb = selected[j];
+        // Show all selected, including "all" options
+        var label = cb.getAttribute('data-etaj-label');
+        var chip = document.createElement('span');
+        chip.className = 'zone-chip-tag';
+        chip.textContent = label;
+        chipsWrap.appendChild(chip);
+      }
+    }
+
+    if (countEl) {
+      // Count only individual floors
+      var individualCount = etajSelectorModal.querySelectorAll('.etaj-selector-cb:checked:not(.etaj-all):not(.etaj-all-except)').length;
+      countEl.textContent = individualCount;
+    }
+
+    closeEtajSelector();
+    updateCompletion();
+  }
+
+  function resetEtajSelection() {
+    var checkboxes = etajSelectorModal.querySelectorAll('.etaj-selector-cb');
+    for (var i = 0; i < checkboxes.length; i++) {
+      checkboxes[i].checked = false;
+    }
+    renderEtajChips();
+  }
+
+  if (etajTriggerBtns.length > 0) {
+    etajTriggerBtns.forEach(function(btn) {
+      btn.addEventListener('click', openEtajSelector);
+    });
+  }
+
+  if (etajDoneBtn) {
+    etajDoneBtn.addEventListener('click', saveEtajSelection);
+  }
+
+  if (etajCloseBtn) {
+    etajCloseBtn.addEventListener('click', closeEtajSelector);
+  }
+
+  if (etajResetBtn) {
+    etajResetBtn.addEventListener('click', resetEtajSelection);
+  }
+
+  if (etajSelectorModal) {
+    var checkboxes = etajSelectorModal.querySelectorAll('.etaj-selector-cb');
+    var allEtajCb = etajSelectorModal.querySelector('.etaj-all');
+    var allExceptDemisolCb = etajSelectorModal.querySelector('.etaj-all-except');
+    
+    function checkAllIndividualFloors() {
+      var allChecked = true;
+      checkboxes.forEach(function(cb) {
+        if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+          if (!cb.checked) allChecked = false;
+        }
+      });
+      if (allChecked && allEtajCb) {
+        allEtajCb.checked = true;
+        if (allExceptDemisolCb) allExceptDemisolCb.checked = false;
+      }
+    }
+    
+    function checkAllExceptDemisol() {
+      var allExceptDemisolChecked = true;
+      checkboxes.forEach(function(cb) {
+        if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+          if (cb.value === 'Demisol' && cb.checked) {
+            allExceptDemisolChecked = false;
+          } else if (cb.value !== 'Demisol' && !cb.checked) {
+            allExceptDemisolChecked = false;
+          }
+        }
+      });
+      if (allExceptDemisolChecked && allExceptDemisolCb) {
+        allExceptDemisolCb.checked = true;
+        if (allEtajCb) allEtajCb.checked = false;
+      }
+    }
+    
+    // Handle "Toate etajele" option
+    if (allEtajCb) {
+      allEtajCb.addEventListener('change', function() {
+        if (this.checked) {
+          // Uncheck "Toate în afară de demisol"
+          if (allExceptDemisolCb) allExceptDemisolCb.checked = false;
+          // Check all individual floors
+          checkboxes.forEach(function(cb) {
+            if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+              cb.checked = true;
+            }
+          });
+          renderEtajChips();
+        } else {
+          // Uncheck all when "all" is unchecked
+          checkboxes.forEach(function(cb) {
+            if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+              cb.checked = false;
+            }
+          });
+          renderEtajChips();
+        }
+      });
+    }
+    
+    // Handle "Toate în afară de demisol" option
+    if (allExceptDemisolCb) {
+      allExceptDemisolCb.addEventListener('change', function() {
+        if (this.checked) {
+          // Uncheck "Toate etajele"
+          if (allEtajCb) allEtajCb.checked = false;
+          // Check all except Demisol
+          checkboxes.forEach(function(cb) {
+            if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+              if (cb.value !== 'Demisol') {
+                cb.checked = true;
+              } else {
+                cb.checked = false;
+              }
+            }
+          });
+          renderEtajChips();
+        } else {
+          // Uncheck all except demisol when option is unchecked
+          checkboxes.forEach(function(cb) {
+            if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+              if (cb.value !== 'Demisol') {
+                cb.checked = false;
+              }
+            }
+          });
+          renderEtajChips();
+        }
+      });
+    }
+    
+    // Handle individual floor changes
+    checkboxes.forEach(function(cb) {
+      if (!cb.classList.contains('etaj-all') && !cb.classList.contains('etaj-all-except')) {
+        cb.addEventListener('change', function() {
+          // If unchecking an individual floor, uncheck "all" options
+          if (!this.checked) {
+            if (allEtajCb) allEtajCb.checked = false;
+            if (allExceptDemisolCb) allExceptDemisolCb.checked = false;
+          } else {
+            // Check if we should auto-select "all" options
+            checkAllIndividualFloors();
+            checkAllExceptDemisol();
+          }
+          renderEtajChips();
+        });
+      }
+    });
+  }
+
+  // ESC key to close
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      if (etajSelectorModal && etajSelectorModal.classList.contains('open')) {
+        closeEtajSelector();
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

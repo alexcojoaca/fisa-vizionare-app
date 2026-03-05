@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Marketplace — Fișa de vizionare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .hub-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: calc(var(--pad-lg) * 2) var(--pad);
+      text-align: center;
+    }
+    .hub-title {
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 800;
+      margin: 0 0 8px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .hub-subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      margin: 0 0 var(--pad-lg);
+    }
+    .hub-cards {
+      display: grid;
+      gap: var(--pad-lg);
+      margin-top: var(--pad-lg);
+    }
+    .hub-card {
+      display: block;
+      padding: var(--pad-lg) calc(var(--pad-lg) * 1.2);
+      background: linear-gradient(180deg, var(--surface) 0%, rgba(255,255,255,.02) 100%);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r-lg);
+      text-decoration: none;
+      color: var(--text);
+      text-align: left;
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.2s ease;
+      box-shadow: var(--shadow2);
+      position: relative;
+      overflow: hidden;
+    }
+    .hub-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, transparent 0%, rgba(234,179,8,.08) 100%);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+    .hub-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      border-color: rgba(234,179,8,.3);
+      box-shadow: 0 16px 40px rgba(0,0,0,.4), 0 0 0 1px rgba(234,179,8,.1);
+    }
+    .hub-card:hover::before {
+      opacity: 1;
+    }
+    .hub-card h2 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      position: relative;
+    }
+    .hub-card p {
+      margin: 0;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.55;
+      position: relative;
+    }
+    .hub-card .arrow {
+      margin-top: 16px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--primary);
+      position: relative;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    .hub-card:hover .arrow {
+      transform: translateX(4px);
+    }
+    .mp-topbar { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <div class="mp-topbar">
+    {% include 'marketplace/_mp_header.html' %}
+    <a href="{{ url_for('home') }}" class="mp-homebtn">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M8 1L2 6v9h4v-6h4v6h4V6L8 1z" fill="currentColor"/>
+      </svg>
+      <span>Acasă</span>
+    </a>
+  </div>
+
+  <div class="hub-wrap">
+    <h1 class="hub-title">Marketplace pentru colaborări între agenți</h1>
+    <p class="hub-subtitle">Alege ce vrei să vezi sau să publici</p>
+
+    <div class="hub-cards">
+      <a href="{{ url_for('marketplace.list_requests') }}" class="hub-card">
+        <h2>Cereri de la agenți și de la clienți</h2>
+        <p>Cereri de cumpărare sau închiriere publicate atât de alți agenți, cât și de clienți. Identifică rapid potrivirile și colaborează eficient.</p>
+        <span class="arrow">Deschide cereri</span>
+      </a>
+      <a href="{{ url_for('marketplace.list_offers') }}" class="hub-card">
+        <h2>Anunțuri exclusive de la agenți</h2>
+        <p>Anunțuri exclusive: vânzări și chirii. Publică ce ai în exclusivitate sau colaborează cu alți agenți.</p>
+        <span class="arrow">Deschide anunțuri</span>
+      </a>
+    </div>
+  </div>
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

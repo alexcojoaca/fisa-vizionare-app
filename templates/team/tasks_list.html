@@ -1,0 +1,42 @@
+{% extends "team/base_team.html" %}
+{% block title %}Task-uri – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Task-uri echipă</h1>
+<p class="kicker" style="margin:0 0 24px;">{{ team.name }}</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+    <a href="{{ url_for('team.task_new') }}" class="btn primary" style="margin-bottom:24px;">➕ Adaugă task</a>
+
+<p style="margin:0 0 16px;font-size:0.8125rem;color:var(--text-muted);">Task-urile mai vechi de 7 zile se șterg automat prin Curățare DB (Admin).</p>
+
+<div class="card">
+  <div class="cardInner" style="padding:0;">
+    {% if task_data %}
+    {% for item in task_data %}
+    {% set t = item.task %}
+    <a href="{{ url_for('team.task_detail', task_id=t.id) }}" style="text-decoration:none;color:inherit;display:block;">
+      <div class="team-task-row">
+        <div>
+          <strong>{{ t.title }}</strong>
+          <span class="team-badge {% if item.overdue %}team-badge-overdue{% elif item.done == item.total %}team-badge-ok{% else %}team-badge-warn{% endif %}" style="margin-left:8px;">
+            {% if item.overdue %}Întârziat{% elif item.done == item.total %}Finalizat{% else %}{{ item.done }}/{{ item.total }}{% endif %}
+          </span>
+          <br><small style="color:var(--text-muted);">Deadline: {{ t.due_date.strftime('%d.%m.%Y') }}{% if item.assignee_display %} · Pentru: {{ item.assignee_display }}{% endif %}</small>
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+    {% else %}
+    <div style="padding:32px;text-align:center;color:var(--text-muted);">
+      <p>Nu ai task-uri. Creează task-uri pentru agenții echipei.</p>
+      <a href="{{ url_for('team.task_new') }}" class="btn primary" style="margin-top:16px;">Adaugă task</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

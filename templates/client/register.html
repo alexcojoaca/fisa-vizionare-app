@@ -1,0 +1,73 @@
+{% extends "base_premium.html" %}
+{% block title %}Creează cont client – Caut un imobil{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.landing') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+</a>
+{% endblock %}
+
+{% block topbar_right %}
+<a href="{{ url_for('client.login') }}" class="topbarAuthBtn">Logare</a>
+{% endblock %}
+
+{% block content %}
+<div class="wrapCentered" style="margin-top:2rem;">
+  <div class="card">
+    <div class="cardInner">
+      <h2 style="margin-top:0;">Creează cont client</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 24px;">
+        Completează datele pentru a-ți crea cont și a publica cererea ta.
+      </p>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat, msg in messages %}
+            <div class="flash">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        <label for="full_name">Nume complet *</label>
+        <input id="full_name" name="full_name" type="text" placeholder="Ion Popescu" value="{{ full_name or '' }}" autocomplete="name" required />
+
+        <label for="email">Email *</label>
+        <input id="email" name="email" type="email" placeholder="email@exemplu.com" value="{{ email or '' }}" autocomplete="email" required />
+
+        <label for="phone">Număr de telefon *</label>
+        <input id="phone" name="phone" type="tel" placeholder="0712345678" value="{{ phone or '' }}" autocomplete="tel" required />
+        <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-top: 4px;">
+          Acest număr va fi vizibil pentru agenții care te contactează.
+        </small>
+
+        <label for="password">Parolă *</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" required />
+        <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-top: 4px;">
+          Minim 6 caractere.
+        </small>
+
+        <div style="margin: 20px 0;">
+          <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+            <input type="checkbox" name="accept_terms" required style="margin-top: 4px; flex-shrink: 0;" />
+            <span style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.5;">
+              Accept <a href="{{ url_for('client.terms') }}" target="_blank" style="color: var(--accent);">termenii și condițiile</a> pentru clienți *
+            </span>
+          </label>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Creează cont</button>
+          <a class="btn ghost" href="{{ url_for('client.landing') }}">Înapoi</a>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center; font-size: 0.8125rem; color: var(--text-secondary);">
+          Ai deja cont? <a href="{{ url_for('client.login') }}" style="color: var(--accent);">Loghează-te</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

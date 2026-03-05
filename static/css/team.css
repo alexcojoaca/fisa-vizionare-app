@@ -1,0 +1,83 @@
+/* Echipă & Performanță – stiluri consistente cu premium */
+.team-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+}
+.team-input:focus { outline: none; border-color: var(--accent); }
+.team-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+.team-tab {
+  padding: 12px 20px;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.team-tab:hover { color: var(--text); }
+.team-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.team-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (min-width: 640px) {
+  .team-stat-grid { grid-template-columns: repeat(4, 1fr); }
+}
+.team-stat-card {
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--accent);
+}
+.team-stat-value { font-size: 1.75rem; font-weight: 800; }
+.team-stat-label { font-size: 0.8125rem; color: var(--text-muted); }
+.team-chart-bar {
+  height: 24px;
+  background: rgba(234,179,8,.2);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  min-width: 4px;
+}
+.team-agents-table { width: 100%; border-collapse: collapse; }
+.team-agents-table th, .team-agents-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+.team-agents-table th { font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); }
+
+.team-agents-cards { display: flex; flex-direction: column; }
+.team-agent-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: inherit;
+  flex-wrap: wrap;
+  min-height: 48px;
+  transition: background var(--transition);
+}
+.team-agent-row:hover { background: var(--surface-hover); }
+.team-agent-row:active { background: var(--surface-hover); }
+.team-agent-name { font-weight: 700; flex: 1 1 120px; min-width: 0; }
+.team-agent-stat { font-size: 0.875rem; white-space: nowrap; }
+.team-agent-label { font-size: 0.6875rem; color: var(--text-muted); margin-right: 2px; }
+
+.team-table-scroll-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.team-table-scroll-wrap table { min-width: 280px; }
+.team-task-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 16px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.team-task-row:hover { background: var(--surface-hover); }
+.team-badge { display: inline-flex; padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 600; }
+.team-badge-ok { background: var(--ok-soft); color: #86efac; }
+.team-badge-warn { background: rgba(245,158,11,.2); color: #fcd34d; }
+.team-badge-overdue { background: var(--danger-soft); color: #fca5a5; }

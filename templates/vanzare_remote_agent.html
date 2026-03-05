@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Remote — Fișă Vânzare – Fișă de vizionare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .resultBox .btnRow { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+    .resultBox .btnSmall { text-decoration: none; }
+  </style>
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+
+    <a href="{{ url_for('vanzare.form_page') }}" class="topbarBtn">Înapoi</a>
+
+  {% endcall %}
+
+    <div class="section">
+      <div class="formSectionTitle">Detalii vizionare (completate de agent)</div>
+
+      <form id="remoteForm" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="row2">
+          <div>
+            <label>Data vizionării</label>
+            <input name="data_vizionarii" id="data_vizionarii" placeholder="ex: 28.01.2026" required>
+          </div>
+          <div>
+            <label>Ora vizionării</label>
+            <input name="ora_vizionarii" id="ora_vizionarii" placeholder="ex: 18:30" required>
+          </div>
+        </div>
+
+        <label>Tip imobil</label>
+        <input name="tip_imobil" id="tip_imobil" placeholder="ex: Apartament 2 camere" required>
+
+        <label>Adresa COMPLETĂ</label>
+        <input name="adresa_locuintei" id="adresa_locuintei" placeholder="ex: București, Sector 1, ..." required>
+
+        <label>Adresa PUBLICĂ (ce vede clientul pe pagină)</label>
+        <input name="adresa_public" id="adresa_public" placeholder="ex: București, Sector 1 (zona Aviatiei)" required>
+        <p class="muted">
+          Tip: aici completezi zona sau strada (fără număr și fără apartament), pentru a nu divulga adresa completă înainte de semnare.
+          Adresa completă va fi vizibilă clientului doar după ce acesta semnează fișa.
+        </p>
+
+        <label>Comision</label>
+        <input name="comision_procent" id="comision_procent" placeholder="ex: 2% / 3% + TVA / negociabil" required>
+
+        <div class="formSectionTitle">Semnătura agent (obligatoriu)</div>
+        <p class="muted">Clientul nu poate finaliza fără semnătura agentului salvată aici.</p>
+
+        <div class="sigLabel">Semnătură Agent</div>
+        <div class="sigWrap">
+          <canvas id="sigCanvasAgent" width="500" height="200"></canvas>
+        </div>
+        <div class="sigActions">
+          <button type="button" class="btn btnSmall" id="clearSigAgent">Șterge</button>
+        </div>
+
+        <input type="hidden" name="signature_agent" id="signature_agent">
+      </form>
+
+      <div class="resultBox" id="resultBox" style="display:none;">
+        <div class="formSectionTitle">Link generat</div>
+        <div class="pill" id="linkPill"></div>
+
+        <div class="btnRow">
+          <button class="btnSmall" type="button" id="btnCopy">Copiază link</button>
+          <a class="btn btnSmall" id="btnWapp" href="#" target="_blank" rel="noopener">Trimite pe WhatsApp</a>
+          <a class="btn btnSmall" href="{{ url_for('chirie.remote_list') }}">Vezi lista remote</a>
+        </div>
+
+        <p class="muted" id="copyStatus"></p>
+      </div>
+
+      <div class="resultBox" id="errorBox" style="display:none;">
+        <span class="statusErr">Eroare:</span>
+        <span id="errorText"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <a class="btn ghost" href="{{ url_for('chirie.remote_list') }}">Lista Remote</a>
+      <button class="btn primary" type="button" id="btnCreate">Generează link</button>
+    </div>
+  </div>
+  <div class="stickySpacer"></div>
+  {{ premium_footer() }}
+  </div>
+
+<script>
+(function () {
+  (function hideStickyWhenKeyboard() {
+    var form = document.getElementById("remoteForm");
+    if (!form) return;
+    var kbdHideTimer;
+    form.querySelectorAll("input, select, textarea").forEach(function(el) {
+      el.addEventListener("focus", function() { clearTimeout(kbdHideTimer); document.body.classList.add("kbd"); });
+      el.addEventListener("blur", function() { kbdHideTimer = setTimeout(function() { document.body.classList.remove("kbd"); }, 120); });
+    });
+  })();
+
+  function setupSignature(canvasId, clearBtnId, hiddenInputId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+
+    // background alb
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+
+    let drawing = false;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function start(e) {
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    }
+
+    function move(e) {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    }
+
+    function end() { drawing = false; }
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end, { passive: false });
+    window.addEventListener("touchend", end, { passive: false });
+
+    document.getElementById(clearBtnId).addEventListener("click", function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      document.getElementById(hiddenInputId).value = "";
+    });
+
+    return {
+      toDataURL: () => canvas.toDataURL("image/png")
+    };
+  }
+
+  const sigAgent = setupSignature("sigCanvasAgent", "clearSigAgent", "signature_agent");
+
+  const btnCreate = document.getElementById("btnCreate");
+  const resultBox = document.getElementById("resultBox");
+  const linkPill = document.getElementById("linkPill");
+  const btnCopy = document.getElementById("btnCopy");
+  const btnWapp = document.getElementById("btnWapp");
+  const copyStatus = document.getElementById("copyStatus");
+
+  const errorBox = document.getElementById("errorBox");
+  const errorText = document.getElementById("errorText");
+
+  function showError(msg){
+    errorText.textContent = msg;
+    errorBox.style.display = "block";
+    resultBox.style.display = "none";
+  }
+  function clearError(){
+    errorBox.style.display = "none";
+    errorText.textContent = "";
+  }
+
+  async function createLink(){
+    clearError();
+
+    // pune semnatura
+    document.getElementById("signature_agent").value = sigAgent.toDataURL();
+
+    const fd = new FormData();
+    var csrfInput = document.querySelector('#remoteForm input[name="csrf_token"]');
+    if (csrfInput) fd.append("csrf_token", csrfInput.value);
+    fd.append("data_vizionarii", document.getElementById("data_vizionarii").value.trim());
+    fd.append("ora_vizionarii", document.getElementById("ora_vizionarii").value.trim());
+    fd.append("tip_imobil", document.getElementById("tip_imobil").value.trim());
+    fd.append("adresa_locuintei", document.getElementById("adresa_locuintei").value.trim());
+    fd.append("adresa_public", document.getElementById("adresa_public").value.trim());
+    fd.append("comision_procent", document.getElementById("comision_procent").value.trim());
+    fd.append("signature_agent", document.getElementById("signature_agent").value);
+
+    // validate semnatura
+    const sigVal = document.getElementById("signature_agent").value || "";
+    if (!sigVal.startsWith("data:image/")) {
+      showError("Semnătura agentului este obligatorie.");
+      return;
+    }
+
+    btnCreate.disabled = true;
+    btnCreate.textContent = "Generez...";
+
+    try{
+      const res = await fetch("/vanzare/remote/create", { method:"POST", body: fd });
+      var data;
+      try { data = await res.json(); } catch (_) {
+        showError(res.ok ? "Răspuns invalid de la server." : ("Eroare " + res.status + ". Încearcă din nou sau verifică că ești logat."));
+        return;
+      }
+      if (!res.ok || !data.ok){
+        // Verifică dacă este cazul de acces limitat atins
+        if (data.requires_activation) {
+          // Afișează modal-ul de activare
+          const whatsappPhone = "{{ config.WHATSAPP_SUPPORT_PHONE }}";
+          const userEmail = "{{ current_user.email }}";
+          showActivationModal(whatsappPhone, userEmail);
+          return;
+        }
+        showError(data.error || data.message || "Nu am putut genera link-ul.");
+        return;
+      }
+
+      const link = data.link;
+      linkPill.innerHTML = `<a class="link" href="${link}" target="_blank" rel="noopener">${link}</a>`;
+      resultBox.style.display = "block";
+
+      const msg = encodeURIComponent("Bună ziua! Vă rog să accesați linkul de mai jos pentru a vizualiza și semna fișa de vizionare. Vă mulțumesc!\n\n" + link);
+      btnWapp.href = "https://wa.me/?text=" + msg;
+
+      copyStatus.textContent = "";
+    } catch(e){
+      showError("Eroare de rețea. Încearcă din nou.");
+    } finally{
+      btnCreate.disabled = false;
+      btnCreate.textContent = "Generează link";
+    }
+  }
+
+  btnCreate.addEventListener("click", createLink);
+
+  btnCopy.addEventListener("click", async function(){
+    const a = linkPill.querySelector("a");
+    if (!a) return;
+    const link = a.getAttribute("href");
+
+    try{
+      await navigator.clipboard.writeText(link);
+      copyStatus.innerHTML = '<span class="statusOk">Copiat ✅</span> (lipeste pe WhatsApp)';
+    } catch(e){
+      copyStatus.textContent = "Nu pot copia automat (browser). Ține apăsat pe link și Copy.";
+    }
+  });
+
+})();
+</script>
+{% include 'partials/activation_modal.html' %}
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

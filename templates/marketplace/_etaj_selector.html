@@ -1,0 +1,31 @@
+{# Etaj selector modal (Demisol + 1..30). Include on offer form pages. #}
+<div class="etaj-selector-overlay" id="etaj-selector-overlay" aria-hidden="true"></div>
+<div class="etaj-selector-modal zone-selector-modal" id="etaj-selector-modal" role="dialog" aria-labelledby="etaj-selector-title" aria-modal="true">
+  <div class="zone-selector-header">
+    <h2 class="zone-selector-title" id="etaj-selector-title">Selectează etaj(e)</h2>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button type="button" class="zone-selector-btn zone-selector-btn-done js-etaj-selector-done">Gata</button>
+      <button type="button" class="zone-selector-close js-etaj-selector-close" aria-label="Închide">×</button>
+    </div>
+  </div>
+  <div class="etaj-selector-chips" id="etaj-selector-chips"></div>
+  <div class="etaj-selector-list" id="etaj-selector-list">
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="Demisol" data-etaj-label="Demisol" />
+      <span>Demisol</span>
+    </label>
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="Parter" data-etaj-label="Parter" />
+      <span>Parter</span>
+    </label>
+    {% for n in range(1, 31) %}
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="{{ n }}" data-etaj-label="{{ n }}" />
+      <span>{{ n }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  <div class="zone-selector-actions">
+    <button type="button" class="zone-selector-btn zone-selector-btn-reset js-etaj-selector-reset">Resetează</button>
+  </div>
+</div>

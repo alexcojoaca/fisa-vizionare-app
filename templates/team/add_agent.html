@@ -1,0 +1,27 @@
+{% extends "team/base_team.html" %}
+{% block title %}Adaugă agent – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Adaugă agent</h1>
+<p class="kicker" style="margin:0 0 24px;">{{ team.name }}</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<div class="card">
+  <div class="cardInner">
+    <p style="margin:0 0 20px;color:var(--text-secondary);">Introdu email-ul agentului care există deja în platformă.</p>
+    <form method="post" action="{{ url_for('team.add_agent') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="email" style="display:block;margin-bottom:8px;font-weight:600;">Email agent</label>
+        <input type="email" name="email" id="email" required placeholder="agent@exemplu.ro" class="team-input" />
+      </div>
+      <button type="submit" class="btn primary">Adaugă</button>
+      <a href="{{ url_for('team.agents_list') }}" class="btn ghost" style="margin-left:12px;">Anulează</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

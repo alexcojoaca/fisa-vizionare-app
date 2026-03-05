@@ -1,0 +1,93 @@
+{% extends "team/base_team.html" %}
+{% block title %}Adaugă task – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Adaugă task</h1>
+<p class="kicker" style="margin:0 0 24px;">{{ team.name }}</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<div class="card">
+  <div class="cardInner">
+    <form method="post" action="{{ url_for('team.task_new') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="title" style="display:block;margin-bottom:8px;font-weight:600;">Titlu *</label>
+        <input type="text" name="title" id="title" required maxlength="255" class="team-input" value="{{ form.title.data or '' }}" />
+        {% if form.title.errors %}<p class="error">{{ form.title.errors[0] }}</p>{% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="description" style="display:block;margin-bottom:8px;font-weight:600;">Descriere</label>
+        <textarea name="description" id="description" rows="3" class="team-input" style="min-height:80px;">{{ form.description.data or '' }}</textarea>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="due_date" style="display:block;margin-bottom:8px;font-weight:600;">Deadline *</label>
+        <input type="date" name="due_date" id="due_date" required class="team-input" value="{{ form.due_date.data.isoformat() if form.due_date.data else '' }}" />
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="priority" style="display:block;margin-bottom:8px;font-weight:600;">Prioritate</label>
+        <select name="priority" id="priority" class="team-input">
+          <option value="low" {% if form.priority.data == 'low' %}selected{% endif %}>Scăzută</option>
+          <option value="medium" {% if form.priority.data == 'medium' or not form.priority.data %}selected{% endif %}>Medie</option>
+          <option value="high" {% if form.priority.data == 'high' %}selected{% endif %}>Ridicată</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:20px;">
+        <label style="display:block;margin-bottom:12px;font-weight:600;">Cui assignezi?</label>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="radio" name="assign_type" value="all" checked />
+            Toată echipa
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="radio" name="assign_type" value="single" />
+            Un agent:
+          </label>
+          <div style="margin-left:28px;">
+            <select name="assignee_single" class="team-input" style="max-width:280px;">
+              <option value="">– Selectează –</option>
+              {% for m, uid, name in agents %}
+              <option value="{{ uid }}">{{ name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="radio" name="assign_type" value="multiple" />
+            Mai mulți agenți:
+          </label>
+          <div style="margin-left:28px;display:flex;flex-direction:column;gap:8px;">
+            {% for m, uid, name in agents %}
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" name="assignee_ids" value="{{ uid }}" />
+              {{ name }}
+            </label>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn primary">Creează task</button>
+      <a href="{{ url_for('team.tasks_list') }}" class="btn ghost" style="margin-left:12px;">Anulează</a>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  function updateUi() {
+    var single = document.querySelector('input[name="assign_type"][value="single"]').checked;
+    var multi = document.querySelector('input[name="assign_type"][value="multiple"]').checked;
+    var select = document.querySelector('select[name="assignee_single"]');
+    var checkboxes = document.querySelectorAll('input[name="assignee_ids"][type="checkbox"]');
+    if (select) select.disabled = !single;
+    checkboxes.forEach(function(cb) { cb.disabled = !multi; if (!multi) cb.checked = false; });
+  }
+  document.querySelectorAll('input[name="assign_type"]').forEach(function(r) {
+    r.addEventListener('change', updateUi);
+  });
+  updateUi();
+})();
+</script>
+{% endblock %}

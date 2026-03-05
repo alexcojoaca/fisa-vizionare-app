@@ -1,0 +1,74 @@
+{% extends "base_premium.html" %}
+{% block title %}Termeni și Condiții – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Termeni și Condiții</h1>
+
+  <div class="card">
+    <div class="cardInner contentCard">
+      <p class="muted">Ultima actualizare: {{ last_updated }}<br>Contact suport: <b>{{ support_email }}</b></p>
+      <div class="divider"></div>
+      <h2>1. Definiții</h2>
+      <ul>
+        <li><b>Serviciul</b> = aplicația web care permite generarea de documente (PDF) pe baza datelor introduse.</li>
+        <li><b>Operator/Prestator</b> = persoana/entitatea care administrează Serviciul (detalii la secțiunea 13).</li>
+        <li><b>Utilizator</b> = persoană care creează cont și folosește Serviciul.</li>
+        <li><b>Documente</b> = fișe de vizionare, contracte și/sau alte șabloane PDF generate de Serviciu.</li>
+        <li><b>Acces</b> = dreptul de a folosi funcționalitățile Serviciului, condiționat de autentificare și statusul contului (trial/abonament).</li>
+      </ul>
+      <h2>2. Acceptarea termenilor</h2>
+      <p>Prin accesarea și/sau utilizarea Serviciului, confirmi că ai citit, înțeles și accepți acești Termeni. Dacă nu ești de acord, te rugăm să nu utilizezi Serviciul.</p>
+      <h2>3. Descrierea serviciului</h2>
+      <p>Serviciul permite completarea de formulare și generarea de Documente (PDF). Unele funcții pot include semnătură trasată pe ecran (semnătură grafică) și opțiuni de partajare (ex: link/WhatsApp).</p>
+      <p><b>Important:</b> Serviciul nu oferă consultanță juridică. Documentele sunt șabloane și pot necesita adaptare. Utilizatorul este responsabil pentru verificarea documentelor înainte de utilizare.</p>
+      <h2>4. Conturi, securitate și autentificare</h2>
+      <ul>
+        <li>Contul este personal. Ești responsabil pentru confidențialitatea credentialelor (email/parolă).</li>
+        <li>Trebuie să furnizezi date reale și actuale la înregistrare.</li>
+        <li>Poți fi deconectat automat în caz de activitate suspectă sau depășirea limitelor de utilizare/dispozitive (dacă sunt aplicate).</li>
+      </ul>
+      <h2>5. Acces gratuit, abonament, activare manuală</h2>
+      <h3>5.1 Acces gratuit</h3>
+      <p>Utilizatorii noi primesc acces gratuit pentru 1 fișă de vizionare chirie. Contractul standard de închiriere rămâne disponibil nelimitat. După utilizarea acțiunilor gratuite, accesul la funcțiile principale poate fi restricționat până la activarea abonamentului.</p>
+      <h3>5.2 Abonament / acces plătit</h3>
+      <p>Accesul plătit poate fi activat manual de către Operator după confirmarea plății, conform condițiilor comunicate. Durata accesului poate fi stabilită pe perioade (ex: 1/3/6 luni) și este evidențiată în cont.</p>
+      <h3>5.3 Suspendare / dezactivare</h3>
+      <p>Operatorul poate suspenda sau dezactiva contul în caz de: neplată, expirare, fraudă, abuz, încălcări ale termenilor, solicitări legale, sau riscuri de securitate.</p>
+      <h2>6. Plăți, facturare, taxe</h2>
+      <p>Condițiile de preț și plată pot fi comunicate separat (în aplicație sau prin canale de suport). Dacă este cazul, facturarea se realizează conform legislației aplicabile (în funcție de forma juridică a Operatorului).</p>
+      <p>Utilizatorul este responsabil să furnizeze informații corecte pentru facturare, dacă solicită factură.</p>
+      <h2>7. Politica de rambursare și dreptul de retragere</h2>
+      <p>În măsura în care se aplică legislația de protecție a consumatorului, Utilizatorul poate avea dreptul de retragere. Pentru servicii digitale, dreptul de retragere poate fi limitat dacă prestarea începe înainte de expirarea termenului legal și Utilizatorul și-a dat acordul expres și a confirmat că a luat la cunoștință pierderea dreptului de retragere, conform legii.</p>
+      <p>Operatorul poate avea o politică de rambursare separată (vezi pagina „Plăți & Rambursări”).</p>
+      <h2>8. Utilizare permisă și interdicții</h2>
+      <ul>
+        <li>Nu folosi Serviciul pentru activități ilegale, frauduloase sau care încalcă drepturi ale terților.</li>
+        <li>Nu introduce date personale fără drept/temei legal (ex: fără consimțământ sau alt temei permis de lege).</li>
+        <li>Nu încerca să accesezi neautorizat infrastructura, să încalci securitatea sau să faci reverse-engineering.</li>
+        <li>Nu automatiza abuziv (scraping/bot) sau supraîncarci Serviciul.</li>
+      </ul>
+      <h2>9. Date introduse și responsabilitate</h2>
+      <p>Utilizatorul este singurul responsabil pentru datele introduse și documentele generate. Operatorul nu verifică acuratețea datelor și nu garantează că documentele se potrivesc unei situații juridice particulare.</p>
+      <p>Înainte de utilizare, Utilizatorul trebuie să revizuiască documentele generate și să se asigure că sunt corecte, complete și conforme cu legislația și scopul urmărit.</p>
+      <h2>10. Semnătura trasată / semnătura electronică</h2>
+      <p>Funcția de semnătură permite atașarea unei semnături grafice (desenată pe ecran) în document. În funcție de context, aceasta poate avea valoare probatorie diferită. Operatorul nu garantează echivalența cu o semnătură electronică calificată. Pentru situații cu cerințe stricte, folosește soluții de semnătură electronică calificată, unde este necesar.</p>
+      <h2>11. Disponibilitate, mentenanță, modificări</h2>
+      <ul>
+        <li>Serviciul poate fi indisponibil temporar pentru mentenanță, actualizări sau probleme tehnice.</li>
+        <li>Operatorul poate modifica funcționalități, interfață sau planuri de acces, cu sau fără notificare, dacă este rezonabil.</li>
+        <li>Operatorul poate actualiza acești Termeni; versiunea curentă este publicată pe această pagină.</li>
+      </ul>
+      <h2>12. Limitarea răspunderii</h2>
+      <p>În limita maximă permisă de lege, Operatorul nu răspunde pentru: (i) pierderi indirecte, profit nerealizat, pierdere de oportunitate, pierdere de date (în afara cazurilor de culpă gravă), (ii) consecințe rezultate din utilizarea documentelor fără verificare, (iii) acțiuni ale terților (ex: platforme de mesagerie, rețele, dispozitive).</p>
+      <p>Răspunderea totală a Operatorului (dacă există) este limitată, în măsura permisă de lege, la sumele efectiv plătite de Utilizator pentru Serviciu în ultimele 30 de zile (sau perioada abonamentului curent), după caz.</p>
+      <h2>13. Identitatea Operatorului și contact</h2>
+      <p>Email suport: <b>{{ support_email }}</b></p>
+      <h2>14. Legea aplicabilă și jurisdicția</h2>
+      <p>Acești Termeni sunt guvernați de legea română. Orice litigiu va fi soluționat de instanțele competente din România, cu respectarea normelor imperative aplicabile consumatorilor (dacă este cazul).</p>
+    </div>
+  </div>
+{% endblock %}

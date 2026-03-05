@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>To-Do – Fișă de vizionare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='todo.css') }}" />
+</head>
+<body class="premium todo-body">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+  {% endcall %}
+
+  <div class="todo-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="todo-flash-wrap">
+          {% for category, msg in messages %}
+            <p class="todo-flash todo-flash-{{ category }}">{{ msg }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Quick add inline -->
+    <form method="post" action="{{ url_for('todo.quick_add') }}" class="todo-quick-add-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <input type="text" name="title" class="todo-quick-add-input" placeholder="Adaugă un task rapid…" required maxlength="255" autocomplete="off" />
+      <button type="submit" class="todo-quick-add-submit" aria-label="Adaugă">
+        <span>+</span>
+      </button>
+    </form>
+
+    <!-- Stats bar -->
+    <div class="todo-stats">
+      <span class="todo-stat">{{ tasks|length }} task-uri</span>
+      <span class="todo-stat">{{ sections.done|length }} finalizate</span>
+      {% if sections.overdue %}
+      <span class="todo-stat todo-stat-overdue">{{ sections.overdue|length }} întârziate</span>
+      {% endif %}
+    </div>
+
+    <!-- Filtre -->
+    <div class="todo-filters">
+      <a class="todo-filter-chip {% if not status_filter and request.args.get('due_today') != '1' and request.args.get('overdue') != '1' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, priority=priority_filter, year=year, month=month) }}">Toate</a>
+      <a class="todo-filter-chip {% if request.args.get('due_today') == '1' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status=status_filter, priority=priority_filter, due_today='1', year=year, month=month) }}">Azi</a>
+      <a class="todo-filter-chip {% if request.args.get('overdue') == '1' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status=status_filter, priority=priority_filter, overdue='1', year=year, month=month) }}">Întârziate</a>
+      <a class="todo-filter-chip {% if status_filter == 'open' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status='open', priority=priority_filter, year=year, month=month) }}">Deschise</a>
+      <a class="todo-filter-chip {% if status_filter == 'in-progress' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status='in-progress', priority=priority_filter, year=year, month=month) }}">În lucru</a>
+      <a class="todo-filter-chip {% if status_filter == 'done' %}active{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status='done', priority=priority_filter, year=year, month=month) }}">Finalizate</a>
+    </div>
+
+    <!-- Search -->
+    <form method="get" action="{{ url_for('todo.list_tasks') }}" class="todo-search-form">
+      <input type="hidden" name="status" value="{{ status_filter }}" />
+      <input type="hidden" name="priority" value="{{ priority_filter }}" />
+      <input type="hidden" name="due_today" value="{{ request.args.get('due_today', '') }}" />
+      <input type="hidden" name="overdue" value="{{ request.args.get('overdue', '') }}" />
+      <input type="hidden" name="day" value="{{ request.args.get('day', '') }}" />
+      <input type="hidden" name="year" value="{{ year }}" />
+      <input type="hidden" name="month" value="{{ month }}" />
+      <input class="todo-search" name="q" value="{{ search }}" placeholder="Caută task-uri…" type="search" />
+      <button type="submit" class="todo-search-btn">Caută</button>
+    </form>
+
+    <!-- Quick templates -->
+    <div class="todo-templates">
+      <a class="todo-template-btn" href="{{ url_for('todo.new_task', template='vizionare') }}">Vizionare</a>
+      <a class="todo-template-btn" href="{{ url_for('todo.new_task', template='followup') }}">Follow-up</a>
+      <a class="todo-template-btn" href="{{ url_for('todo.new_task', template='contract') }}">Contract</a>
+    </div>
+
+    <!-- Task list cu secțiuni -->
+    <div class="todo-list">
+      {% for sec_key, sec_tasks, sec_title, sec_class in [
+        ('overdue', sections.overdue, 'Întârziate', 'overdue'),
+        ('today', sections.today, 'Azi', 'today'),
+        ('this_week', sections.this_week, 'Săptămâna asta', 'week'),
+        ('later', sections.later, 'Mai târziu', 'later'),
+        ('no_date', sections.no_date, 'Fără dată', 'no-date'),
+        ('done', sections.done, 'Finalizate', 'done')
+      ] %}
+        {% if sec_tasks %}
+        <section class="todo-section todo-section-{{ sec_class }}">
+          <h3 class="todo-section-title">{{ sec_title }} <span class="todo-section-count">{{ sec_tasks|length }}</span></h3>
+          {% for task in sec_tasks %}
+          <article class="todo-card todo-card-{{ task.status }} {% if task.status == 'done' %}todo-card-done{% endif %} {% if is_overdue(task) %}is-overdue{% endif %}" data-task-id="{{ task.id }}">
+            <form method="post" action="{{ url_for('todo.toggle_task', task_id=task.id) }}" class="todo-toggle-form">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="todo-check" aria-pressed="{% if task.status == 'done' %}true{% else %}false{% endif %}" aria-label="{% if task.status == 'done' %}Marchează nefinalizat{% else %}Marchează finalizat{% endif %}">
+                <span class="todo-check-icon">{% if task.status == 'done' %}✓{% endif %}</span>
+              </button>
+            </form>
+            <a href="{{ url_for('todo.edit_task', task_id=task.id) }}" class="todo-card-main">
+              <h4 class="todo-card-title">{{ task.title }}</h4>
+              {% if task.description %}
+              <p class="todo-card-desc">{{ task.description[:120] }}{% if task.description|length > 120 %}…{% endif %}</p>
+              {% endif %}
+              <div class="todo-card-meta">
+                {% if task.due_date %}
+                <span class="todo-meta todo-meta-date {% if is_overdue(task) %}overdue{% endif %}">{{ task.due_date.strftime('%d.%m.%Y') }}{% if is_overdue(task) %} · Întârziat{% endif %}</span>
+                {% else %}
+                <span class="todo-meta todo-meta-nodate">Fără termen</span>
+                {% endif %}
+                <span class="todo-meta todo-meta-priority priority-{{ task.priority }}">{% if task.priority == 'low' %}Scăzută{% elif task.priority == 'high' %}Ridicată{% else %}Medie{% endif %}</span>
+                {% if task.tags %}
+                {% for tag in task.tags.split(',') %}
+                {% set t = tag.strip() %}
+                {% if t %}<span class="todo-meta todo-meta-tag">{{ t }}</span>{% endif %}
+                {% endfor %}
+                {% endif %}
+              </div>
+            </a>
+            <div class="todo-card-actions">
+              <a href="{{ url_for('todo.edit_task', task_id=task.id) }}" class="todo-action todo-action-edit" aria-label="Editează">Editează</a>
+              <form method="post" action="{{ url_for('todo.delete_task', task_id=task.id) }}" class="todo-action-form" onsubmit="return confirm('Ștergi acest task?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="todo-action todo-action-delete" aria-label="Șterge">Șterge</button>
+              </form>
+            </div>
+          </article>
+          {% endfor %}
+        </section>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+
+    {% if not tasks %}
+    <div class="todo-empty">
+      <div class="todo-empty-icon">📋</div>
+      <h3>Niciun task</h3>
+      <p>Adaugă un task rapid în câmpul de mai sus sau apasă butonul + pentru detalii complete.</p>
+      <a href="{{ url_for('todo.new_task') }}" class="todo-empty-btn">+ Task complet</a>
+    </div>
+    {% endif %}
+
+    <!-- Calendar -->
+    <section class="todo-calendar">
+      <h3>Calendar</h3>
+      <div class="todo-calendar-nav">
+        <a href="{{ url_for('todo.list_tasks', q=search, status=status_filter, priority=priority_filter, year=month == 1 and year - 1 or year, month=month == 1 and 12 or month - 1, day=request.args.get('day')) }}">←</a>
+        <span>{{ month_name }} {{ year }}</span>
+        <a href="{{ url_for('todo.list_tasks', q=search, status=status_filter, priority=priority_filter, year=month == 12 and year + 1 or year, month=month == 12 and 1 or month + 1, day=request.args.get('day')) }}">→</a>
+      </div>
+      <div class="todo-calendar-grid">
+        <span class="todo-cal-weekday">Lun</span><span class="todo-cal-weekday">Mar</span><span class="todo-cal-weekday">Mie</span><span class="todo-cal-weekday">Joi</span><span class="todo-cal-weekday">Vin</span><span class="todo-cal-weekday">Sâm</span><span class="todo-cal-weekday">Dum</span>
+        {% for i in range(first_weekday) %}<span class="todo-cal-day empty"></span>{% endfor %}
+        {% for d in range(1, last_day.day + 1) %}
+          {% set cell_date = first_day.replace(day=d) %}
+          {% set day_iso = cell_date.isoformat() %}
+          {% set count = tasks_by_day.get(day_iso, 0) %}
+          {% set is_today = (cell_date == today) %}
+          {% set is_selected = (request.args.get('day') == day_iso) %}
+          <a class="todo-cal-day {% if count %}has-tasks{% endif %} {% if is_today %}today{% endif %} {% if is_selected %}selected{% endif %}" href="{{ url_for('todo.list_tasks', q=search, status=status_filter, priority=priority_filter, day=day_iso, year=year, month=month) }}">
+            {{ d }}{% if count %}<span class="count">{{ count }}</span>{% endif %}
+          </a>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <!-- FAB -->
+  <a href="{{ url_for('todo.new_task') }}" class="todo-fab" aria-label="Adaugă task">
+    <span>+</span>
+  </a>
+
+  {{ premium_footer() }}
+  </div>
+{% include 'partials/assistant_widget.html' %}
+
+<script>
+(function() {
+  // Toggle AJAX – feedback instant fără reload
+  document.querySelectorAll('.todo-toggle-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      if (!('fetch' in window)) return;
+      e.preventDefault();
+      var form = this;
+      var card = form.closest('.todo-card');
+      var btn = form.querySelector('.todo-check');
+      var icon = form.querySelector('.todo-check-icon');
+      var wasDone = btn.getAttribute('aria-pressed') === 'true';
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          if (data.status === 'done') {
+            btn.setAttribute('aria-pressed', 'true');
+            icon.textContent = '✓';
+            card.classList.add('todo-card-done');
+          } else {
+            btn.setAttribute('aria-pressed', 'false');
+            icon.textContent = '';
+            card.classList.remove('todo-card-done');
+          }
+          card.style.animation = 'todoPulse 0.4s ease';
+          setTimeout(function() { card.style.animation = ''; }, 400);
+        } else {
+          form.submit();
+        }
+      })
+      .catch(function() { form.submit(); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

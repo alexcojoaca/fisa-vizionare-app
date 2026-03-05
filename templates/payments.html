@@ -1,0 +1,35 @@
+{% extends "base_premium.html" %}
+{% block title %}Plăți & Rambursări – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Plăți & Rambursări</h1>
+
+  <div class="card">
+    <div class="cardInner contentCard">
+      <p class="muted">
+        Ultima actualizare: {{ last_updated }}<br>
+        Contact: <b>{{ support_email }}</b>
+      </p>
+      <div class="divider"></div>
+      <h2>1. Activare acces</h2>
+      <p>Accesul plătit se poate activa manual după confirmarea plății. Durata accesului este stabilită conform ofertei acceptate.</p>
+      <h2>2. Metode de plată</h2>
+      <p>Metodele de plată și instrucțiunile sunt comunicate de Operator (ex: transfer bancar / alte metode).</p>
+      <h2>3. Rambursări</h2>
+      <p>Rambursările (dacă sunt aplicabile) se analizează în funcție de situație, conform legii și condițiilor de mai jos.</p>
+      <ul>
+        <li>Dacă accesul a fost activat și serviciul a fost utilizat, rambursarea poate fi limitată sau refuzată, în măsura permisă de lege.</li>
+        <li>Dacă există probleme tehnice persistente imputabile Operatorului și acestea împiedică utilizarea Serviciului, putem oferi: prelungire acces sau rambursare proporțională.</li>
+        <li>Orice rambursare se face prin aceeași metodă (sau una agreată), într-un termen rezonabil după confirmare.</li>
+      </ul>
+      <h2>4. Dreptul de retragere (consumatori)</h2>
+      <p>Dacă ești consumator, este posibil să ai drept de retragere conform legislației aplicabile. Pentru conținut/servicii digitale, dreptul de retragere poate fi pierdut dacă prestarea începe înainte de expirarea termenului legal și ai consimțit expres, confirmând că ai luat la cunoștință pierderea dreptului, conform legii.</p>
+      <h2>5. Dispute</h2>
+      <p>Pentru orice problemă legată de plăți, contactează suportul: <b>{{ support_email }}</b>.</p>
+    </div>
+  </div>
+{% endblock %}

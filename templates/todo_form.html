@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#09090b" />
+  <title>{% if task %}Editează task{% else %}Task nou{% endif %} – Fișă de vizionare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='todo.css') }}" />
+</head>
+<body class="premium todo-body">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('todo.list_tasks') }}" class="topbarBtn">← Înapoi la To-Do</a>
+  {% endcall %}
+
+  <div class="todo-wrap">
+    <h2 class="todo-form-title">{% if task %}Editează task{% else %}Task nou{% endif %}</h2>
+
+    <form method="post" class="todo-form">
+      {{ form.hidden_tag() }}
+
+      <div class="form-group">
+        <label for="title">{{ form.title.label.text }}</label>
+        {{ form.title(class='todo-form-input', placeholder='Ex: Vizionare imobil, Sună client...') }}
+        {% if form.title.errors %}
+        <div class="error">{{ form.title.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group">
+        <label for="description">{{ form.description.label.text }}</label>
+        {{ form.description(class='todo-form-input', rows=4, placeholder='Detalii opționale...') }}
+        {% if form.description.errors %}
+        <div class="error">{{ form.description.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="due_date">{{ form.due_date.label.text }}</label>
+          {{ form.due_date() }}
+          {% if form.due_date.errors %}
+          <div class="error">{{ form.due_date.errors[0] }}</div>
+          {% endif %}
+        </div>
+        <div class="form-group">
+          <label for="priority">{{ form.priority.label.text }}</label>
+          {{ form.priority() }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="status">{{ form.status.label.text }}</label>
+        {{ form.status() }}
+      </div>
+
+      <div class="form-group">
+        <label for="tags">{{ form.tags.label.text }}</label>
+        {{ form.tags(placeholder='vizionare, client, urgent') }}
+        {% if form.tags.errors %}
+        <div class="error">{{ form.tags.errors[0] }}</div>
+        {% endif %}
+      </div>
+
+      <div class="form-group form-actions">
+        <button type="submit" class="btn-submit todo-form">{% if task %}Salvează{% else %}Creează task{% endif %}</button>
+        {% if task %}
+        <a href="{{ url_for('todo.list_tasks') }}" class="todo-form-cancel">Anulează</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+  {{ premium_footer() }}
+  </div>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

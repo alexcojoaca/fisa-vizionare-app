@@ -1,0 +1,239 @@
+{% extends "base_premium.html" %}
+{% block title %}Caut un imobil – Publică cererea ta{% endblock %}
+{% block google_analytics %}{% include 'partials/google_analytics.html' %}{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.landing') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+  <p style="margin:0;font-size:0.875rem;color:var(--text-secondary);font-weight:400;">Platformă dedicată clienților</p>
+</a>
+{% endblock %}
+
+{% block topbar_right %}
+<div class="topbarAuthGroup">
+  <a href="{{ url_for('client.login') }}" class="topbarAuthBtn">Logare</a>
+  <a href="{{ url_for('client.register') }}" class="topbarAuthBtn topbarAuthBtnPrimary">Creează cont</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+  .client-hero {
+    text-align: center;
+    padding: 60px 20px 80px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  .client-hero h2 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin: 0 0 20px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  @media (max-width: 640px) {
+    .client-hero h2 { font-size: 2rem; }
+  }
+  .client-hero p {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0 0 40px;
+  }
+  .client-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .client-benefits {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+  .benefit-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 32px;
+    margin-bottom: 24px;
+  }
+  .benefit-card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--text);
+  }
+  .benefit-card p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+  }
+  .how-it-works {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px 32px;
+    margin: 40px 20px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .how-it-works h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 0 32px;
+    text-align: center;
+    color: var(--text);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  @media (min-width: 640px) {
+    .steps { grid-template-columns: repeat(3, 1fr); }
+  }
+  .step-item {
+    text-align: center;
+  }
+  .step-number {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin: 0 auto 16px;
+  }
+  .step-item h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: var(--text);
+  }
+  .step-item p {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+  }
+  .support-section {
+    text-align: center;
+    padding: 40px 20px;
+    margin-top: 60px;
+  }
+  .support-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: var(--text);
+  }
+  .support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9375rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .support-btn:hover {
+    background: #e5e5e5;
+    border-color: #e5e5e5;
+  }
+</style>
+
+<div class="client-hero">
+  <h2>Caut un imobil</h2>
+  <p>
+    Publică cererea ta și lasă agenții imobiliari să te contacteze cu oferte relevante. Tu alegi dacă plătesti sau nu comision. 
+    Simplu, rapid și gratuit.
+  </p>
+  <div class="client-cta">
+    <a href="{{ url_for('client.register') }}" class="btn primary" style="min-width: 160px;">
+      Creează cont gratuit
+    </a>
+    <a href="{{ url_for('client.login') }}" class="btn ghost" style="min-width: 160px;">
+      Logare
+    </a>
+  </div>
+</div>
+
+<div class="client-benefits">
+  <div class="benefit-card">
+    <h3>📋 Publică cererea ta</h3>
+    <p>
+      Completează un formular simplu cu ce cauți: tip imobil, zonă, buget, camere și alte detalii. 
+      Cererea ta va fi vizibilă pentru agenții imobiliari care pot avea oferte potrivite.
+    </p>
+  </div>
+
+  <div class="benefit-card">
+    <h3>👥 Agenții te contactează</h3>
+    <p>
+      Agenții imobiliari vor vedea cererea ta și te vor contacta direct dacă au oferte care se potrivesc 
+      cu criteriile tale. Nu mai trebuie să cauți tu – ofertele vin la tine.
+    </p>
+  </div>
+
+  <div class="benefit-card">
+    <h3>💰 Tu decizi despre comision</h3>
+    <p>
+      Poți specifica dacă oferi comision agentului sau nu. Agenții vor vedea clar această informație 
+      înainte să te contacteze, astfel încât să știe la ce să se aștepte.
+    </p>
+  </div>
+
+  <div class="benefit-card">
+    <h3>⏱️ Cereri valabile 30 zile</h3>
+    <p>
+      Fiecare cerere este activă timp de 30 de zile. După aceea, se șterge automat. 
+      Poți publica maximum 2 cereri pe lună pentru a preveni abuzul.
+    </p>
+  </div>
+</div>
+
+<div class="how-it-works">
+  <h3>Cum funcționează?</h3>
+  <div class="steps">
+    <div class="step-item">
+      <div class="step-number">1</div>
+      <h4>Creează cont</h4>
+      <p>Înregistrează-te cu nume, email, telefon și parolă</p>
+    </div>
+    <div class="step-item">
+      <div class="step-number">2</div>
+      <h4>Publică cererea</h4>
+      <p>Completează formularul cu ce cauți și publică cererea</p>
+    </div>
+    <div class="step-item">
+      <div class="step-number">3</div>
+      <h4>Primești oferte</h4>
+      <p>Agenții te contactează direct cu oferte relevante</p>
+    </div>
+  </div>
+</div>
+
+<div class="support-section">
+  <h3>Ai întrebări?</h3>
+  <p style="color: var(--text-secondary); margin-bottom: 20px;">
+    Echipa noastră este aici să te ajute.
+  </p>
+  {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+  {% set wa_text = 'Salut! Am o întrebare despre platforma "Caut un imobil".' %}
+  <a href="https://wa.me/{{ wa_phone }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener" class="support-btn">
+    Contactează suportul
+  </a>
+</div>
+{% endblock %}

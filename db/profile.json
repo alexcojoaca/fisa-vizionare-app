@@ -1,0 +1,15 @@
+{
+  "agency": {
+    "name": "Dorin",
+    "hq_address": "Strada maguricea nr.3",
+    "orc_number": "300029928",
+    "cui": "2344985",
+    "iban": "ro77645456555454",
+    "bank": "Banca Transilvania",
+    "administrator": "Mircea"
+  },
+  "agent": {
+    "name": "Alexndru Cojoaca",
+    "signature_dataurl": "data:image/png;base64,AAAA...."
+  }
+}

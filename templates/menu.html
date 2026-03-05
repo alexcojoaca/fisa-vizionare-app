@@ -1,0 +1,151 @@
+{% extends "base_premium.html" %}
+{% block title %}Meniu – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;">Meniu</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  {% if is_team_manager or has_team %}
+  <div class="card" style="margin-bottom:20px;">
+    <div class="cardInner">
+      <p class="kicker">Echipă & Performanță</p>
+      <a class="menuBtnWrap primary" href="{{ url_for('team.index') }}">
+        <span>Echipă & Performanță <small>{% if is_team_manager %}dashboard, agenți{% else %}echipa mea{% endif %}</small></span>
+        {% if unread_team_tasks %}<span class="pill" style="margin-left:8px;background:var(--danger-soft);color:#fca5a5;">{{ unread_team_tasks }} task nou</span>{% endif %}
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="cardInner">
+      <p class="kicker">Setări documente</p>
+      <div class="menuGrid">
+        <a class="menuBtnWrap primary" href="{{ url_for('menu.agent_profile') }}">
+          <span>Date agent <small>nume agent, date</small></span>
+        </a>
+        <a class="menuBtnWrap" href="{{ url_for('chirie.remote_list') }}">
+          <span>Fișe remote (listă) <small>chirie / vânzare / introducere</small></span>
+        </a>
+        <a class="menuBtnWrap" href="{{ url_for('menu.agency_profile') }}">
+          <span>Date agenție <small>nume firmă, CUI, IBAN etc.</small></span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="cardInner">
+      <h2 style="margin:0 0 4px;">Despre aplicație</h2>
+      <p style="margin:0 0 12px;">Cum funcționează, beneficii, securitate și suport.</p>
+      <a class="btn ghost" href="/despre">Află mai multe</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="cardInner">
+      <p class="kicker">Cont</p>
+
+      {% if current_user.is_authenticated %}
+        <p class="meta" style="margin:0 0 12px;">
+          <b>ID:</b> <span class="val">#{{ current_user.id }}</span><br>
+          <b>Nume:</b> <span class="val">{{ current_user.full_name }}</span><br>
+          <b>Email:</b> <span class="val">{{ current_user.email }}</span>
+        </p>
+
+        {% set has_access = current_user.has_access() %}
+        {% set days_left = current_user.days_left() %}
+        {% set until = current_user.access_until() %}
+        {% set source = current_user.access_source() %}
+
+        <div class="row">
+          {% if source == "paid" %}
+            <span class="pill ok">Abonament activ • {{ days_left }} zile</span>
+          {% elif source == "blocked" %}
+            <span class="pill bad">Cont blocat</span>
+          {% else %}
+            <span class="pill bad">Ești în perioadă de testare gratuită</span>
+          {% endif %}
+          {% if until %}
+            <span class="pill">Până la: {{ until.strftime("%d.%m.%Y") }}</span>
+          {% endif %}
+        </div>
+
+        {% set wa_text = current_user.support_whatsapp_text() %}
+        {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE %}
+
+        <div class="menuGrid" style="margin-top:16px;">
+          <a class="menuBtnWrap wa" href="https://wa.me/{{ wa_phone }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener">
+            <span>Contact tehnic (WhatsApp) <small>activare / prelungire abonament / Prețuri</small></span>
+          </a>
+          <a class="menuBtnWrap" href="{{ url_for('account.password') }}">
+            <span>Schimbă parola <small>recomandat periodic</small></span>
+          </a>
+          <a class="menuBtnWrap" href="{{ url_for('account.email') }}">
+            <span>Schimbă email <small>adresa de logare</small></span>
+          </a>
+          <a class="menuBtnWrap danger" href="{{ url_for('auth.logout') }}">
+            <span>Deconectare <small>ieși din cont pe acest device</small></span>
+          </a>
+        </div>
+
+        {% if not has_access %}
+          <div class="meta" style="margin-top:16px; padding:16px; background:var(--accent-soft); border-radius:var(--radius-sm); border:1px solid var(--accent);">
+            <p style="margin:0 0 12px; font-weight:700; color:var(--accent);"><b>Ești în perioada de testare gratuită</b></p>
+            <p style="margin:0 0 12px; font-size:0.875rem; line-height:1.5; color:var(--text-secondary);">
+              În perioada de testare gratuită poți utiliza:
+            </p>
+            <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--surface); border-radius:var(--radius-sm);">
+                <span style="font-size:0.875rem; color:var(--text);">Fișă de vizionare CHIRIE</span>
+                <span style="font-size:0.875rem; font-weight:600; color:{% if current_user.free_rental_viewing_used %}var(--text-muted){% else %}var(--accent){% endif %};">
+                  {% if current_user.free_rental_viewing_used %}1/1 (folosit){% else %}0/1 (disponibil){% endif %}
+                </span>
+              
+            </div>
+            <p style="margin:0 0 8px; font-size:0.875rem; line-height:1.5; color:var(--text-secondary);">
+              Restul funcțiilor sunt accesibile doar în conturile active.
+            </p>
+            <p style="margin:0; font-size:0.875rem; line-height:1.5; color:var(--text-secondary);">
+              <b>Activează accesul</b> contactând suportul pentru a debloca toate funcțiile.
+            </p>
+          </div>
+        {% endif %}
+      {% else %}
+        <p class="meta" style="margin:0 0 12px;">Nu ești conectat. Conectează-te ca să poți folosi fișele și contractele.</p>
+        <div class="menuGrid">
+          <a class="menuBtnWrap primary" href="{{ url_for('auth.login') }}">
+            <span>Logare <small>intră în cont</small></span>
+          </a>
+          <a class="menuBtnWrap" href="{{ url_for('auth.register') }}">
+            <span>Creează cont <small>acces gratuit pentru început</small></span>
+          </a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="menu-download-wrap">
+    <button type="button" class="btn-download-slim" onclick="window.openInstallAppModal()">
+      Descarcă
+    </button>
+  </div>
+
+  <div class="stickySpacer"></div>
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <a class="btn primary" href="{{ url_for('home') }}">Înapoi acasă</a>
+      <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Refresh</a>
+    </div>
+  </div>
+  {% include 'partials/install_app_modal.html' %}
+{% endblock %}

@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>Fișă de vizionare — semnare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding-bottom: 90px;
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .flash {
+      margin: 0 0 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: #fde8e8;
+      color: #b91c1c;
+      font-size: 0.9rem;
+    }
+    .block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .block-title {
+      margin: 0 0 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+    }
+    .meta-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .meta-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.95rem;
+    }
+    .meta-list li:last-child { border-bottom: 0; }
+    .meta-list .key { color: #666; }
+    .meta-list .val { font-weight: 600; color: #1a1a1a; }
+    .doc-block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .doc-block .doc-title {
+      margin: 0 0 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+    }
+    .doc-body {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #333;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .doc-body b { color: #1a1a1a; font-weight: 600; }
+    label {
+      display: block;
+      margin-top: 16px;
+      margin-bottom: 4px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+    label:first-of-type { margin-top: 0; }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: inherit;
+      background: #fff;
+      color: #1a1a1a;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus {
+      outline: none;
+      border-color: #1a1a1a;
+      box-shadow: 0 0 0 2px rgba(26,26,26,0.1);
+    }
+    .grid2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    @media (max-width: 400px) { .grid2 { grid-template-columns: 1fr; } }
+    .hint {
+      margin: 8px 0 0;
+      font-size: 0.8rem;
+      color: #666;
+      line-height: 1.4;
+    }
+    .sig-label {
+      margin: 20px 0 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #1a1a1a;
+    }
+    .sig-wrap {
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+    .sig-wrap canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      touch-action: none;
+      cursor: crosshair;
+      border-radius: 4px;
+    }
+    @media (max-width: 768px) {
+      .sig-wrap canvas { min-height: 180px; }
+    }
+    .sig-actions { margin-top: 10px; }
+    .btn-clear-sig {
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #666;
+      background: #f0f0f0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-clear-sig:hover { background: #e5e5e5; }
+    .sticky-bar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      padding: 14px 16px;
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
+      background: #fff;
+      border-top: 1px solid #e0e0e0;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+      z-index: 100;
+    }
+    body.kbd .sticky-bar { transform: translateY(100%); pointer-events: none; }
+    .sticky-inner {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+    .btn-download {
+      width: 100%;
+      padding: 16px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-download:hover { background: #333; }
+    .btn-download:active { transform: scale(0.99); }
+  </style>
+</head>
+<body class="remote-public">
+  <div class="wrap">
+    <header class="header">
+      <h1>Fișă de vizionare — închiriere</h1>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="flash">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="block">
+      <p class="block-title">Detalii vizionare</p>
+      <ul class="meta-list">
+        <li><span class="key">Data</span><span class="val">{{ info.data_vizionarii }}</span></li>
+        <li><span class="key">Ora</span><span class="val">{{ info.ora_vizionarii }}</span></li>
+        <li><span class="key">Tip imobil</span><span class="val">{{ info.tip_imobil }}</span></li>
+        <li><span class="key">Locație</span><span class="val">{{ info.adresa_public }}</span></li>
+        <li><span class="key">Comision</span><span class="val">{{ info.comision_procent }}</span></li>
+      </ul>
+    </div>
+
+    <div class="doc-block">
+      <p class="block-title">Documentul pe care îl semnezi</p>
+      <div class="doc-title">FIȘĂ DE VIZIONARE — ÎNCHIRIERE</div>
+      <div class="doc-body"><b>FIȘĂ DE VIZIONARE — ÎNCHIRIERE</b>
+
+<b>Data vizionării:</b> {{ info.data_vizionarii }}
+<b>Ora vizionării:</b> {{ info.ora_vizionarii }}
+
+<b>1. PĂRȚI</b>
+<b>Prestator (Agenție imobiliară):</b>
+{{ agency_text if agency_text else "—" }}
+
+<b>Agent imobiliar:</b> {{ agent_name if agent_name else "—" }}
+
+<b>2. VIZITATOR (CLIENT)</b>
+Datele Vizitatorului se completează în formularul de mai jos (Nume, Telefon, Email, CI — Serie și Număr).
+<b>Notă:</b> Seria și numărul CI sunt folosite strict pentru identificare.
+
+Vizitatorul declară că datele furnizate sunt corecte, reale și îi aparțin. Furnizarea datelor are ca scop organizarea vizionării, intermedierea și, după caz, dovedirea intermedierii și a consimțământului exprimat prin semnare. În măsura în care unele date sunt opționale, acestea sunt furnizate voluntar; refuzul furnizării poate limita posibilitatea dovedirii identității în cazul unei contestări, fără a anula prin sine însuși valoarea prezentei fișe.
+
+<b>3. IMOBIL VIZIONAT</b>
+<b>Tip imobil:</b> {{ info.tip_imobil }}
+<b>Locație / zonă:</b> {{ info.adresa_public }}
+
+Vizitatorul confirmă că i-au fost prezentate imobilul și informațiile relevante pentru închiriere (caracteristici, condiții, disponibilitate) prin intermediul Prestatorului/Agentului, iar această introducere la proprietate este element esențial al activității de intermediere.
+
+<b>4. OBIECTUL FIȘEI</b>
+Prin prezenta, Vizitatorul confirmă că a efectuat vizionarea imobilului descris mai sus prin intermediul Prestatorului, în prezența/participarea Agentului imobiliar, primind informații despre caracteristicile, starea și condițiile de închiriere ale imobilului.
+
+Prezenta fișă are rol de dovadă a intermedierii și a introducerii Vizitatorului la proprietate, în scopul protejării dreptului Prestatorului la comision. De asemenea, fișa poate fi utilizată pentru a demonstra cronologia evenimentelor (vizionare/negociere/închiriere) și legătura dintre vizionarea realizată prin Prestator și tranzacția finală.
+
+Părțile înțeleg că prezenta fișă nu ține loc de contract de închiriere și nu transferă drepturi de proprietate sau folosință; totuși, ea produce efecte juridice între părți cu privire la confirmarea intermedierii, obligațiile de neeludare și plata comisionului.
+
+<b>5. CLAUZĂ DE NEELUDARE A INTERMEDIERII</b>
+Vizitatorul se obligă ca, pe o perioadă de 6 (șase) luni de la data semnării prezentei fișe, să nu contacteze direct proprietarul imobilului și să nu încheie, direct sau indirect, nicio tranzacție de închiriere având ca obiect imobilul vizionat, fără participarea Prestatorului.
+
+Interdicția se aplică inclusiv prin persoane interpuse (rude până la gradul IV inclusiv, societăți controlate, prieteni, colegi sau orice alte persoane interpuse), precum și în situația în care tranzacția se realizează în condiții identice sau similare celor prezentate la vizionare ori în condiții modificate (preț negociat, durată diferită etc.), dacă există legătură cu introducerea la proprietate realizată de Prestator.
+
+Încălcarea obligației de mai sus atrage răspunderea contractuală a Vizitatorului, iar comisionul prevăzut la secțiunea următoare reprezintă prejudiciu minim prezumat rezultat din eludarea intermedierii. În plus, Prestatorul își rezervă dreptul de a solicita, atunci când este cazul, repararea integrală a prejudiciului dovedit (inclusiv cheltuieli de recuperare, taxe, onorarii și alte costuri ocazionate de demersurile necesare).
+
+<b>6. COMISION</b>
+În cazul în care tranzacția de închiriere se finalizează pentru imobilul vizionat (direct sau indirect), Vizitatorul se obligă să achite Prestatorului un comision de <b>{{ info.comision_procent }}</b> din valoarea chiriei lunare, conform acordului comercial dintre părți.
+
+Comisionul devine exigibil la data semnării contractului de închiriere și/sau la data obținerii folosinței imobilului (de exemplu primire chei/mutare), oricare intervine prima, întrucât acesta este momentul în care intermedierea produce rezultatul final.
+
+Plata comisionului se va efectua în termen de maximum 7 (șapte) zile calendaristice de la data finalizării tranzacției (semnarea contractului de închiriere). Neplata la scadență poate conduce la demersuri de recuperare și, după caz, la acțiuni legale.
+
+<b>7. ACORD ȘI CONFIRMARE</b>
+Vizitatorul declară și confirmă că:
+• a efectuat vizionarea imobilului prin intermediul Prestatorului;
+• a luat la cunoștință conținutul prezentei fișe și îl acceptă integral;
+• datele furnizate sunt reale și aparțin Vizitatorului;
+• a înțeles clauza de neeludare și efectele acesteia, inclusiv obligația de plată a comisionului în caz de eludare;
+• a primit / poate primi o copie electronică a documentului (WhatsApp / e-mail).
+
+Vizitatorul confirmă că a avut posibilitatea de a citi documentul înainte de semnare, că a solicitat lămuriri acolo unde a considerat necesar și că își exprimă consimțământul în mod liber. Orice neconcordanță observată ulterior va fi comunicată Prestatorului fără întârziere.
+
+<b>8. SEMNĂTURĂ ELECTRONICĂ</b>
+Prin semnarea prezentului document, inclusiv prin semnătură electronică simplă (trasare pe ecran), Vizitatorul confirmă acordul integral cu conținutul prezentei fișe.
+
+Documentul poate fi comunicat și păstrat în format electronic, având valoare probatorie conform dispozițiilor legale aplicabile. Părțile acceptă că forma electronică este adecvată scopului, iar fișa nu poate fi respinsă ca probă doar pentru faptul că este în format electronic.
+
+În situația în care semnarea se face la distanță, părțile acceptă utilizarea elementelor tehnice de trasabilitate (metadate) pentru a stabili momentul semnării și a lega documentul de persoana care a primit link-ul de semnare, conform secțiunii 9.
+
+<b>9. DATE DE IDENTIFICARE ALE SEMNĂRII LA DISTANȚĂ (REMOTE)</b>
+În documentul PDF final vor fi înscrise automat data/ora semnării (România), fusul orar și adresa IP, ca elemente tehnice de suport pentru dovada semnării la distanță.
+
+Aceste date constituie o urmă de audit (audit trail) care permite, dacă este necesar, reconstituirea cronologiei semnării și demonstrarea faptului că acceptarea a avut loc printr-o acțiune voluntară a persoanei care a accesat link-ul de semnare. Data și ora semnării sunt păstrate pentru a stabili momentul exact al consimțământului și pentru a separa clar data/ora vizionării de data/ora semnării. Adresa IP este colectată exclusiv în scop de securitate și prevenire a abuzurilor. Accesul la aceste informații este restricționat și comunicarea către terți se face numai în temei legal sau pentru apărarea drepturilor Prestatorului.
+
+<b>10. PROTECȚIA DATELOR (GDPR)</b>
+Operatorul de date cu caracter personal este Prestatorul (Agenția imobiliară) menționat la secțiunea 1. Datele cu caracter personal sunt prelucrate în conformitate cu Regulamentul (UE) 2016/679 (GDPR) și legislația națională aplicabilă.
+
+Scopurile prelucrării sunt: (i) organizarea și derularea vizionării, (ii) intermedierea tranzacției imobiliare, (iii) comunicarea cu Vizitatorul, (iv) dovedirea intermedierii și protejarea dreptului Prestatorului la comision, inclusiv prevenirea eludării intermedierii, (v) securitatea procesului de semnare și prevenirea abuzurilor/fraudei, (vi) apărarea drepturilor în cazul unor litigii și îndeplinirea obligațiilor legale.
+
+Categoriile de date prelucrate pot include: nume, telefon, e-mail, date din actul de identitate (serie/număr — dacă sunt furnizate), date privind imobilul vizionat și, în cazul semnării la distanță, metadate tehnice precum data/ora semnării, fus orar și adresă IP. Aceste metadate sunt utilizate strict pentru trasabilitate, securitate și probă, nu pentru profilare sau marketing.
+
+Temeiurile legale ale prelucrării (art. 6 GDPR) sunt: executarea demersurilor precontractuale/contractuale (organizare vizionare, intermediere, comunicare), interesul legitim al Prestatorului (dovada intermedierii, prevenirea eludării, securitatea semnării și apărarea drepturilor) și, după caz, îndeplinirea obligațiilor legale. În situațiile în care anumite date sunt opționale, furnizarea lor este voluntară; refuzul nu împiedică în mod automat vizionarea, dar poate limita posibilitatea de probare în caz de contestare.
+
+Datele nu sunt vândute și nu sunt transmise terților în scopuri de marketing. Pot fi comunicate doar către furnizori de servicii necesari funcționării (ex.: servicii IT/găzduire, comunicare electronică), în baza obligațiilor de confidențialitate și securitate, precum și către autorități/instanțe/consultanți juridici atunci când există obligație legală sau este necesar pentru constatarea, exercitarea ori apărarea unui drept în instanță.
+
+Durata de stocare: datele sunt păstrate pe perioada necesară îndeplinirii scopurilor de mai sus, inclusiv pe durata în care pot apărea pretenții, contestări sau litigii privind intermedierea și comisionul, precum și pe duratele cerute de obligațiile legale aplicabile. După expirarea termenelor, datele sunt șterse sau anonimizate, după caz.
+
+Măsuri de securitate: Prestatorul aplică măsuri tehnice și organizatorice rezonabile pentru protecția datelor (control acces, limitare acces, logare, back-up, măsuri anti-abuz). Accesul la metadate (IP, loguri) este strict limitat la personal autorizat.
+
+Drepturile Vizitatorului: dreptul de acces, rectificare, ștergere (în limitele legii), restricționare, opoziție (în special față de prelucrări bazate pe interes legitim), portabilitate (unde este aplicabil) și dreptul de a depune plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP). Solicitările se pot transmite Prestatorului folosind datele de contact ale agenției.</div>
+    </div>
+
+    <div class="block" id="formBlock">
+      <p class="block-title">Completează datele tale</p>
+      <form method="POST" id="clientForm" action="/chirie/s/{{ token }}/submit">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <label for="nume">Nume complet</label>
+        <input name="nume" id="nume" placeholder="Ex: Popescu Ion" required>
+
+        <label for="telefon">Telefon</label>
+        <input name="telefon" id="telefon" type="tel" placeholder="Ex: 07...">
+
+        <label for="email">Email</label>
+        <input name="email" id="email" type="email" placeholder="Ex: nume@email.com">
+
+        <div class="grid2">
+          <div>
+            <label for="ci_serie">CI – Serie</label>
+            <input name="ci_serie" id="ci_serie" placeholder="Ex: XR">
+          </div>
+          <div>
+            <label for="ci_numar">CI – Număr</label>
+            <input name="ci_numar" id="ci_numar" placeholder="Ex: 123456">
+          </div>
+        </div>
+        <p class="hint">Seria și numărul CI sunt opționale; se folosesc pentru identificare.</p>
+
+        <p class="sig-label" id="sigLabel">Semnătura ta</p>
+        <p class="hint">Semnează în chenarul de mai jos. După ce completezi și semnezi, apasă „Descarcă PDF” pentru a obține documentul.</p>
+        <div class="sig-wrap">
+          <canvas id="sigCanvasVisitor" width="500" height="200"></canvas>
+        </div>
+        <div class="sig-actions">
+          <button type="button" class="btn-clear-sig" id="clearSigVisitor">Șterge semnătura</button>
+        </div>
+        <input type="hidden" name="signature_visitor" id="signature_visitor">
+      </form>
+    </div>
+  </div>
+
+  <div class="sticky-bar">
+    <div class="sticky-inner">
+      <button class="btn-download" type="button" id="btnSubmit">Descarcă PDF</button>
+    </div>
+  </div>
+
+<script>
+(function () {
+  function setupSignature(canvasId, clearBtnId, hiddenInputId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#111";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    let drawing = false;
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+    }
+    function start(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+    function move(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+    function end() { drawing = false; }
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end, { passive: false });
+    window.addEventListener("touchend", end, { passive: false });
+    document.getElementById(clearBtnId).addEventListener("click", function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      document.getElementById(hiddenInputId).value = "";
+    });
+    return { clear: function() { ctx.clearRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height); }, toDataURL: function() { return canvas.toDataURL("image/png"); } };
+  }
+  const form = document.getElementById("clientForm");
+  const sigVisitor = setupSignature("sigCanvasVisitor", "clearSigVisitor", "signature_visitor");
+  form.querySelectorAll("input, select, textarea").forEach(function(el) {
+    el.addEventListener("focus", function() { document.body.classList.add("kbd"); });
+    el.addEventListener("blur", function() { setTimeout(function() { document.body.classList.remove("kbd"); }, 120); });
+  });
+  function setSig() { document.getElementById("signature_visitor").value = sigVisitor.toDataURL(); }
+  function looksLikeSig(dataUrl) { return (dataUrl || "").startsWith("data:image/"); }
+  document.getElementById("btnSubmit").addEventListener("click", function () {
+    var numeEl = document.getElementById("nume");
+    var nume = (numeEl.value || "").trim();
+    setSig();
+    var sigVal = document.getElementById("signature_visitor").value || "";
+    if (!nume) {
+      numeEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      numeEl.focus();
+      alert("Numele este obligatoriu.");
+      return;
+    }
+    if (!looksLikeSig(sigVal)) {
+      document.getElementById("sigLabel").scrollIntoView({ behavior: "smooth", block: "center" });
+      alert("Semnătura este obligatorie.");
+      return;
+    }
+    form.submit();
+  });
+})();
+</script>
+</body>
+</html>

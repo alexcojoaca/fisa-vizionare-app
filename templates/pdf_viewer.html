@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>{{ title or "Vizualizare PDF" }}</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/pdf_viewer.css') }}" />
+</head>
+
+<body class="premium pdf-viewer-page">
+  <div class="pdf-viewer-container">
+    <!-- Toolbar -->
+    <div class="pdf-toolbar" id="pdfToolbar">
+      <div class="pdf-toolbar-inner">
+        <button class="pdf-toolbar-btn" id="btnBack" aria-label="Înapoi">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="btn-text">Înapoi</span>
+        </button>
+        
+        <div class="pdf-toolbar-spacer"></div>
+        
+        <a href="{{ download_url }}" class="pdf-toolbar-btn" download aria-label="Descarcă PDF">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.5 12.5V15.8333C17.5 16.2754 17.3244 16.6993 17.0118 17.0118C16.6993 17.3244 16.2754 17.5 15.8333 17.5H4.16667C3.72464 17.5 3.30072 17.3244 2.98816 17.0118C2.67559 16.6993 2.5 16.2754 2.5 15.8333V12.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.83331 8.33333L9.99998 12.5L14.1666 8.33333" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 12.5V2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="btn-text">Descarcă</span>
+        </a>
+        
+        <button class="pdf-toolbar-btn" id="btnOpenBrowser" aria-label="Deschide în browser">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15.8333 2.5H4.16667C3.72464 2.5 3.30072 2.67559 2.98816 2.98816C2.67559 3.30072 2.5 3.72464 2.5 4.16667V15.8333C2.5 16.2754 2.67559 16.6993 2.98816 17.0118C3.30072 17.3244 3.72464 17.5 4.16667 17.5H15.8333C16.2754 17.5 16.6993 17.3244 17.0118 17.0118C17.3244 16.6993 17.5 16.2754 17.5 15.8333V4.16667C17.5 3.72464 17.3244 3.30072 17.0118 2.98816C16.6993 2.67559 16.2754 2.5 15.8333 2.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12.5 2.5V7.5H17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span class="btn-text">Deschide în browser</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- PDF Viewer -->
+    <div class="pdf-viewer-wrapper">
+      <iframe 
+        id="pdfFrame"
+        src="{{ pdf_url }}"
+        class="pdf-frame"
+        title="Vizualizare PDF"
+        allow="fullscreen"
+      ></iframe>
+      
+      <!-- Fallback message if PDF can't be displayed -->
+      <div class="pdf-fallback" id="pdfFallback" style="display: none;">
+        <div class="pdf-fallback-content">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 16px; opacity: 0.6;">
+            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 2V8H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p style="font-size: 1rem; font-weight: 600; margin: 0 0 8px; color: var(--text);">
+            PDF-ul nu poate fi previzualizat aici
+          </p>
+          <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0 0 20px;">
+            Apasă „Deschide în browser” sau „Descarcă” pentru a accesa PDF-ul.
+          </p>
+          <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
+            <a href="{{ download_url }}" class="btn primary" download>Descarcă PDF</a>
+            <button class="btn ghost" id="btnOpenBrowserFallback">Deschide în browser</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const btnBack = document.getElementById('btnBack');
+    const btnOpenBrowser = document.getElementById('btnOpenBrowser');
+    const btnOpenBrowserFallback = document.getElementById('btnOpenBrowserFallback');
+    const pdfFrame = document.getElementById('pdfFrame');
+    const pdfFallback = document.getElementById('pdfFallback');
+    const backUrl = {{ back_url|tojson|safe }};
+    const pdfUrl = {{ pdf_url|tojson|safe }};
+    const downloadUrl = {{ download_url|tojson|safe }};
+    const autoDownload = {{ auto_download|default(false)|tojson|safe }};
+
+    // Back button handler
+    btnBack.addEventListener('click', function() {
+      // Robust back navigation
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = backUrl;
+      }
+    });
+
+    // Open in browser handler
+    function openInBrowser() {
+      window.open(pdfUrl, '_blank', 'noopener,noreferrer');
+    }
+    
+    if (btnOpenBrowser) {
+      btnOpenBrowser.addEventListener('click', openInBrowser);
+    }
+    
+    if (btnOpenBrowserFallback) {
+      btnOpenBrowserFallback.addEventListener('click', openInBrowser);
+    }
+
+    // Check if PDF loaded successfully
+    pdfFrame.addEventListener('load', function() {
+      try {
+        // Try to access iframe content (may fail due to CORS)
+        const iframeDoc = pdfFrame.contentDocument || pdfFrame.contentWindow.document;
+        // If we can access it, check if there's an error
+        if (iframeDoc.body && iframeDoc.body.innerHTML.includes('error') || iframeDoc.body.innerHTML.includes('404')) {
+          showFallback();
+        }
+      } catch (e) {
+        // CORS error is normal - PDF should still display
+        // Only show fallback if we can detect a real error
+      }
+    });
+
+    pdfFrame.addEventListener('error', function() {
+      showFallback();
+    });
+
+    function showFallback() {
+      pdfFrame.style.display = 'none';
+      pdfFallback.style.display = 'flex';
+    }
+
+    // Fallback timeout - if PDF doesn't load in 5 seconds, show fallback
+    setTimeout(function() {
+      try {
+        const iframeDoc = pdfFrame.contentDocument || pdfFrame.contentWindow.document;
+        if (!iframeDoc || !iframeDoc.body || iframeDoc.body.innerHTML.trim() === '') {
+          showFallback();
+        }
+      } catch (e) {
+        // CORS - assume PDF is loading fine
+      }
+    }, 5000);
+
+    // Auto-download if requested
+    if (autoDownload && downloadUrl) {
+      // Trigger download after a short delay to ensure page is loaded
+      setTimeout(function() {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = downloadUrl;
+        downloadLink.download = '';
+        downloadLink.style.display = 'none';
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // After download starts, optionally go back or stay on page
+        // User can use back button if they want
+      }, 500);
+    }
+  })();
+  </script>
+</body>
+</html>

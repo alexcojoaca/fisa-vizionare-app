@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Profilul meu — Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .profile-section { 
+      background: linear-gradient(180deg, var(--surface) 0%, rgba(255,255,255,.02) 100%); 
+      border: 1px solid var(--stroke); 
+      border-radius: var(--r-lg); 
+      padding: var(--pad-lg); 
+      margin-bottom: var(--pad-lg); 
+    }
+    .profile-section h2 { 
+      margin: 0 0 16px; 
+      font-size: 20px; 
+      font-weight: 800; 
+      display: flex; 
+      align-items: center; 
+      gap: 10px; 
+    }
+    .profile-section h3 { 
+      margin: 24px 0 12px; 
+      font-size: 16px; 
+      font-weight: 700; 
+      color: var(--text); 
+    }
+    .profile-section p { 
+      margin: 0 0 12px; 
+      font-size: 14px; 
+      color: var(--muted); 
+      line-height: 1.6; 
+    }
+    .profile-section .stat { 
+      font-size: 20px; 
+      font-weight: 800; 
+      margin: 10px 0 6px; 
+    }
+    .info-box { 
+      background: rgba(59, 130, 246, 0.1); 
+      border: 1px solid rgba(59, 130, 246, 0.3); 
+      border-radius: var(--r-md); 
+      padding: 14px 16px; 
+      margin: 16px 0; 
+      font-size: 13px; 
+      line-height: 1.6; 
+      color: #93c5fd; 
+    }
+    .info-box strong { 
+      color: #dbeafe; 
+      font-weight: 700; 
+    }
+    .info-box ul { 
+      margin: 8px 0 0 20px; 
+      padding: 0; 
+    }
+    .info-box li { 
+      margin: 6px 0; 
+    }
+    .stats-grid { 
+      display: grid; 
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+      gap: 12px; 
+      margin: 16px 0; 
+    }
+    .stat-card { 
+      background: rgba(255,255,255,.05); 
+      border: 1px solid var(--stroke); 
+      border-radius: var(--r-md); 
+      padding: 14px; 
+      text-align: center; 
+    }
+    .stat-card .stat-value { 
+      font-size: 28px; 
+      font-weight: 800; 
+      color: var(--text); 
+      margin-bottom: 4px; 
+    }
+    .stat-card .stat-label { 
+      font-size: 12px; 
+      color: var(--muted); 
+      text-transform: uppercase; 
+      letter-spacing: 0.5px; 
+    }
+    .stat-card.highlight { 
+      background: rgba(34,197,94,.1); 
+      border-color: rgba(34,197,94,.3); 
+    }
+    .stat-card.highlight .stat-value { 
+      color: #86efac; 
+    }
+    .my-card-actions { 
+      display: flex; 
+      gap: 8px; 
+      flex-wrap: wrap; 
+      margin-top: 12px; 
+    }
+    .my-card-actions a, .my-card-actions button { 
+      padding: 8px 14px; 
+      border-radius: var(--r-md); 
+      font-size: 13px; 
+      font-weight: 700; 
+      text-decoration: none; 
+      border: 1px solid var(--stroke); 
+      background: var(--surface); 
+      color: var(--text); 
+      cursor: pointer; 
+      transition: all 0.2s; 
+    }
+    .my-card-actions a:hover, .my-card-actions button:hover { 
+      background: rgba(255,255,255,.08); 
+      transform: translateY(-1px); 
+    }
+    .my-card-actions .delete { 
+      border-color: rgba(239,68,68,.4); 
+      color: #fecaca; 
+    }
+    .my-card-actions .delete:hover { 
+      background: rgba(239,68,68,.15); 
+    }
+    .contact-wa { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 8px; 
+      margin-top: 16px; 
+      padding: 12px 20px; 
+      border-radius: var(--r-md); 
+      background: rgba(34,197,94,.15); 
+      border: 1px solid rgba(34,197,94,.35); 
+      color: #86efac; 
+      font-weight: 700; 
+      font-size: 14px; 
+      text-decoration: none; 
+      transition: all 0.2s; 
+    }
+    .contact-wa:hover { 
+      background: rgba(34,197,94,.25); 
+      transform: translateY(-1px); 
+    }
+    .contact-wa svg { 
+      width: 18px; 
+      height: 18px; 
+    }
+    .profile-actions { 
+      display: flex; 
+      gap: 10px; 
+      flex-wrap: wrap; 
+      margin-top: 16px; 
+    }
+    .slot-breakdown { 
+      background: rgba(255,255,255,.04); 
+      border-radius: var(--r-md); 
+      padding: 16px; 
+      margin: 16px 0; 
+      font-size: 14px; 
+      line-height: 1.6; 
+    }
+    .slot-breakdown .line { 
+      margin: 8px 0; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
+    .slot-breakdown .highlight { 
+      color: var(--text); 
+      font-weight: 700; 
+      font-size: 15px; 
+    }
+    .slot-breakdown .after-expiry { 
+      color: var(--muted); 
+      font-size: 13px; 
+      margin-top: 12px; 
+      padding-top: 12px; 
+      border-top: 1px solid var(--stroke); 
+    }
+    .paid-info { 
+      margin-top: 12px; 
+      padding-top: 12px; 
+      border-top: 1px solid var(--stroke); 
+      font-size: 13px; 
+      color: var(--muted); 
+      line-height: 1.5; 
+    }
+    /* Card în profil: permitem click pe Vezi / Editează / Șterge (overlay-ul ::before nu blochează) */
+    .marketplace-cards .req-card.profile-offer-card::before,
+    .marketplace-cards .req-card.profile-request-card::before { pointer-events: none; }
+    .marketplace-cards .req-card.profile-offer-card .my-card-actions a,
+    .marketplace-cards .req-card.profile-offer-card .my-card-actions button,
+    .marketplace-cards .req-card.profile-offer-card .my-card-actions form,
+    .marketplace-cards .req-card.profile-request-card .my-card-actions a,
+    .marketplace-cards .req-card.profile-request-card .my-card-actions button,
+    .marketplace-cards .req-card.profile-request-card .my-card-actions form { position: relative; z-index: 1; }
+    @media (max-width: 640px) {
+      .stats-grid { 
+        grid-template-columns: repeat(2, 1fr); 
+      }
+      .stat-card .stat-value { 
+        font-size: 24px; 
+      }
+      .profile-section { 
+        padding: 16px; 
+      }
+      .profile-section h2 { 
+        font-size: 18px; 
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="mp-topbar">
+    {% include 'marketplace/_mp_header.html' %}
+    <a href="{{ url_for('marketplace.list_requests') }}" class="mp-homebtn" style="margin-right:8px;">Cereri</a>
+    <a href="{{ url_for('marketplace.list_offers') }}" class="mp-homebtn" style="margin-right:8px;">Anunțuri</a>
+    <a href="{{ url_for('marketplace.hub') }}" class="mp-homebtn">Marketplace</a>
+    <a href="{{ url_for('home') }}" class="mp-homebtn">Acasă</a>
+  </div>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Profilul meu</h1>
+      <p>Vezi câte anunțuri și cereri ai folosit, sloturile plătite și expirarea. Editează sau șterge anunțurile și cererile tale.</p>
+    </div>
+  </section>
+
+  <div class="search-actions-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <!-- Anunțuri -->
+    <div class="profile-section">
+      <h2>📦 Anunțuri</h2>
+      
+      <div class="info-box">
+        <strong>{{ OFFER_FREE_SLOTS }} anunțuri gratuite valabile 30 de zile</strong><br>
+        După 30 de zile, anunțul se șterge automat și trebuie repostat din nou. Ai <strong>{{ OFFER_FREE_SLOTS }} anunțuri gratuite în fiecare lună</strong> atât timp cât abonamentul tău este activ.
+      </div>
+
+      <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Cum funcționează:</strong></p>
+      <ul style="margin: 0 0 16px 20px; padding: 0; color: var(--muted); font-size: 14px; line-height: 1.8;">
+        <li>Anunțurile se șterg automat după <strong>30 de zile</strong> pentru a ne asigura că încă sunt valabile și nu ai uitat de ele</li>
+        <li>Le poți <strong>reactiva</strong> după ce au fost șterse</li>
+        <li>Le poți <strong>edita</strong>, <strong>șterge</strong> și pune altele în locul lor</li>
+        <li>Când ștergi un anunț, slotul devine liber și poți adăuga altul imediat</li>
+      </ul>
+
+      <div class="stats-grid">
+        <div class="stat-card{% if offer_paid_slots == 0 %} highlight{% endif %}">
+          <div class="stat-value">{{ OFFER_FREE_SLOTS }}</div>
+          <div class="stat-label">Gratuite</div>
+        </div>
+        {% if offer_paid_slots > 0 %}
+        <div class="stat-card">
+          <div class="stat-value">{{ offer_paid_slots }}</div>
+          <div class="stat-label">Plătite</div>
+        </div>
+        {% endif %}
+        <div class="stat-card highlight">
+          <div class="stat-value">{{ offer_limit }}</div>
+          <div class="stat-label">Total sloturi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ offer_used }}</div>
+          <div class="stat-label">Folosite</div>
+        </div>
+        <div class="stat-card{% if offer_remaining > 0 %} highlight{% endif %}">
+          <div class="stat-value">{{ offer_remaining }}</div>
+          <div class="stat-label">Disponibile</div>
+        </div>
+      </div>
+
+      {% if offer_paid_slots > 0 and offer_paid_expires %}
+        <div class="paid-info">
+          <strong>Sloturi plătite:</strong> Valabile până la <strong>{{ offer_paid_expires.strftime('%d.%m.%Y') }}</strong>. După această dată, vei avea doar cele 3 sloturi gratuite. Poți reactiva un pachet oricând.
+        </div>
+      {% else %}
+        <div class="paid-info">
+          <strong>Dorești mai multe anunțuri?</strong> Pachete disponibile: +3 / +6 / +12 anunțuri. Contactează-ne pentru detalii.
+        </div>
+      {% endif %}
+
+      {% if has_access %}
+        <div class="profile-actions">
+          {% if offer_remaining > 0 %}
+            <a class="mp-action-btn mp-primary" href="{{ url_for('marketplace.new_offer') }}">➕ Adaugă anunț</a>
+          {% endif %}
+          <a class="contact-wa" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! Doresc mai multe anunțuri. User ID: ' ~ current_user.id ~ '. Email: ' ~ current_user.email ~ '. Anunțuri gratuite: ' ~ OFFER_FREE_SLOTS ~ '. Anunțuri folosite: ' ~ offer_used ~ '. Anunțuri disponibile: ' ~ offer_remaining)|urlencode }}" target="_blank" rel="noopener">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+            </svg>
+            Mai multe anunțuri pe WhatsApp
+          </a>
+        </div>
+      {% else %}
+        <p style="margin-top: 16px; color: var(--muted);">Trebuie să ai acces activ (trial sau abonament) pentru a publica anunțuri.</p>
+      {% endif %}
+    </div>
+
+    <!-- Lista anunțuri -->
+    <h3 style="margin-top:20px;">Anunțurile tale</h3>
+    <div class="marketplace-cards">
+      {% for offer in offers_list %}
+        {% set tip_imobil = offer.property_type|property_type_label %}
+        {% set tip_oferta = 'Vânzare' if offer.request_type == 'cumparare' else 'Închiriere' %}
+        {% set pret = offer.price if offer.price is not none else (offer.budget_min if offer.budget_min is not none else offer.budget_max) %}
+        <div class="req-card profile-offer-card" style="display:block;">
+          <div class="badge-row">
+            <span class="badge badge-tip">{{ tip_oferta }}</span>
+          </div>
+          <h2 class="title">{{ tip_imobil }}{% if offer.rooms %} · {{ offer.rooms }} camere{% endif %}</h2>
+          <div class="zones">
+            {% for z in offer.zones[:3] %}
+              <span class="zone-chip">{{ z.name|zone_display_name }}</span>
+            {% endfor %}
+            {% if offer.zones|length > 3 %}
+              <span class="zone-chip">+{{ offer.zones|length - 3 }}</span>
+            {% endif %}
+          </div>
+          <p class="meta">
+            {% if pret is not none %}<strong>Preț:</strong> {{ pret|format_budget }} €{% else %}<strong>Preț:</strong> la cerere{% endif %}
+            {% if offer.price_negotiable %}<span style="color:var(--muted);"> · Preț negociabil</span>{% endif %}
+            {% if getattr(offer, 'plus_tva', False) %}<span style="color:var(--muted);"> · Plus TVA</span>{% endif %}
+            {% if offer.created_at %} · {{ offer.created_at.strftime('%d.%m.%Y') }}{% endif %}
+          </p>
+          {% if offer.surface_totala is not none or offer.surface_utila is not none %}
+            <p class="meta"><strong>Suprafață:</strong> {{ ((offer.surface_utila or offer.surface_totala)|string).replace('.', ',') }} m²</p>
+          {% endif %}
+          <div class="my-card-actions">
+            <a href="{{ url_for('marketplace.detail_offer', id=offer.id) }}" class="mp-profile-action-link">Vezi</a>
+            <a href="{{ url_for('marketplace.edit_offer', id=offer.id) }}" class="mp-profile-action-link">Editează</a>
+            <form method="post" action="{{ url_for('marketplace.delete_offer', id=offer.id) }}" class="mp-profile-action-form" onsubmit="return confirm('Ștergi acest anunț? Slotul devine liber.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="delete">Șterge</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state" style="grid-column:1/-1;">
+          <p class="muted">Nu ai anunțuri în ultimele 30 zile.{% if has_access and offer_remaining > 0 %} <a href="{{ url_for('marketplace.new_offer') }}">Adaugă unul</a>{% endif %}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Cereri -->
+    <div class="profile-section" style="margin-top: 28px;">
+      <h2>📋 Cereri</h2>
+      
+      <div class="info-box">
+        <strong>{{ REQUEST_FREE_SLOTS }} cereri gratuite valabile 30 de zile</strong><br>
+        După 30 de zile, cererea se șterge automat și trebuie repostată din nou. Ai <strong>{{ REQUEST_FREE_SLOTS }} cereri gratuite în fiecare lună</strong> atât timp cât abonamentul tău este activ.
+      </div>
+
+      <p style="margin-top: 16px; margin-bottom: 8px;"><strong>Cum funcționează:</strong></p>
+      <ul style="margin: 0 0 16px 20px; padding: 0; color: var(--muted); font-size: 14px; line-height: 1.8;">
+        <li>Cererile se șterg automat după <strong>30 de zile</strong> pentru a ne asigura că încă sunt valabile și nu ai uitat de ele</li>
+        <li>Le poți <strong>reactiva</strong> după ce au fost șterse</li>
+        <li>Le poți <strong>edita</strong>, <strong>șterge</strong> și pune altele în locul lor</li>
+        <li>Când ștergi o cerere, slotul devine liber și poți adăuga alta imediat</li>
+      </ul>
+
+      <div class="stats-grid">
+        <div class="stat-card{% if request_paid_slots == 0 %} highlight{% endif %}">
+          <div class="stat-value">{{ REQUEST_FREE_SLOTS }}</div>
+          <div class="stat-label">Gratuite</div>
+        </div>
+        {% if request_paid_slots > 0 %}
+        <div class="stat-card">
+          <div class="stat-value">{{ request_paid_slots }}</div>
+          <div class="stat-label">Plătite</div>
+        </div>
+        {% endif %}
+        <div class="stat-card highlight">
+          <div class="stat-value">{{ request_limit }}</div>
+          <div class="stat-label">Total sloturi</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ request_used }}</div>
+          <div class="stat-label">Folosite</div>
+        </div>
+        <div class="stat-card{% if request_remaining > 0 %} highlight{% endif %}">
+          <div class="stat-value">{{ request_remaining }}</div>
+          <div class="stat-label">Disponibile</div>
+        </div>
+      </div>
+
+      {% if request_paid_slots > 0 and request_paid_expires %}
+        <div class="paid-info">
+          <strong>Sloturi plătite:</strong> Valabile până la <strong>{{ request_paid_expires.strftime('%d.%m.%Y') }}</strong>. După această dată, vei avea doar cele {{ REQUEST_FREE_SLOTS }} sloturi gratuite. Poți reactiva un pachet oricând.
+        </div>
+      {% else %}
+        <div class="paid-info">
+          <strong>Dorești mai multe cereri?</strong> Pachete disponibile pentru cereri suplimentare. Contactează-ne pentru detalii.
+        </div>
+      {% endif %}
+
+      <div class="profile-actions">
+        {% if request_remaining > 0 %}
+          <a class="mp-action-btn mp-primary" href="{{ url_for('marketplace.new_request') }}">➕ Adaugă cerere</a>
+        {% endif %}
+        <a class="contact-wa" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! Doresc mai multe cereri. User ID: ' ~ current_user.id ~ '. Email: ' ~ current_user.email ~ '. Cereri gratuite: ' ~ REQUEST_FREE_SLOTS ~ '. Cereri folosite: ' ~ request_used ~ '. Cereri disponibile: ' ~ request_remaining)|urlencode }}" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+          </svg>
+          Mai multe cereri pe WhatsApp
+        </a>
+      </div>
+    </div>
+
+    <!-- Lista cereri -->
+    <h3 style="margin-top:20px;">Cererile tale</h3>
+    <div class="marketplace-cards">
+      {% for req in requests_list %}
+        {% set tip_imobil = req.property_type|property_type_label %}
+        {% set tip_cerere = 'Cumpărare' if req.request_type == 'cumparare' else 'Închiriere' %}
+        <div class="req-card profile-request-card" style="display:block;">
+          <div class="badge-row">
+            <span class="badge badge-tip">{{ tip_cerere }}</span>
+          </div>
+          <h2 class="title">{{ tip_imobil }}{% if req.rooms %} · {{ req.rooms }} camere{% endif %}</h2>
+          <div class="zones">
+            {% for z in req.zones[:3] %}
+              <span class="zone-chip">{{ z.name|zone_display_name }}</span>
+            {% endfor %}
+            {% if req.zones|length > 3 %}
+              <span class="zone-chip">+{{ req.zones|length - 3 }}</span>
+            {% endif %}
+          </div>
+          <p class="meta">
+            {% if req.budget_min or req.budget_max %}
+              <strong>Buget:</strong> {{ req.budget_min|format_budget if req.budget_min else '—' }} – {{ req.budget_max|format_budget if req.budget_max else '—' }} €{% if getattr(req, 'plus_tva', False) %}<span style="color:var(--muted);"> · plus TVA</span>{% endif %}
+            {% else %}
+              Buget: la cerere
+            {% endif %}
+            {% if req.created_at %} · {{ req.created_at.strftime('%d.%m.%Y') }}{% endif %}
+          </p>
+          <div class="my-card-actions">
+            <a href="{{ url_for('marketplace.detail', id=req.id) }}" class="mp-profile-action-link">Vezi</a>
+            <a href="{{ url_for('marketplace.edit_request', id=req.id) }}" class="mp-profile-action-link">Editează</a>
+            <form method="post" action="{{ url_for('marketplace.delete_request', id=req.id) }}" class="mp-profile-action-form" onsubmit="return confirm('Ștergi această cerere? Slotul devine liber.');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="delete">Șterge</button>
+            </form>
+          </div>
+        </div>
+      {% else %}
+        <div class="empty-state" style="grid-column:1/-1;">
+          <p class="muted">Nu ai cereri în ultimele 30 zile.{% if request_remaining > 0 %} <a href="{{ url_for('marketplace.new_request') }}">Adaugă una</a>{% endif %}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Contact -->
+    <div class="profile-section" style="margin-top: 28px;">
+      <h2>Contact</h2>
+      <p>Pentru pachete anunțuri sau cereri, reînnoiri sau întrebări:</p>
+      <a class="contact-wa" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! User ID: ' ~ current_user.id ~ '. Email: ' ~ current_user.email)|urlencode }}" target="_blank" rel="noopener">Contact WhatsApp</a>
+    </div>
+  </div>
+
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

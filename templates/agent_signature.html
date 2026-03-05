@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Semnătură agent – Fișă de vizionare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .sig-box { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; background: #fff; margin: 16px 0; }
+    .sig-box canvas { width: 100%; height: auto; touch-action: none; cursor: crosshair; display: block; }
+    .sig-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  </style>
+</head>
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('menu.menu_home') }}" class="topbarBtn">Meniu</a>
+  {% endcall %}
+
+  <h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Semnătură agent</h1>
+  <p style="margin:0 0 16px;color:var(--text-secondary);font-size:0.875rem;">Semnează în chenar. Apasă „Salvează” și semnătura se pune automat în PDF-urile viitoare.</p>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}" style="margin-bottom:16px;">{{ message }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="sig-box">
+      <canvas id="sigCanvas" width="600" height="220"></canvas>
+    </div>
+    <input type="hidden" name="signature_agent" id="signature_agent" value="" />
+    <div class="sig-actions">
+      <button type="button" id="clearSig" class="btn ghost">Șterge</button>
+      <button type="submit" class="btn primary">Salvează semnătura</button>
+      <a href="{{ url_for('menu.agent_profile') }}" class="btn ghost">Înapoi</a>
+    </div>
+  </form>
+
+  {{ premium_footer() }}
+  </div>
+
+  <script>
+    (function () {
+      const canvas = document.getElementById("sigCanvas");
+      const ctx = canvas.getContext("2d");
+      function paintWhite() { ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+      paintWhite();
+      ctx.strokeStyle = "#111";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      let drawing = false;
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+      }
+      function start(e) { drawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); e.preventDefault(); }
+      function move(e) { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); e.preventDefault(); }
+      function end(e) { drawing = false; e.preventDefault(); }
+      canvas.addEventListener("mousedown", start);
+      canvas.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", end);
+      canvas.addEventListener("touchstart", start, { passive: false });
+      canvas.addEventListener("touchmove", move, { passive: false });
+      canvas.addEventListener("touchend", end, { passive: false });
+      document.getElementById("clearSig").addEventListener("click", function () {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        paintWhite();
+        document.getElementById("signature_agent").value = "";
+      });
+      canvas.closest("form").addEventListener("submit", function () {
+        document.getElementById("signature_agent").value = canvas.toDataURL("image/png");
+      });
+    })();
+  </script>
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>Previzualizare – Contract Închiriere</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .header-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #333; }
+    .btn-ghost {
+      background: transparent;
+      color: #1a1a1a;
+      border: 1px solid #ccc;
+    }
+    .btn-ghost:hover { background: #f0f0f0; }
+    .doc-block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .doc-block .doc-title {
+      margin: 0 0 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+    }
+    .doc-body {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #333;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .doc-body b { color: #1a1a1a; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1>Previzualizare – Contract Închiriere</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('contract_templates.download_template', template_id='inchiriere') }}" class="btn">📥 Descarcă Word</a>
+        <a href="{{ url_for('contract_templates.list_templates') }}" class="btn btn-ghost">← Înapoi</a>
+      </div>
+    </header>
+
+    <div class="doc-block">
+      <p class="block-title">Documentul</p>
+      <div class="doc-title">CONTRACT DE ÎNCHIRIERE</div>
+      <div class="doc-body"><b>CONTRACT DE ÎNCHIRIERE</b>
+
+<b>Între:</b>
+
+<b>PROPRIETAR:</b>
+Nume: __________
+CNP: __________
+Adresă: __________
+Telefon: __________
+Email: __________
+CI Serie: __________
+CI Număr: __________
+
+{{ profile.agency_name if profile.agency_name else "" }}
+{{ "Agenție imobiliară: " ~ profile.agency_name if profile.agency_name else "" }}
+
+<b>CHIRIAȘ:</b>
+Nume: __________
+CNP: __________
+Adresă: __________
+Telefon: __________
+Email: __________
+CI Serie: __________
+CI Număr: __________
+
+<b>Art. 1 OBIECTUL CONTRACTULUI</b>
+Proprietarul închiriază Chiriașului, iar Chiriașul acceptă să închirieze de la Proprietar, imobilul descris mai jos, în condițiile prevăzute în prezentul contract.
+
+<b>Art. 2 IMOBIL</b>
+Tip imobil: __________
+Adresă: __________
+Suprafață utilă: __________ m²
+Suprafață totală: __________ m²
+Număr camere: __________
+Etaj: __________
+Număr etaje clădire: __________
+Alte caracteristici: __________
+
+<b>Art. 3 DURATA</b>
+Contractul este încheiat pentru o perioadă de __________ luni, începând cu data de __________ și expirând la data de __________.
+
+<b>Art. 4 CHIRIE</b>
+Chiria lunară este de __________ {{ "RON" if profile.agency_iban and "RON" in profile.agency_iban else "EUR" }}, plătibilă în avans, până în ziua de __________ a fiecărei luni.
+
+Prima plată: __________ (chirie + garanție)
+
+<b>Art. 5 GARANȚIE</b>
+Chiriașul depune o garanție în valoare de __________ {{ "RON" if profile.agency_iban and "RON" in profile.agency_iban else "EUR" }}, care va fi returnată la terminarea contractului, după verificarea stării imobilului și plata tuturor datoriilor.
+
+<b>Art. 6 OBLIGAȚIILE PROPRIETARULUI</b>
+Proprietarul se obligă să:
+• predea imobilul în stare bună de folosință;
+• asigure condițiile necesare pentru folosirea normală a imobilului;
+• efectueze reparațiile majore necesare.
+
+<b>Art. 7 OBLIGAȚIILE CHIRIAȘULUI</b>
+Chiriașul se obligă să:
+• plătească chiria la termen;
+• folosească imobilul conform destinației;
+• efectueze reparațiile curente;
+• restituie imobilul în aceeași stare la terminarea contractului.
+
+<b>Art. 8 UTILITĂȚI</b>
+Utilitățile (electricitate, apă, gaz, încălzire, internet) sunt în sarcina Chiriașului.
+
+<b>Art. 9 DENUNȚAREA CONTRACTULUI</b>
+Denunțarea unilaterală se poate realiza cu un preaviz de minimum 30 de zile calendaristice, prin notificare scrisă transmisă celeilalte părți.
+
+<b>Art. 10 DISPOZIȚII FINALE</b>
+Contractul este încheiat în două exemplare, câte unul pentru fiecare parte.
+
+Data: __________
+
+Semnătura Proprietarului: __________
+Semnătura Chiriașului: __________</div>
+    </div>
+  </div>
+</body>
+</html>

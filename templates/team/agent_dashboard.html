@@ -1,0 +1,152 @@
+{% extends "base_premium.html" %}
+{% block title %}Echipa mea – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" /><link rel="stylesheet" href="{{ url_for('static', filename='todo.css') }}" />{% endblock %}
+
+{% block brand_content %}{% endblock %}
+{% block topbar_right %}
+  <div class="topbarNav">
+    <a href="{{ url_for('team.index') }}" class="topbarBtn">Echipă</a>
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+  </div>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">{{ team.name }}</h1>
+<p class="kicker" style="margin:0 0 24px;">Echipa mea</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<!-- Ce ai făcut azi -->
+<section class="todo-daily-activity">
+  <h3 class="todo-daily-title">📝 Ce ai făcut azi în total?</h3>
+  <form method="post" action="{{ url_for('team.agent_save_daily_activity') }}" class="todo-daily-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <div class="todo-daily-row">
+      <label for="viewings_count">Vizionări</label>
+      <input type="number" name="viewings_count" id="viewings_count" min="0" value="{{ daily_activity_today.viewings_count if daily_activity_today else 0 }}" class="todo-daily-input" />
+    </div>
+    <div class="todo-daily-row">
+      <label for="deals_closed_count">Deal-uri închise</label>
+      <input type="number" name="deals_closed_count" id="deals_closed_count" min="0" value="{{ daily_activity_today.deals_closed_count if daily_activity_today else 0 }}" class="todo-daily-input" />
+    </div>
+    <div class="todo-daily-row">
+      <label for="total_amount">Suma totală (€)</label>
+      <input type="text" name="total_amount" id="total_amount" placeholder="0" value="{{ daily_activity_today.total_amount if daily_activity_today and daily_activity_today.total_amount else '' }}" class="todo-daily-input" style="width:90px;" />
+    </div>
+    <button type="submit" class="todo-daily-btn">Salvează</button>
+  </form>
+</section>
+
+<!-- Stats (collapsible) -->
+<div class="card" style="margin-bottom:24px;">
+  <div class="cardInner">
+    <button type="button" class="btn ghost" id="toggle-agent-stats" onclick="document.getElementById('agent-stats-content').hidden = !document.getElementById('agent-stats-content').hidden; this.textContent = document.getElementById('agent-stats-content').hidden ? '📊 Vezi statistica ta' : '📊 Ascunde statistica';" style="margin-bottom:0;">📊 Vezi statistica ta</button>
+    <div id="agent-stats-content" hidden>
+      <div class="team-stat-grid" style="margin-top:20px;margin-bottom:24px;">
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_today }}</div>
+          <div class="team-stat-label">Vizionări azi</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_today }}</div>
+          <div class="team-stat-label">Deal-uri azi</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_today %}{{ amount_today|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă azi</div>
+        </div>
+      </div>
+      <div class="team-stat-grid" style="margin-bottom:24px;">
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_week }}</div>
+          <div class="team-stat-label">Vizionări (săpt.)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_week }}</div>
+          <div class="team-stat-label">Deal-uri (săpt.)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_week %}{{ amount_week|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă (săpt.)</div>
+        </div>
+      </div>
+      <div class="team-stat-grid" style="margin-bottom:24px;">
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_month }}</div>
+          <div class="team-stat-label">Vizionări (ultima lună)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_month }}</div>
+          <div class="team-stat-label">Deal-uri (ultima lună)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_month %}{{ amount_month|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă (ultima lună)</div>
+        </div>
+      </div>
+      <div class="team-stat-grid" style="margin-bottom:0;">
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_3m }}</div>
+          <div class="team-stat-label">Vizionări (ultimele 3 luni)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_3m }}</div>
+          <div class="team-stat-label">Deal-uri (ultimele 3 luni)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_3m %}{{ amount_3m|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă (ultimele 3 luni)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Task-uri de la Manager -->
+<div class="card" style="margin-bottom:24px;">
+  <div class="cardInner">
+    <h3 style="margin:0 0 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      Task-uri de la Manager
+      {% if new_tasks_count %}
+      <form method="post" action="{{ url_for('team.agent_acknowledge_tasks') }}" style="display:inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <span class="team-badge team-badge-overdue" style="margin-right:8px;">{{ new_tasks_count }} noi</span>
+        <button type="submit" class="btn ghost" style="padding:6px 12px;font-size:0.8125rem;">Am văzut</button>
+      </form>
+      {% endif %}
+    </h3>
+    {% if assignments %}
+      {% for assignment in assignments %}
+      {% set t = assignment.task %}
+      <article class="todo-team-card {% if t.due_date < today %}is-overdue{% endif %}" style="margin-bottom:16px;">
+        <h4 class="todo-team-title">{{ t.title }}</h4>
+        {% if t.description %}<p class="todo-team-desc">{{ t.description }}</p>{% endif %}
+        <div class="todo-team-meta">
+          <span class="todo-meta todo-meta-date {% if t.due_date < today %}overdue{% endif %}">{{ t.due_date.strftime('%d.%m.%Y') }}{% if t.due_date < today %} · Întârziat{% endif %}</span>
+          <span class="todo-meta todo-meta-priority priority-{{ t.priority }}">{% if t.priority == 'low' %}Scăzută{% elif t.priority == 'high' %}Ridicată{% else %}Medie{% endif %}</span>
+        </div>
+        <form method="post" action="{{ url_for('team.agent_complete_team_task', assignment_id=assignment.id) }}" class="todo-team-complete-form">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="text" name="comment" placeholder="Ce ai făcut? (opțional)" class="todo-team-comment" maxlength="500" />
+          <button type="submit" class="todo-team-complete-btn">✅ Am finalizat</button>
+        </form>
+      </article>
+      {% endfor %}
+    {% else %}
+      <p style="margin:0;color:var(--text-muted);">Nu ai task-uri de la manager.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Ieși din echipă -->
+<div class="card">
+  <div class="cardInner">
+    <form method="post" action="{{ url_for('team.leave_team') }}" onsubmit="return confirm('Sigur vrei să ieși din echipă?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn" style="border-color:var(--danger);color:var(--danger);">Ieși din echipă</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

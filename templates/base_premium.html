@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% block google_analytics %}{% endblock %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>{% block title %}Fișă de vizionare{% endblock %}</title>
+  {% block meta %}{% endblock %}
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}">
+  {% block head_extra %}{% endblock %}
+  
+  <!-- Script pentru modal activare acces - trebuie în head pentru a fi disponibil când se execută onclick -->
+  {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+  {% if current_user.is_authenticated %}
+    {% set wa_text = current_user.support_whatsapp_text() %}
+  {% else %}
+    {% set wa_text = 'Salut! Vreau să activez accesul complet la aplicație.' %}
+  {% endif %}
+  
+  <script>
+    // Modal activare acces - funcții globale (definite în head pentru disponibilitate imediată)
+    var WHATSAPP_PHONE = '{{ wa_phone }}';
+    var WHATSAPP_TEXT = {{ wa_text|tojson }};
+    
+    window.showActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        var whatsappBtn = document.getElementById('activate-whatsapp-btn');
+        
+        if (!modal) {
+          alert('Eroare: Modal-ul nu a fost găsit.');
+          return;
+        }
+        
+        // Setează link-ul WhatsApp
+        if (whatsappBtn && WHATSAPP_PHONE && WHATSAPP_TEXT) {
+          var encodedText = encodeURIComponent(WHATSAPP_TEXT);
+          whatsappBtn.href = 'https://wa.me/' + WHATSAPP_PHONE + '?text=' + encodedText;
+        }
+        
+        // Afișează modalul
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        if (document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      } catch (e) {
+        console.error('Eroare la afișarea modalului:', e);
+        alert('Eroare la afișarea modalului. Verifică consola pentru detalii.');
+      }
+    };
+
+    window.closeActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        if (modal) {
+          modal.style.display = 'none';
+          if (document.body) {
+            document.body.style.overflow = '';
+          }
+        }
+      } catch (e) {
+        console.error('Eroare la închiderea modalului:', e);
+      }
+    };
+  </script>
+</head>
+<body class="premium">
+  <div class="wrap">
+    <header class="topbar">
+      <div class="brand">
+        {% block brand_content %}
+        <a href="{{ url_for('home') }}" style="color:inherit;text-decoration:none;">
+          <h1>Fișă de vizionare</h1>
+          {% block brand_subtitle %}{% endblock %}
+        </a>
+        {% endblock %}
+      </div>
+      <div class="topbarRight">
+        {% block topbar_right %}{% endblock %}
+      </div>
+    </header>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <div class="footer">
+      © 2026 Fișă de Vizionare · Versiunea 1.1<br>
+      <a href="/despre">Despre</a> · <a href="/termeni">Termeni</a> · <a href="/confidentialitate">Confidențialitate</a> · <a href="/plati">Plăți</a>
+    </div>
+  </div>
+  {% include 'partials/assistant_widget.html' %}
+  
+  <!-- Modal Activare Acces -->
+  <div id="activate-access-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; flex-direction:column;">
+    <div onclick="event.stopPropagation();" style="background:#1a1a1a; border-radius:8px; padding:24px; max-width:500px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.3); position:relative; margin:auto;">
+      <h2 style="margin:0 0 16px; font-size:1.25rem; font-weight:700; color:#e5e7eb;">Activează accesul</h2>
+      <p style="margin:0 0 20px; color:#9ca3af; line-height:1.6;">
+        Această funcție este disponibilă doar pentru conturi active. Contactează suportul pentru a activa accesul complet.
+      </p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a id="activate-whatsapp-btn" href="#" target="_blank" rel="noopener" style="flex:1; min-width:200px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px; background:#25D366; color:white; border-radius:var(--radius-sm); text-decoration:none; font-weight:600; transition:background 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Contactează suportul
+        </a>
+        <button onclick="window.closeActivateModal()" style="padding:12px 20px; background:#27272a; color:#e5e7eb; border:1px solid #3f3f46; border-radius:6px; font-weight:600; cursor:pointer; transition:background 0.2s;">
+          Închide
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Setup pentru închidere modal (după ce DOM-ul e gata)
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal = document.getElementById('activate-access-modal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            window.closeActivateModal();
+          }
+        });
+      }
+
+      // Închidere modal cu Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          window.closeActivateModal();
+        }
+      });
+    });
+  </script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

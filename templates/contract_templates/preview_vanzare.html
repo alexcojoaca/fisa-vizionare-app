@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>Previzualizare – Fișă de vizionare Vânzare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1a1a1a;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 20px;
+      padding-left: max(16px, env(safe-area-inset-left));
+      padding-right: max(16px, env(safe-area-inset-right));
+    }
+    .wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 20px 0;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+    .header-actions {
+      margin-top: 16px;
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      padding: 12px 24px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff;
+      background: #1a1a1a;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: #333; }
+    .btn-ghost {
+      background: transparent;
+      color: #1a1a1a;
+      border: 1px solid #ccc;
+    }
+    .btn-ghost:hover { background: #f0f0f0; }
+    .block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .block-title {
+      margin: 0 0 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+    }
+    .meta-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .meta-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 0.95rem;
+    }
+    .meta-list li:last-child { border-bottom: 0; }
+    .meta-list .key { color: #666; }
+    .meta-list .val { font-weight: 600; color: #1a1a1a; }
+    .doc-block {
+      background: #fff;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .doc-block .doc-title {
+      margin: 0 0 16px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a1a1a;
+      text-align: center;
+    }
+    .doc-body {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: #333;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .doc-body b { color: #1a1a1a; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="header">
+      <h1>Previzualizare – Fișă de vizionare Vânzare</h1>
+      <div class="header-actions">
+        <a href="{{ url_for('contract_templates.download_template', template_id='vanzare') }}" class="btn">📥 Descarcă Word</a>
+        <a href="{{ url_for('contract_templates.list_templates') }}" class="btn btn-ghost">← Înapoi</a>
+      </div>
+    </header>
+
+    <div class="block">
+      <p class="block-title">Detalii vizionare</p>
+      <ul class="meta-list">
+        <li><span class="key">Data</span><span class="val">{{ info.data_vizionarii }}</span></li>
+        <li><span class="key">Ora</span><span class="val">{{ info.ora_vizionarii }}</span></li>
+        <li><span class="key">Tip imobil</span><span class="val">{{ info.tip_imobil }}</span></li>
+        <li><span class="key">Locație</span><span class="val">{{ info.adresa_public }}</span></li>
+        <li><span class="key">Comision</span><span class="val">{{ info.comision_procent }}</span></li>
+      </ul>
+    </div>
+
+    <div class="doc-block">
+      <p class="block-title">Documentul</p>
+      <div class="doc-title">FIȘĂ DE VIZIONARE — VÂNZARE</div>
+      <div class="doc-body"><b>FIȘĂ DE VIZIONARE — VÂNZARE</b>
+
+<b>Data vizionării:</b> {{ info.data_vizionarii }}
+<b>Ora vizionării:</b> {{ info.ora_vizionarii }}
+
+<b>1. PĂRȚI</b>
+<b>Prestator (Agenție imobiliară):</b>
+{{ agency_text if agency_text else "—" }}
+
+<b>Agent imobiliar:</b> {{ agent_name if agent_name else "—" }}
+
+<b>2. VIZITATOR (CLIENT)</b>
+<b>Nume:</b> (se completează mai jos)
+<b>Telefon:</b> (se completează mai jos)
+<b>Email:</b> (se completează mai jos)
+<b>Act identitate (CI) — serie:</b> (se completează mai jos)
+<b>Act identitate (CI) — număr:</b> (se completează mai jos)
+
+Vizitatorul declară că datele furnizate sunt corecte, reale și îi aparțin. Furnizarea datelor are ca scop organizarea vizionării, intermedierea și, după caz, dovedirea intermedierii și a consimțământului exprimat prin semnare. În măsura în care unele date sunt opționale, acestea sunt furnizate voluntar; refuzul furnizării poate limita posibilitatea dovedirii identității în cazul unei contestări, fără a anula prin sine însuși valoarea prezentei fișe.
+
+<b>3. IMOBIL VIZIONAT</b>
+<b>Tip imobil:</b> {{ info.tip_imobil }}
+<b>Locație / zonă:</b> {{ info.adresa_public }}
+
+Vizitatorul confirmă că i-au fost prezentate imobilul și informațiile relevante pentru vânzare (caracteristici, condiții, disponibilitate) prin intermediul Prestatorului/Agentului, iar această introducere la proprietate este element esențial al activității de intermediere.
+
+<b>4. OBIECTUL FIȘEI</b>
+Prin prezenta, Vizitatorul confirmă că a efectuat vizionarea imobilului descris mai sus prin intermediul Prestatorului, în prezența/participarea Agentului imobiliar, primind informații despre caracteristicile, starea și condițiile de vânzare ale imobilului.
+
+Prezenta fișă are rol de dovadă a intermedierii și a introducerii Vizitatorului la proprietate, în scopul protejării dreptului Prestatorului la comision. De asemenea, fișa poate fi utilizată pentru a demonstra cronologia evenimentelor (vizionare/negociere/tranzacție) și legătura dintre vizionarea realizată prin Prestator și tranzacția finală.
+
+Părțile înțeleg că prezenta fișă nu ține loc de antecontract/contract de vânzare-cumpărare și nu transferă drepturi de proprietate; totuși, ea produce efecte juridice între părți cu privire la confirmarea intermedierii, obligațiile de neeludare și plata comisionului în cazurile prevăzute.
+
+<b>5. CLAUZĂ DE NEELUDARE A INTERMEDIERII</b>
+Vizitatorul se obligă ca, pe o perioadă de 6 (șase) luni de la data semnării prezentei fișe, să nu contacteze direct proprietarul/vânzătorul imobilului și să nu încheie, direct sau indirect, nicio tranzacție de vânzare-cumpărare având ca obiect imobilul vizionat, fără participarea Prestatorului.
+
+Interdicția se aplică inclusiv prin persoane interpuse (rude până la gradul IV inclusiv, societăți controlate, prieteni, colegi sau orice alte persoane interpuse), precum și în situația în care tranzacția se realizează în condiții identice sau similare celor prezentate la vizionare ori în condiții modificate (preț negociat, termene diferite etc.), dacă există legătură cu introducerea la proprietate realizată de Prestator.
+
+Încălcarea obligației de mai sus atrage răspunderea contractuală a Vizitatorului, iar comisionul prevăzut la secțiunea următoare reprezintă prejudiciu minim prezumat rezultat din eludarea intermedierii. În plus, Prestatorul își rezervă dreptul de a solicita, atunci când este cazul, repararea integrală a prejudiciului dovedit (inclusiv cheltuieli de recuperare, taxe, onorarii și alte costuri ocazionate de demersurile necesare).
+
+<b>6. COMISION</b>
+În cazul în care tranzacția de vânzare-cumpărare se finalizează pentru imobilul vizionat (direct sau indirect), Vizitatorul se obligă să achite Prestatorului un comision de <b>{{ info.comision_procent }}</b> din prețul de vânzare negociat, conform acordului comercial dintre părți.
+
+Comisionul devine exigibil la data semnării antecontractului/contractului de vânzare-cumpărare ori la data la care tranzacția produce efecte (după caz), întrucât acesta este momentul în care intermedierea produce rezultatul final.
+
+Plata comisionului se va efectua în termen de maximum 7 (șapte) zile calendaristice de la data finalizării tranzacției (semnare antecontract/contract, după caz). Neplata la scadență poate conduce la demersuri de recuperare și, după caz, la acțiuni legale.
+
+<b>7. ACORD ȘI CONFIRMARE</b>
+Vizitatorul declară și confirmă că:
+• a efectuat vizionarea imobilului prin intermediul Prestatorului;
+• a luat la cunoștință conținutul prezentei fișe și îl acceptă integral;
+• datele furnizate sunt reale și aparțin Vizitatorului;
+• a înțeles clauza de neeludare și efectele acesteia, inclusiv obligația de plată a comisionului în caz de eludare;
+• a primit / poate primi o copie electronică a documentului (WhatsApp / e-mail).
+
+Vizitatorul confirmă că a avut posibilitatea de a citi documentul înainte de semnare, că a solicitat lămuriri acolo unde a considerat necesar și că își exprimă consimțământul în mod liber. Orice neconcordanță observată ulterior va fi comunicată Prestatorului fără întârziere.
+
+<b>8. SEMNĂTURĂ ELECTRONICĂ</b>
+Prin semnarea prezentului document, inclusiv prin semnătură electronică simplă (trasare pe ecran), Vizitatorul confirmă acordul integral cu conținutul prezentei fișe.
+
+Documentul poate fi comunicat și păstrat în format electronic, având valoare probatorie conform dispozițiilor legale aplicabile. Părțile acceptă că forma electronică este adecvată scopului, iar fișa nu poate fi respinsă ca probă doar pentru faptul că este în format electronic.
+
+În situația în care semnarea se face la distanță, părțile acceptă utilizarea elementelor tehnice de trasabilitate (metadate) pentru a stabili momentul semnării și a lega documentul de persoana care a primit link-ul de semnare, conform secțiunii 9.
+
+<b>9. DATE DE IDENTIFICARE ALE SEMNĂRII LA DISTANȚĂ</b>
+În documentul PDF final vor fi înscrise automat data/ora semnării (România), fusul orar și adresa IP, ca elemente tehnice de suport pentru dovada semnării la distanță.
+
+<b>10. PROTECȚIA DATELOR (GDPR)</b>
+Operatorul de date cu caracter personal este Prestatorul (Agenția imobiliară) menționat la secțiunea 1. Datele cu caracter personal sunt prelucrate în conformitate cu Regulamentul (UE) 2016/679 (GDPR) și legislația națională aplicabilă.
+
+Scopurile prelucrării sunt: (i) organizarea și derularea vizionării, (ii) intermedierea tranzacției imobiliare, (iii) comunicarea cu Vizitatorul, (iv) dovedirea intermedierii și protejarea dreptului Prestatorului la comision, inclusiv prevenirea eludării intermedierii, (v) securitatea procesului de semnare și prevenirea abuzurilor/fraudei, (vi) apărarea drepturilor în cazul unor litigii și îndeplinirea obligațiilor legale.
+
+Categoriile de date prelucrate pot include: nume, telefon, e-mail, date din actul de identitate (serie/număr — dacă sunt furnizate), date privind imobilul vizionat și, în cazul semnării la distanță, metadate tehnice precum data/ora semnării, fus orar și adresă IP. Aceste metadate sunt utilizate strict pentru trasabilitate, securitate și probă, nu pentru profilare sau marketing.
+
+Temeiurile legale ale prelucrării (art. 6 GDPR) sunt: executarea demersurilor precontractuale/contractuale (organizare vizionare, intermediere, comunicare), interesul legitim al Prestatorului (dovada intermedierii, prevenirea eludării, securitatea semnării și apărarea drepturilor) și, după caz, îndeplinirea obligațiilor legale. În situațiile în care anumite date sunt opționale, furnizarea lor este voluntară; refuzul nu împiedică în mod automat vizionarea, dar poate limita posibilitatea de probare în caz de contestare.
+
+Datele nu sunt vândute și nu sunt transmise terților în scopuri de marketing. Pot fi comunicate doar către furnizori de servicii necesari funcționării (ex.: servicii IT/găzduire, comunicare electronică), în baza obligațiilor de confidențialitate și securitate, precum și către autorități/instanțe/consultanți juridici atunci când există obligație legală sau este necesar pentru constatarea, exercitarea ori apărarea unui drept în instanță.
+
+Durata de stocare: datele sunt păstrate pe perioada necesară îndeplinirii scopurilor de mai sus, inclusiv pe durata în care pot apărea pretenții, contestări sau litigii privind intermedierea și comisionul, precum și pe duratele cerute de obligațiile legale aplicabile. După expirarea termenelor, datele sunt șterse sau anonimizate, după caz.
+
+Măsuri de securitate: Prestatorul aplică măsuri tehnice și organizatorice rezonabile pentru protecția datelor (control acces, limitare acces, logare, back-up, măsuri anti-abuz). Accesul la metadate (IP, loguri) este strict limitat la personal autorizat.
+
+Drepturile Vizitatorului: dreptul de acces, rectificare, ștergere (în limitele legii), restricționare, opoziție (în special față de prelucrări bazate pe interes legitim), portabilitate (unde este aplicabil) și dreptul de a depune plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP). Solicitările se pot transmite Prestatorului folosind datele de contact ale agenției.</div>
+    </div>
+  </div>
+</body>
+</html>

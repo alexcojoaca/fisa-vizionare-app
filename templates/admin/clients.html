@@ -1,0 +1,356 @@
+{% extends "base_premium.html" %}
+{% block title %}Admin – Gestionare Clienți{% endblock %}
+
+{% block content %}
+<style>
+  .admin-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .admin-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  .search-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .search-input {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9375rem;
+    min-width: 250px;
+  }
+  .btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-focus);
+  }
+  .btn-primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .btn-danger {
+    background: #ff5c7c;
+    border-color: #ff5c7c;
+    color: white;
+  }
+  .btn-danger:hover {
+    background: #ff3d66;
+  }
+  .stats-bar {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    flex-wrap: wrap;
+  }
+  .stat-item {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .stat-value {
+    font-weight: 700;
+    color: var(--text);
+    font-size: 1rem;
+  }
+  .clients-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  .clients-table th {
+    background: var(--surface-hover);
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    border-bottom: 2px solid var(--border);
+  }
+  .clients-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.9375rem;
+  }
+  .clients-table tr:last-child td {
+    border-bottom: none;
+  }
+  .clients-table tr:hover {
+    background: var(--surface-hover);
+  }
+  .client-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .client-name {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .client-email {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .client-phone {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .badge-active {
+    background: rgba(36, 209, 143, 0.1);
+    color: #24d18f;
+  }
+  .badge-inactive {
+    background: rgba(255, 92, 124, 0.1);
+    color: #ff5c7c;
+  }
+  .requests-list {
+    max-width: 400px;
+  }
+  .request-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+  }
+  .request-info {
+    flex: 1;
+  }
+  .request-type {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .request-details {
+    font-size: 0.8125rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .request-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 0.8125rem;
+  }
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-muted);
+  }
+  .empty-state-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+</style>
+
+<div class="admin-container">
+  <div class="admin-header">
+    <h1 class="admin-title">Gestionare Clienți</h1>
+    <div class="search-form">
+      <form method="GET" action="{{ url_for('admin.admin_clients') }}" style="display: flex; gap: 8px;">
+        <input
+          type="text"
+          name="q"
+          value="{{ q }}"
+          placeholder="Caută după nume, email, telefon sau ID..."
+          class="search-input"
+        />
+        <button type="submit" class="btn btn-primary">Caută</button>
+        {% if q %}
+        <a href="{{ url_for('admin.admin_clients') }}" class="btn">Resetează</a>
+        {% endif %}
+      </form>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      Total clienți: <span class="stat-value">{{ total }}</span>
+    </div>
+  </div>
+
+  {% if clients %}
+  <table class="clients-table">
+    <thead>
+      <tr>
+        <th>Client</th>
+        <th>Telefon</th>
+        <th>Data creării</th>
+        <th>Ultima autentificare</th>
+        <th>Status</th>
+        <th>Cereri</th>
+        <th>Acțiuni</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for client in clients %}
+      <tr>
+        <td>
+          <div class="client-info">
+            <div class="client-name">{{ client.full_name }}</div>
+            <div class="client-email">{{ client.email }}</div>
+            <div class="client-email">ID: {{ client.id }}</div>
+          </div>
+        </td>
+        <td>
+          <div class="client-phone">{{ client.phone }}</div>
+        </td>
+        <td>
+          <div>{{ client.created_at_short }}</div>
+          <div style="font-size: 0.8125rem; color: var(--text-muted);">{{ client.created_at }}</div>
+        </td>
+        <td>
+          <div>{{ client.last_login_at }}</div>
+        </td>
+        <td>
+          {% if client.is_active %}
+          <span class="badge badge-active">Activ</span>
+          {% else %}
+          <span class="badge badge-inactive">Inactiv</span>
+          {% endif %}
+        </td>
+        <td>
+          <div class="requests-list">
+            {% if client.requests %}
+              <div style="margin-bottom: 8px;">
+                <strong>{{ client.requests_count }} cerere{{ 'i' if client.requests_count != 1 else '' }}</strong>
+              </div>
+              {% for req in client.requests[:5] %}
+              <div class="request-item">
+                <div class="request-info">
+                  <div class="request-type">#{{ req.id }} - {{ req.request_type|title }} {{ req.property_type|title }}</div>
+                  <div class="request-details">
+                    {{ req.created_at_short }} | {{ req.zones }}
+                    {% if req.budget_min or req.budget_max %}
+                      | {% if req.budget_min %}{{ req.budget_min|format_budget }}{% endif %}
+                      {% if req.budget_min and req.budget_max %} - {% endif %}
+                      {% if req.budget_max %}{{ req.budget_max|format_budget }}{% endif %} €
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="request-actions">
+                  <form method="POST" action="{{ url_for('admin.admin_clients_delete_request', client_id=client.id, request_id=req.id) }}" style="display: inline;" onsubmit="return confirm('Ești sigur că vrei să ștergi cererea #{{ req.id }}?');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                    <button type="submit" class="btn btn-danger btn-sm">Șterge</button>
+                  </form>
+                </div>
+              </div>
+              {% endfor %}
+              {% if client.requests_count > 5 %}
+              <div style="font-size: 0.8125rem; color: var(--text-muted); margin-top: 6px;">
+                +{{ client.requests_count - 5 }} mai multe...
+              </div>
+              {% endif %}
+            {% else %}
+              <div style="color: var(--text-muted); font-size: 0.875rem;">Fără cereri</div>
+            {% endif %}
+          </div>
+        </td>
+        <td>
+          <div class="actions-cell">
+            <form method="POST" action="{{ url_for('admin.admin_clients_reset_password', client_id=client.id) }}" style="display: inline;" onsubmit="var pwd = prompt('Introdu noua parolă (minim 6 caractere):'); if (!pwd || pwd.length < 6) { alert('Parola trebuie să aibă minim 6 caractere.'); return false; } this.querySelector('input[name=new_password]').value = pwd; return confirm('Ești sigur că vrei să resetezi parola pentru {{ client.email }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <input type="hidden" name="new_password" value="" />
+              <button type="submit" class="btn btn-sm" style="background: rgba(79, 140, 255, 0.1); border-color: rgba(79, 140, 255, 0.3); color: #4f8cff;">Resetare parolă</button>
+            </form>
+            {% if client.requests_count > 0 %}
+            <form method="POST" action="{{ url_for('admin.admin_clients_delete_all_requests', client_id=client.id) }}" style="display: inline;" onsubmit="return confirm('Ești sigur că vrei să ștergi toate cele {{ client.requests_count }} cereri ale acestui client?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-danger btn-sm">Șterge toate cererile</button>
+            </form>
+            {% endif %}
+            <form method="POST" action="{{ url_for('admin.admin_clients_delete_account', client_id=client.id) }}" style="display: inline;" onsubmit="return confirm('Ești sigur că vrei să ștergi contul clientului {{ client.email }}? Această acțiune va șterge și toate cererile asociate și nu poate fi anulată!');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-danger">Șterge cont</button>
+            </form>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">👤</div>
+    <h3>Nu s-au găsit clienți</h3>
+    <p>{% if q %}Nu există clienți care să corespundă criteriilor de căutare.{% else %}Nu există clienți înregistrați.{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div style="position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;">
+      {% for category, message in messages %}
+      <div style="padding: 12px 16px; margin-bottom: 8px; border-radius: var(--radius-sm); background: {% if category == 'ok' %}rgba(36, 209, 143, 0.1){% else %}rgba(255, 92, 124, 0.1){% endif %}; border: 1px solid {% if category == 'ok' %}rgba(36, 209, 143, 0.3){% else %}rgba(255, 92, 124, 0.3){% endif %}; color: {% if category == 'ok' %}#24d18f{% else %}#ff5c7c{% endif %}; font-size: 0.875rem;">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    <script>
+      setTimeout(function() {
+        document.querySelectorAll('[style*="position: fixed"]').forEach(function(el) {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity 0.3s';
+          setTimeout(function() { el.remove(); }, 300);
+        });
+      }, 5000);
+    </script>
+  {% endif %}
+{% endwith %}
+{% endblock %}

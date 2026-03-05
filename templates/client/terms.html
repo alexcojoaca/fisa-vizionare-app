@@ -1,0 +1,99 @@
+{% extends "base_premium.html" %}
+{% block title %}Termeni și condiții – Caut un imobil{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.landing') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="wrapCentered" style="max-width: 800px; padding: 2rem 1rem;">
+  <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">Termeni și condiții</h1>
+  <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+    Ultima actualizare: {{ last_updated }}
+  </p>
+
+  <div style="line-height: 1.7; color: var(--text);">
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">1. Despre platformă</h2>
+    <p>
+      "Caut un imobil" este o platformă dedicată clienților care doresc să publice cereri de cumpărare sau închiriere imobiliare. 
+      Prin intermediul acestei platforme, clienții își pot publica cererile, iar agenții imobiliari pot vedea aceste cereri și vă pot contacta direct dacă au oferte potrivite.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">2. Crearea contului</h2>
+    <p>
+      Pentru a folosi platforma, trebuie să vă creați un cont cu următoarele date:
+    </p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+      <li>Nume complet</li>
+      <li>Adresă de email</li>
+      <li>Număr de telefon</li>
+      <li>Parolă</li>
+    </ul>
+    <p style="margin-top: 1rem;">
+      Vă angajați să furnizați informații corecte și actualizate. Numărul dvs. de telefon va fi vizibil pentru agenții imobiliari care doresc să vă contacteze.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">3. Publicarea cererilor</h2>
+    <p>
+      Puteți publica maximum 2 cereri pe lună. Fiecare cerere este activă timp de 30 de zile de la data publicării, după care se șterge automat din sistem.
+    </p>
+    <p style="margin-top: 1rem;">
+      Cererile trebuie să conțină informații corecte despre ce căutați. Vă rugăm să descrieți cât mai detaliat cerințele pentru a primi oferte relevante de la agenți.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">4. Comision</h2>
+    <p>
+      La publicarea unei cereri, puteți specifica dacă oferiți comision agentului sau nu. Această informație va fi vizibilă pentru agenții imobiliari înainte să vă contacteze.
+    </p>
+    <p style="margin-top: 1rem;">
+      Dacă specificați că nu oferiți comision, agenților le va apărea clar mesajul: "Clientul nu oferă comision. Nu contacta dacă dorești comision."
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">5. Contactarea de către agenți</h2>
+    <p>
+      Agenții imobiliari care au conturi active pot vedea cererile dvs. și vă pot contacta direct prin telefon dacă au oferte potrivite cu cerințele dvs.
+    </p>
+    <p style="margin-top: 1rem;">
+      Nu garantăm că veți primi contacte de la agenți sau că ofertele primite vor corespunde exact cerințelor dvs.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">6. Confidențialitate</h2>
+    <p>
+      Datele dvs. personale (nume, email, telefon) sunt folosite exclusiv în scopul funcționării platformei. 
+      Numărul dvs. de telefon este vizibil doar pentru agenții imobiliari cu conturi active.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">7. Ștergerea contului</h2>
+    <p>
+      Puteți șterge contul dvs. în orice moment din setările contului. La ștergerea contului, toate datele dvs., inclusiv cererile, vor fi șterse definitiv din sistem.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">8. Responsabilități</h2>
+    <p>
+      Platforma este furnizată "așa cum este", fără garanții. Nu ne asumăm responsabilitate pentru:
+    </p>
+    <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+      <li>Calitatea sau autenticitatea ofertelor primite de la agenți</li>
+      <li>Rezultatele tranzacțiilor imobiliare</li>
+      <li>Comportamentul agenților imobiliari</li>
+    </ul>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">9. Modificări</h2>
+    <p>
+      Ne rezervăm dreptul de a modifica acești termeni și condiții în orice moment. Modificările vor fi comunicate prin actualizarea datei "Ultima actualizare" de mai sus.
+    </p>
+
+    <h2 style="font-size: 1.25rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem;">10. Contact</h2>
+    <p>
+      Pentru întrebări sau probleme, ne puteți contacta prin WhatsApp la numărul de suport indicat pe platformă.
+    </p>
+
+    <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border);">
+      <p style="color: var(--text-secondary); font-size: 0.875rem;">
+        Prin crearea unui cont și utilizarea platformei, confirmați că ați citit, înțeles și acceptați acești termeni și condiții.
+      </p>
+    </div>
+</div>
+{% endblock %}

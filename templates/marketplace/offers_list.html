@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Platforma de colaborare între agenți — Fișa de vizionare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+</head>
+<body>
+  <div class="mp-topbar">
+    {% include 'marketplace/_mp_header.html' %}
+    
+    <a href="{{ url_for('home') }}" class="mp-homebtn">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M8 1L2 6v9h4v-6h4v6h4V6L8 1z" fill="currentColor"/>
+      </svg>
+      <span>Acasă</span>
+    </a>
+  </div>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Platforma de colaborare între agenți</h1>
+      <p>Anunțuri exclusive de la agenți: vânzări și închirieri. Recomandarea este să publici ce ai în exclusivitate.</p>
+    </div>
+  </section>
+
+  <div class="search-actions-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="get" action="{{ url_for('marketplace.list_offers') }}" class="search-row">
+      {% if mine %}<input type="hidden" name="mine" value="1" />{% endif %}
+      <div class="search-input-wrap">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="search" name="q" value="{{ search }}" placeholder="Cuvinte cheie: apartament, închiriere, zonă…" aria-label="Caută" autocomplete="off" />
+      </div>
+      <button type="submit">Caută</button>
+    </form>
+
+    <div class="mp-actions">
+      <form method="get" action="{{ url_for('marketplace.list_offers') }}" class="sort-form-inline" onchange="this.submit()">
+        <input type="hidden" name="q" value="{{ search }}" />
+        {% if mine %}<input type="hidden" name="mine" value="1" />{% endif %}
+        {% for zid in zone_ids %}<input type="hidden" name="zone_id" value="{{ zid }}" />{% endfor %}
+        <input type="hidden" name="request_type" value="{{ request_type }}" />
+        <input type="hidden" name="property_type" value="{{ property_type }}" />
+        <input type="hidden" name="rooms" value="{{ rooms_filter if rooms_filter is not none else '' }}" />
+        <input type="hidden" name="budget_min" value="{{ budget_min or '' }}" />
+        <input type="hidden" name="budget_max" value="{{ budget_max or '' }}" />
+        <label for="sort-select" class="sr-only">Sortare</label>
+        <select name="sort" id="sort-select" class="mp-sort-select" aria-label="Sortare">
+          <option value="fair" {{ 'selected' if sort == 'fair' }}>Recomandate (Fair)</option>
+          <option value="new" {{ 'selected' if sort in ('new', 'newest') }}>Cele mai noi</option>
+        </select>
+      </form>
+      <button type="button" class="mp-action-btn" id="filters-open-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M2 4h14M5 9h8M7 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Filtre</span>
+      </button>
+      {% if offer_quota_remaining > 0 %}
+        <a class="mp-action-btn mp-primary" href="{{ url_for('marketplace.new_offer') }}">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Adaugă anunț</span>
+        </a>
+      {% else %}
+        <a class="mp-action-btn" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! Doresc să adaug mai multe anunțuri. Limita mea: ' ~ offer_quota_limit ~ '. Mai pot adăuga: 0. ID user: ' ~ current_user.id ~ '. Email: ' ~ current_user.email)|urlencode }}" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 3v12M3 9h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>Mai multe anunțuri</span>
+        </a>
+      {% endif %}
+      <div class="mp-actions-right">
+        <a class="mp-action-btn mp-primary" href="{{ url_for('marketplace.profile_page') }}">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M9 9a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM3 16c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <span>Profilul meu</span>
+        </a>
+      </div>
+    </div>
+
+    {% if mine %}
+      <p style="margin:12px 0 0; font-size: 13px; color: var(--muted);">Afișezi doar anunțurile tale.</p>
+    {% endif %}
+  </div>
+
+  <div class="marketplace-cards">
+    {% for offer in offers_list %}
+      {% set tip_imobil = offer.property_type|property_type_label %}
+      {% set tip_oferta = 'Vânzare' if offer.request_type == 'cumparare' else 'Închiriere' %}
+      {% set pret = offer.price if offer.price is not none else (offer.budget_min if offer.budget_min is not none else offer.budget_max) %}
+      <a class="req-card" href="{{ url_for('marketplace.detail_offer', id=offer.id) }}">
+        <div class="badge-row">
+          <span class="badge badge-tip">{{ tip_oferta }}</span>
+        </div>
+        <h2 class="title">{{ tip_imobil }}{% if offer.rooms %} · {{ offer.rooms }} camere{% endif %}</h2>
+        <div class="zones">
+          {% for z in offer.zones[:3] %}
+            <span class="zone-chip">{{ z.name|zone_display_name }}</span>
+          {% endfor %}
+          {% if offer.zones|length > 3 %}
+            <span class="zone-chip">+{{ offer.zones|length - 3 }}</span>
+          {% endif %}
+        </div>
+        <p class="meta">
+          {% if pret is not none %}
+            <strong>Preț:</strong> {{ pret|format_budget }} €
+          {% else %}
+            <strong>Preț:</strong> la cerere
+          {% endif %}
+          {% if offer.price_negotiable %}<span style="color:var(--muted);"> · Preț negociabil</span>{% endif %}
+          {% if getattr(offer, 'plus_tva', False) %}<span style="color:var(--muted);"> · Plus TVA</span>{% endif %}
+        </p>
+        {% if offer.surface_totala is not none or offer.surface_utila is not none %}
+          <p class="meta"><strong>Suprafață:</strong> {{ ((offer.surface_utila or offer.surface_totala)|string).replace('.', ',') }} m²</p>
+        {% endif %}
+        <div class="cta-row">
+          <span class="cta">Vezi anunț</span>
+        </div>
+      </a>
+    {% else %}
+      <div class="empty-state">
+        <div class="icon">📦</div>
+        <h3>Niciun anunț</h3>
+        <p>{% if mine %}Nu ai anunțuri. Adaugă unul (ce ai în exclusivitate).{% else %}Nu există anunțuri pentru filtrele alese.{% endif %}</p>
+        {% if not mine %}
+          <p style="margin-top:16px;">
+            <a href="{{ url_for('marketplace.list_offers') }}" style="display:inline-block; padding:10px 20px; border-radius:var(--r-md); border:1px solid var(--stroke); background:var(--surface); color:var(--text); text-decoration:none; font-weight:700; font-size:14px;">Resetează filtre</a>
+          </p>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if pagination.pages > 1 %}
+    <nav class="pagination">
+      {% if pagination.has_prev %}
+        <a href="{{ url_for('marketplace.list_offers', page=pagination.prev_num, **pagination_query) }}">← Anterior</a>
+      {% else %}
+        <span class="disabled">← Anterior</span>
+      {% endif %}
+      <span>Pagina {{ pagination.page }} / {{ pagination.pages }}</span>
+      {% if pagination.has_next %}
+        <a href="{{ url_for('marketplace.list_offers', page=pagination.next_num, **pagination_query) }}">Următor</a>
+      {% else %}
+        <span class="disabled">Următor</span>
+      {% endif %}
+    </nav>
+  {% endif %}
+
+  {% if offer_quota_remaining > 0 %}
+    <div class="sticky-add">
+      <a class="btn" href="{{ url_for('marketplace.new_offer') }}">➕ Adaugă anunț</a>
+    </div>
+  {% endif %}
+
+  <div class="filters-panel-overlay" id="filters-panel-overlay" aria-hidden="true"></div>
+  <div class="filters-panel" id="filters-panel">
+    <div class="filters-panel-header">
+      <h2 class="filters-panel-title">Filtre</h2>
+      <button type="button" class="filters-panel-close js-filters-panel-close" aria-label="Închide">×</button>
+    </div>
+    <form method="get" action="{{ url_for('marketplace.list_offers') }}" id="filters-form" class="filters-panel-body">
+      <input type="hidden" name="q" value="{{ search }}" />
+      <input type="hidden" name="sort" value="{{ sort }}" />
+      {% if mine %}<input type="hidden" name="mine" value="1" />{% endif %}
+      <div class="zone-row-wrap">
+        <span class="zone-row-label">Zonă</span>
+        <button type="button" class="zone-trigger-btn js-open-zone-selector"
+          id="zone-trigger-filters"
+          data-form-id="filters-form"
+          data-container-id="filter-zone-inputs"
+          data-input-name="zone_id"
+          data-count-el="filter-zone-count"
+          data-chips-wrap-id="filter-zone-chips">
+          Zone selectate: <span id="filter-zone-count">{{ zone_ids|length }}</span>
+        </button>
+        <div id="filter-zone-inputs">
+          {% for zid in zone_ids %}
+            <input type="hidden" name="zone_id" value="{{ zid }}" />
+          {% endfor %}
+        </div>
+        <div class="zone-chips-wrap" id="filter-zone-chips">
+          {% for zid in zone_ids %}
+            {% set z = zones|selectattr('id', 'equalto', zid)|first %}
+            {% if z %}<span class="zone-chip-tag">{{ z.name|zone_display_name }}</span>{% endif %}
+          {% endfor %}
+        </div>
+      </div>
+      <label>Tip ofertă</label>
+      <select name="request_type">
+        <option value="">Toate</option>
+        <option value="cumparare" {{ 'selected' if request_type == 'cumparare' }}>Vânzări</option>
+        <option value="inchiriere" {{ 'selected' if request_type == 'inchiriere' }}>Chirii</option>
+      </select>
+      <label>Tip proprietate</label>
+      <select name="property_type">
+        <option value="">Toate</option>
+        <option value="apartament" {{ 'selected' if property_type == 'apartament' }}>Apartament</option>
+        <option value="casa" {{ 'selected' if property_type == 'casa' }}>Casă/Vilă</option>
+        <option value="teren" {{ 'selected' if property_type == 'teren' }}>Teren</option>
+        <option value="spatiu_comercial" {{ 'selected' if property_type == 'spatiu_comercial' }}>Spațiu comercial</option>
+        <option value="birou" {{ 'selected' if property_type == 'birou' }}>Birou</option>
+        <option value="spatiu_industrial" {{ 'selected' if property_type == 'spatiu_industrial' }}>Spațiu industrial</option>
+      </select>
+      <label>Camere</label>
+      <select name="rooms">
+        <option value="">Toate</option>
+        <option value="1" {{ 'selected' if rooms_filter == 1 }}>1</option>
+        <option value="2" {{ 'selected' if rooms_filter == 2 }}>2</option>
+        <option value="3" {{ 'selected' if rooms_filter == 3 }}>3</option>
+        <option value="4" {{ 'selected' if rooms_filter is not none and rooms_filter >= 4 }}>4+</option>
+      </select>
+      <label>Preț minim (€)</label>
+      <input type="number" name="budget_min" value="{{ budget_min or '' }}" placeholder="Optional" min="0" />
+      <label>Preț maxim (€)</label>
+      <input type="number" name="budget_max" value="{{ budget_max or '' }}" placeholder="Optional" min="0" />
+      <div class="filters-panel-actions">
+        <button type="submit" class="btn-apply">Aplică filtre</button>
+        <a href="{{ url_for('marketplace.list_offers') }}" class="btn-reset-filters" id="filters-reset-btn">Resetează</a>
+      </div>
+    </form>
+  </div>
+
+  {% include 'marketplace/_zone_selector.html' %}
+  <script src="{{ url_for('static', filename='js/marketplace.js') }}"></script>
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

@@ -1,0 +1,37 @@
+{% extends "team/base_team.html" %}
+{% block title %}Agenți – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Agenți</h1>
+<p class="kicker" style="margin:0 0 24px;">{{ team.name }}</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<a href="{{ url_for('team.add_agent') }}" class="btn primary" style="margin-bottom:24px;">➕ Adaugă agent</a>
+
+<div class="card">
+  <div class="cardInner" style="padding:0;">
+    {% if agents %}
+    <div class="team-agents-cards">
+      {% for a in agents %}
+      <a href="{{ url_for('team.agent_detail', user_id=a.user_id) }}" class="team-agent-row">
+        <span class="team-agent-name">{{ a.full_name }}</span>
+        <span class="team-agent-stat"><span class="team-agent-label">Viz</span> {{ a.viewings_today }}</span>
+        <span class="team-agent-stat"><span class="team-agent-label">Deal</span> {{ a.deals_today }}</span>
+        <span class="team-agent-stat"><span class="team-agent-label">Sumă 30z</span> {{ a.amount_30|int if a.amount_30 else 0 }} €</span>
+        <span class="team-agent-stat"><span class="team-agent-label">Task</span> {{ a.tasks_open }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="padding:32px;text-align:center;color:var(--text-muted);">
+      <p>Nu ai agenți încă. Adaugă agenți pentru a le da task-uri și a urmări performanța.</p>
+      <a href="{{ url_for('team.add_agent') }}" class="btn primary" style="margin-top:16px;">Adaugă primul agent</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

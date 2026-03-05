@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin – Limite Marketplace (oferte + cereri)</title>
+  <style>
+    :root { --bg:#0b0f19; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --line:#1f2937; --radius: 14px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(180deg, #0b0f19 0%, #0b1022 100%); color: var(--text); }
+    .wrap { max-width: 600px; margin: 0 auto; padding: 18px 14px 60px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .title { margin: 0; font-size: 20px; font-weight: 900; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; }
+    .btn:hover { background: rgba(255,255,255,.08); }
+    .btn.ok { border-color: rgba(34,197,94,.4); color: #86efac; }
+    .card { background: rgba(17,24,39,.85); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+    .flash { margin-bottom: 14px; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; }
+    .flash.ok { border: 1px solid rgba(34,197,94,.35); background: rgba(34,197,94,.1); color: #86efac; }
+    .flash.error { border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.1); color: #fecaca; }
+    label { display: block; margin-bottom: 6px; font-size: 13px; color: var(--muted); }
+    input { width: 100%; max-width: 320px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-size: 14px; }
+    .row { margin-bottom: 14px; }
+    .help { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1 class="title">Limite Marketplace</h1>
+      <a class="btn" href="{{ url_for('admin.admin_marketplace_moderation') }}">← Moderation</a>
+      <a class="btn" href="{{ url_for('admin.admin_index') }}">Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ 'ok' if cat == 'ok' else 'error' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+      <p style="margin:0 0 14px; color: var(--muted); font-size: 13px;">Stabilești limite per user: oferte (anunțuri) și cereri. Gol = default. Utilizatorii cer mai multe prin WhatsApp; tu le aplici aici.</p>
+      <form method="get" action="{{ url_for('admin.admin_offer_quotas') }}" style="margin-bottom: 14px;">
+        <div class="row">
+          <label for="email">Caută user după email</label>
+          <input type="email" id="email" name="email" value="{{ email or '' }}" placeholder="email@example.com" />
+        </div>
+        <button type="submit" class="btn">Caută</button>
+      </form>
+      {% if user %}
+        <p style="margin: 12px 0 0; font-size: 14px;"><strong>{{ user.full_name }}</strong> ({{ user.email }}) — ID: {{ user.id }}</p>
+        <form method="post" action="{{ url_for('admin.admin_offer_quotas') }}" style="margin-top: 14px;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <input type="hidden" name="email" value="{{ user.email }}" />
+          <div class="row">
+            <label for="offer_quota">Limita anunțuri (oferte) — default 3</label>
+            <input type="number" id="offer_quota" name="offer_quota" min="0" max="999" placeholder="Ex: 5 sau gol" value="{{ user.offer_quota_limit if user.offer_quota_limit is not none else '' }}" />
+          </div>
+          <div class="row">
+            <label for="request_quota">Limita cereri (în 30 zile) — default 10</label>
+            <input type="number" id="request_quota" name="request_quota" min="0" max="999" placeholder="Ex: 20 sau gol" value="{{ user.request_quota_limit if user.request_quota_limit is not none else '' }}" />
+          </div>
+          <button type="submit" class="btn ok">Salvează limite</button>
+        </form>
+      {% elif email %}
+        <p style="margin: 12px 0 0; color: var(--muted);">Nu s-a găsit utilizator cu acest email.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

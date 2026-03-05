@@ -1,0 +1,213 @@
+{# Modal pentru acces limitat atins - se afișează când utilizatorul nu mai are acțiuni gratuite #}
+<div id="activationModal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>🔒 Acces limitat atins</h2>
+      <button class="modal-close" onclick="closeActivationModal()" aria-label="Închide">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p><strong>Ai folosit toate funcțiile gratuite disponibile.</strong></p>
+      <p>Pentru a continua și a avea acces complet la:</p>
+      <ul>
+        <li>✅ Fișe nelimitate</li>
+        <li>✅ Contracte</li>
+        <li>✅ Marketplace</li>
+        <li>✅ To-Do List</li>
+      </ul>
+      <p><strong>activează contul tău acum.</strong></p>
+    </div>
+    <div class="modal-footer">
+      <a id="activationWhatsAppBtn" class="btn primary" href="#" target="_blank" rel="noopener">
+        👉 Activează accesul (25 RON / lună)
+      </a>
+      <button class="btn secondary" onclick="closeActivationModal()">Mai târziu</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 500px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 32px;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.modal-close:hover {
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.modal-body p {
+  margin: 0 0 16px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.modal-body ul {
+  margin: 16px 0;
+  padding-left: 24px;
+}
+
+.modal-body li {
+  margin: 8px 0;
+  color: #555;
+}
+
+.modal-footer {
+  padding: 16px 24px 24px;
+  border-top: 1px solid #e5e5e5;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.modal-footer .btn {
+  flex: 1;
+  min-width: 140px;
+  text-align: center;
+  text-decoration: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-footer .btn.primary {
+  background: #eab308;
+  color: #1a1a1a;
+}
+
+.modal-footer .btn.primary:hover {
+  background: #ca9a04;
+  transform: translateY(-1px);
+}
+
+.modal-footer .btn.secondary {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.modal-footer .btn.secondary:hover {
+  background: #e5e5e5;
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    margin: 10px;
+    max-width: calc(100% - 20px);
+  }
+  
+  .modal-header, .modal-body, .modal-footer {
+    padding: 20px;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
+  }
+}
+</style>
+
+<script>
+function showActivationModal(whatsappPhone, userEmail) {
+  const modal = document.getElementById('activationModal');
+  if (!modal) return;
+  
+  // Construiește mesajul WhatsApp precompletat
+  const message = `Salut! Vreau să activez contul meu.
+
+Email: ${userEmail || '[scrie aici]'}
+
+Vreau acces complet la toate funcțiile.`;
+  
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
+  document.getElementById('activationWhatsAppBtn').href = whatsappUrl;
+  
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden'; // Previne scroll în background
+}
+
+function closeActivationModal() {
+  const modal = document.getElementById('activationModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = ''; // Restaurează scroll
+  }
+}
+
+// Închide modal-ul când se apasă pe overlay (în afara conținutului)
+document.addEventListener('DOMContentLoaded', function() {
+  const modal = document.getElementById('activationModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeActivationModal();
+      }
+    });
+  }
+  
+  // Închide cu Escape
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeActivationModal();
+    }
+  });
+});
+</script>

@@ -1,0 +1,25 @@
+{# Macros for pages that don't extend base_premium but want the same look. #}
+{# Usage: {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %} #}
+{#        {% call premium_topbar() %} <a href="..." class="topbarBtn">...</a> {% endcall %} #}
+{#        ... main content ... #}
+{#        {{ premium_footer() }} #}
+
+{% macro premium_topbar() %}
+<header class="topbar">
+  <div class="brand">
+    <a href="{{ url_for('home') }}" style="color:inherit;text-decoration:none;">
+      <h1>Fișă de vizionare</h1>
+    </a>
+  </div>
+  <div class="topbarRight">
+    {{ caller() }}
+  </div>
+</header>
+{% endmacro %}
+
+{% macro premium_footer() %}
+<div class="footer">
+  © 2026 Fișă de Vizionare · Versiunea 1.0<br>
+  <a href="/despre">Despre</a> · <a href="/termeni">Termeni</a> · <a href="/confidentialitate">Confidențialitate</a> · <a href="/plati">Plăți</a>
+</div>
+{% endmacro %}

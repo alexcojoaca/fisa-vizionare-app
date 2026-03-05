@@ -1,0 +1,33 @@
+{% extends "team/base_team.html" %}
+{% block title %}{{ task.title }} – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<a href="{{ url_for('team.tasks_list') }}" class="btn ghost" style="margin-bottom:20px;">Înapoi la task-uri</a>
+
+<div class="card">
+  <div class="cardInner">
+    <h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">{{ task.title }}</h1>
+    {% if overdue %}<span class="team-badge team-badge-overdue">Întârziat</span>{% endif %}
+    <p style="margin:12px 0 0;color:var(--text-secondary);">Deadline: {{ task.due_date.strftime('%d.%m.%Y') }} · Prioritate: {{ 'Ridicată' if task.priority == 'high' else ('Scăzută' if task.priority == 'low' else 'Medie') }}</p>
+    {% if task.description %}<p style="margin:16px 0 0;line-height:1.6;">{{ task.description }}</p>{% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-top:24px;">
+  <div class="cardInner">
+    <h3 style="margin:0 0 16px;">Cine a finalizat / cine nu</h3>
+    {% for a in assignments %}
+    <div class="team-task-row">
+      <div>
+        <strong>{{ a.assignee.full_name }}</strong>
+        <span class="team-badge {% if a.status == 'done' %}team-badge-ok{% else %}team-badge-warn{% endif %}" style="margin-left:8px;">
+          {% if a.status == 'done' %}Finalizat{% else %}Open{% endif %}
+        </span>
+        {% if a.comment %}<br><small style="color:var(--text-muted);">{{ a.comment }}</small>{% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

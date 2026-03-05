@@ -1,0 +1,42 @@
+{# Etaj selector modal pentru clienți (Demisol + Parter + 1..18 + opțiuni speciale). #}
+<div class="etaj-selector-overlay" id="etaj-selector-overlay" aria-hidden="true"></div>
+<div class="etaj-selector-modal zone-selector-modal" id="etaj-selector-modal" role="dialog" aria-labelledby="etaj-selector-title" aria-modal="true">
+  <div class="zone-selector-header">
+    <h2 class="zone-selector-title" id="etaj-selector-title">Selectează etaj(e)</h2>
+    <div style="display:flex; align-items:center; gap:12px;">
+      <button type="button" class="zone-selector-btn zone-selector-btn-done js-etaj-selector-done">Gata</button>
+      <button type="button" class="zone-selector-close js-etaj-selector-close" aria-label="Închide">×</button>
+    </div>
+  </div>
+  <div class="etaj-selector-chips" id="etaj-selector-chips"></div>
+  <div class="etaj-selector-list" id="etaj-selector-list">
+    {# Opțiuni speciale #}
+    <label class="zone-selector-option etaj-option" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: var(--r-sm); padding: 12px;">
+      <input type="checkbox" class="etaj-selector-cb etaj-all" value="toate" data-etaj-label="Toate etajele" />
+      <span style="font-weight: 600;">Toate etajele</span>
+    </label>
+    <label class="zone-selector-option etaj-option" style="background: rgba(234, 179, 8, 0.1); border: 1px solid rgba(234, 179, 8, 0.3); border-radius: var(--r-sm); padding: 12px;">
+      <input type="checkbox" class="etaj-selector-cb etaj-all-except" value="toate_fara_demisol" data-etaj-label="Toate în afară de demisol" />
+      <span style="font-weight: 600;">Toate în afară de demisol</span>
+    </label>
+    <div style="height: 1px; background: var(--stroke); margin: 12px 0;"></div>
+    {# Etaje individuale #}
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="Demisol" data-etaj-label="Demisol" />
+      <span>Demisol</span>
+    </label>
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="Parter" data-etaj-label="Parter" />
+      <span>Parter</span>
+    </label>
+    {% for n in range(1, 19) %}
+    <label class="zone-selector-option etaj-option">
+      <input type="checkbox" class="etaj-selector-cb" value="{{ n }}" data-etaj-label="{{ n }}" />
+      <span>{{ n }}</span>
+    </label>
+    {% endfor %}
+  </div>
+  <div class="zone-selector-actions">
+    <button type="button" class="zone-selector-btn zone-selector-btn-reset js-etaj-selector-reset">Resetează</button>
+  </div>
+</div>

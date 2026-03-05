@@ -1,0 +1,40 @@
+{% extends "base_premium.html" %}
+{% block title %}Creează echipă – Echipă & Performanță{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block brand_content %}{% endblock %}
+{% block topbar_right %}
+  <div class="topbarNav"><a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a></div>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Creează echipă</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+  {% endfor %}
+{% endwith %}
+
+<div class="card">
+  <div class="cardInner">
+    <p class="kicker">Echipă & Performanță</p>
+    <p style="margin:0 0 20px;color:var(--text-secondary);">Construiește-ți echipa de agenți, dă-le task-uri și urmărește-le progresul – totul ca să fii mai organizat și să vezi cum crește rata de conversie.</p>
+    <form method="post" action="{{ url_for('team.create_team') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <div class="form-group" style="margin-bottom:20px;">
+        <label for="name" style="display:block;margin-bottom:8px;font-weight:600;">Nume echipă</label>
+        <input type="text" name="name" id="name" required maxlength="120" placeholder="Ex: Agenție XYZ" class="team-input" value="{{ form.name.data or '' }}" />
+        {% if form.name.errors %}<p class="error">{{ form.name.errors[0] }}</p>{% endif %}
+      </div>
+      <button type="submit" class="btn primary">Creează echipa</button>
+    </form>
+  </div>
+</div>
+
+<div class="card" style="margin-top:20px;">
+  <div class="cardInner">
+    <p style="margin:0;font-size:0.875rem;color:var(--text-muted);">După creare vei putea adăuga agenți și să le dai task-uri. Managerul echipei vei fi tu.</p>
+  </div>
+</div>
+{% endblock %}

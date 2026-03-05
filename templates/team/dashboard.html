@@ -1,0 +1,87 @@
+{% extends "team/base_team.html" %}
+{% block title %}Dashboard – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">{{ team.name }}</h1>
+<p class="kicker" style="margin:0 0 24px;">Echipă & Performanță · Dashboard</p>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+{% endwith %}
+
+<div class="team-stat-grid" style="margin-bottom:24px;">
+  <div class="team-stat-card">
+    <div class="team-stat-value">{{ conv_rate }}%</div>
+    <div class="team-stat-label">Rata conversie (săpt.)</div>
+  </div>
+  <div class="team-stat-card">
+    <div class="team-stat-value">{{ deals_week }}</div>
+    <div class="team-stat-label">Deal-uri închise (săpt.)</div>
+  </div>
+</div>
+<div class="card" style="margin-bottom:24px;">
+  <div class="cardInner">
+    <button type="button" class="btn ghost" id="toggle-manager-stats" onclick="var el=document.getElementById('manager-stats-content');el.hidden=!el.hidden;this.textContent=el.hidden?'📊 Vezi mai multe':'📊 Ascunde';" style="margin-bottom:0;">📊 Vezi mai multe</button>
+    <div id="manager-stats-content" hidden>
+      <div class="team-stat-grid" style="margin-top:20px;margin-bottom:16px;">
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ active_agents }}/{{ total_agents }}</div>
+          <div class="team-stat-label">Agenți activi (7 zile)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_today }}</div>
+          <div class="team-stat-label">Vizionări azi</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_today }}</div>
+          <div class="team-stat-label">Deal-uri azi</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_week }}</div>
+          <div class="team-stat-label">Vizionări (săpt.)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_week }}</div>
+          <div class="team-stat-label">Deal-uri (săpt.)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_week %}{{ amount_week|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă (săpt.)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ viewings_month }}</div>
+          <div class="team-stat-label">Vizionări (lună)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{{ deals_month }}</div>
+          <div class="team-stat-label">Deal-uri (lună)</div>
+        </div>
+        <div class="team-stat-card">
+          <div class="team-stat-value">{% if amount_30 %}{{ amount_30|int }}{% else %}0{% endif %} €</div>
+          <div class="team-stat-label">Sumă (30 zile)</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="cardInner">
+    <h3 style="margin:0 0 16px;">Sumar lunar</h3>
+    {% for m in monthly_data %}
+    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+      <span>{{ m.month }}</span>
+      <span>V: {{ m.viewings }} · D: {{ m.deals }} · {{ m.amount|int if m.amount else 0 }} € · {{ m.conv_rate }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<p style="margin-top:32px;margin-bottom:0;font-size:0.75rem;color:var(--text-muted);">
+  <form method="post" action="{{ url_for('team.delete_team') }}" style="display:inline;" onsubmit="return confirm('Ștergi echipa? Agenții vor fi eliminați din echipă.');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <button type="submit" class="btn" style="padding:4px 8px;font-size:0.75rem;border:none;background:none;color:var(--text-muted);text-decoration:underline;cursor:pointer;">Șterge echipa</button>
+  </form>
+</p>
+{% endblock %}

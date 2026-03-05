@@ -1,0 +1,182 @@
+/* PDF Viewer Styles - Premium design for PWA standalone mode */
+
+.pdf-viewer-page {
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-viewer-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  background: var(--bg);
+}
+
+/* Toolbar */
+.pdf-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(9, 9, 11, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+}
+
+.pdf-toolbar-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.pdf-toolbar-spacer {
+  flex: 1;
+}
+
+.pdf-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* Touch-friendly */
+}
+
+.pdf-toolbar-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-focus);
+  color: var(--text);
+}
+
+.pdf-toolbar-btn:active {
+  transform: scale(0.98);
+}
+
+.pdf-toolbar-btn svg {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.pdf-toolbar-btn .btn-text {
+  white-space: nowrap;
+}
+
+/* Hide text on very small screens */
+@media (max-width: 360px) {
+  .pdf-toolbar-btn .btn-text {
+    display: none;
+  }
+  .pdf-toolbar-btn {
+    padding: 10px 12px;
+  }
+}
+
+/* PDF Viewer Wrapper */
+.pdf-viewer-wrapper {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdf-frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #525252; /* Neutral gray for PDF background */
+}
+
+/* Fallback message */
+.pdf-fallback {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg);
+}
+
+.pdf-fallback-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.pdf-fallback-content svg {
+  color: var(--text-secondary);
+}
+
+.pdf-fallback-content .btn {
+  min-height: 44px;
+  padding: 12px 24px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Desktop: Center PDF with max-width */
+@media (min-width: 768px) {
+  .pdf-viewer-wrapper {
+    padding: 24px;
+  }
+  
+  .pdf-frame {
+    max-width: 1200px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* Ensure toolbar stays visible on mobile */
+@media (max-width: 767px) {
+  .pdf-toolbar {
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+  
+  .pdf-toolbar-inner {
+    padding: 10px 0;
+    gap: 6px;
+  }
+  
+  .pdf-toolbar-btn {
+    padding: 8px 12px;
+    font-size: 0.8125rem;
+  }
+  
+  .pdf-viewer-wrapper {
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent iOS zoom on input focus (not relevant here but good practice) */
+@media screen and (max-width: 767px) {
+  .pdf-viewer-page {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}

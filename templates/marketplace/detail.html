@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Cerere #{{ req.id }} — Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .detail-wrap {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: var(--pad-lg) var(--pad);
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--stroke);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: var(--pad-lg);
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      background: var(--surface2);
+      border-color: var(--primary);
+    }
+    .detail-card {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r-lg);
+      padding: var(--pad-lg);
+      margin-bottom: var(--pad);
+      box-shadow: var(--shadow2);
+    }
+    .detail-section-title {
+      margin: 0 0 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    .detail-value {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    .detail-value strong {
+      color: var(--muted);
+      font-weight: 600;
+      margin-right: 8px;
+    }
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge.agent {
+      background: rgba(36, 209, 143, .15);
+      color: var(--success);
+      border: 1px solid rgba(36, 209, 143, .3);
+    }
+    .badge.pf {
+      background: rgba(168, 85, 247, .15);
+      color: #e9d5ff;
+      border: 1px solid rgba(168, 85, 247, .3);
+    }
+    .badge.urgent {
+      background: rgba(255, 92, 124, .15);
+      color: var(--danger);
+      border: 1px solid rgba(255, 92, 124, .3);
+    }
+    .badge.badge-collab {
+      background: rgba(36, 209, 143, .12);
+      color: var(--success);
+      border: 1px solid rgba(36, 209, 143, .25);
+    }
+    .badge.badge-comision {
+      background: rgba(79, 140, 255, .15);
+      color: var(--primary);
+      border: 1px solid rgba(79, 140, 255, .3);
+    }
+    .zone-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .zone-chips span {
+      padding: 6px 12px;
+      border-radius: var(--r-sm);
+      font-size: 13px;
+      background: var(--surface2);
+      border: 1px solid var(--stroke);
+      color: var(--muted);
+    }
+    .contact-locked {
+      padding: var(--pad);
+      border-radius: var(--r-md);
+      background: var(--surface2);
+      border: 1px solid var(--stroke);
+      margin-top: 12px;
+    }
+    .contact-locked p {
+      margin: 0 0 14px;
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .contact-cta-text {
+      margin-bottom: 14px !important;
+      font-weight: 600;
+      color: var(--text) !important;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: var(--r-md);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      border: 1px solid var(--stroke);
+      background: var(--surface);
+      color: var(--text);
+      margin-right: 10px;
+      margin-top: 8px;
+      min-height: 48px;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--surface2);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 4px 16px rgba(79,140,255,.3);
+    }
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79,140,255,.4);
+    }
+    .btn.wa {
+      background: rgba(37,211,102,.18);
+      border-color: rgba(37,211,102,.4);
+      color: #dcfce7;
+    }
+    .btn.wa:hover {
+      background: rgba(37,211,102,.25);
+      border-color: rgba(37,211,102,.5);
+    }
+    .btn.danger {
+      background: rgba(255,92,124,.12);
+      border-color: rgba(255,92,124,.35);
+      color: var(--danger);
+    }
+    .btn.danger:hover {
+      background: rgba(255,92,124,.2);
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .detail-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 0 0 8px;
+      line-height: 1.3;
+    }
+    .detail-meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="detail-wrap">
+    <a class="back-btn" href="{{ url_for('marketplace.list_requests') }}">← Înapoi</a>
+
+    <div class="detail-card">
+      <div class="badge-row">
+        {% if req.urgent %}<span class="badge urgent">Urgent</span>{% endif %}
+        {% if is_client_request %}
+          <span class="badge" style="background: rgba(79, 140, 255, .15); color: #4f8cff; border: 1px solid rgba(79, 140, 255, .3); font-size: 0.75rem; padding: 4px 8px;">👤 Client</span>
+        {% endif %}
+      </div>
+      <h1 class="detail-title">
+        {% if req.request_type == 'cumparare' %}Caut să cumpăr{% elif req.request_type == 'inchiriere' %}Caut să închiriez{% else %}{{ req.request_type|title }}{% endif %} — {{ req.property_type|property_type_label }}
+      </h1>
+      <p class="detail-meta">{{ req.created_at.strftime('%d.%m.%Y %H:%M') }}</p>
+    </div>
+
+    <div class="detail-card">
+      <p class="detail-section-title">{{ 'Zonă' if req.zones|length == 1 else 'Zone' }}</p>
+      <div class="zone-chips">
+        {% for z in req.zones %}
+          <span>{{ z.name|zone_display_name }}</span>
+        {% endfor %}
+        {% if not req.zones %}<span>–</span>{% endif %}
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <p class="detail-section-title">Buget</p>
+      <p class="detail-value">
+        {% if req.budget_min is not none or req.budget_max is not none %}
+          <strong>Buget:</strong>
+          {% if req.budget_min is not none and req.budget_max is not none %}
+            {{ req.budget_min|format_budget }} – {{ req.budget_max|format_budget }} €
+          {% elif req.budget_min is not none %}
+            de la {{ req.budget_min|format_budget }} €
+          {% else %}
+            până la {{ req.budget_max|format_budget }} €
+          {% endif %}
+        {% else %}
+          <strong>Buget:</strong> flexibil
+        {% endif %}
+        {% if getattr(req, 'plus_tva', False) %} <span style="color:var(--muted);">(plus TVA)</span>{% endif %}
+      </p>
+    </div>
+
+    {% if req.rooms or req.year_min or req.year_max %}
+      <div class="detail-card">
+        <p class="detail-section-title">Detalii imobil</p>
+        <p class="detail-value">
+          {% if req.rooms %}<strong>Număr de camere dorite:</strong> {{ req.rooms }}<br>{% endif %}
+          {% if req.year_min or req.year_max %}
+            <strong>An construcție (după anul):</strong> {{ req.year_min or '–' }} – {{ req.year_max or '–' }}
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+
+
+    {% if req.description %}
+      <div class="detail-card">
+        <p class="detail-section-title">Descriere</p>
+        <p class="detail-value" style="white-space: pre-wrap;">{{ req.description }}</p>
+      </div>
+    {% endif %}
+
+    {% if is_client_request and client_commission_info %}
+    <div class="detail-card">
+      <p class="detail-section-title">Comision</p>
+      {% if client_commission_info == "no_commission" %}
+      <div style="padding: 12px; background: rgba(255, 92, 124, 0.1); border: 1px solid rgba(255, 92, 124, 0.3); border-radius: var(--r-md); margin-bottom: 12px;">
+        <p style="margin: 0; font-size: 14px; color: var(--danger); font-weight: 600;">
+          ⚠️ Clientul nu oferă comision. Nu contacta dacă dorești comision.
+        </p>
+      </div>
+      {% elif client_commission_info[0] == "offers_commission" %}
+      <div style="padding: 12px; background: rgba(36, 209, 143, 0.1); border: 1px solid rgba(36, 209, 143, 0.3); border-radius: var(--r-md); margin-bottom: 12px;">
+        <p style="margin: 0; font-size: 14px; color: var(--success); font-weight: 600;">
+          ✅ Clientul oferă comision: {{ client_commission_info[1] }}
+        </p>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="detail-card">
+      <p class="detail-section-title">Contact</p>
+      <div class="contact-locked">
+        {% if has_active_access and contact_phone %}
+          {% if is_client_request %}
+            {# For client requests, show contact button with warning #}
+            <p style="margin-bottom: 12px; font-size: 14px; color: var(--muted); line-height: 1.6;">
+              Contactează clientul doar dacă oferta ta se potrivește foarte bine cu cerințele lui. 
+              Verifică dacă oferă comision sau nu. Nu suna inutil cu oferte nepotrivite.
+            </p>
+            <button id="contact-client-btn" class="btn primary" style="width: 100%;">
+              Contactează clientul
+            </button>
+            <div id="client-phone-display" style="display: none; margin-top: 16px; padding: 12px; background: var(--surface2); border-radius: var(--r-md);">
+              <p class="detail-value" style="margin: 0;"><strong>Telefon:</strong> <a href="tel:{{ contact_phone_digits }}" style="color:var(--primary); text-decoration:none; font-weight:600;">{{ contact_phone }}</a></p>
+            </div>
+            <script>
+              document.getElementById('contact-client-btn').addEventListener('click', function() {
+                if (confirm('Contactează clientul doar dacă oferta ta se potrivește foarte bine cu cerințele lui. Verifică dacă oferă comision sau nu. Nu suna inutil cu oferte nepotrivite.\n\nAm înțeles și vreau să văd numărul de telefon.')) {
+                  document.getElementById('client-phone-display').style.display = 'block';
+                  this.style.display = 'none';
+                }
+              });
+            </script>
+          {% else %}
+            {# For agent requests: show phone directly #}
+            <p class="detail-value"><strong>Telefon:</strong> <a href="tel:{{ contact_phone_digits }}" style="color:var(--primary); text-decoration:none; font-weight:600;">{{ contact_phone }}</a></p>
+          {% endif %}
+        {% else %}
+          {# User without active account (only free actions or expired): show CTA to activate #}
+          <p class="contact-cta-text">🔒 Disponibil doar pentru conturi active</p>
+          <p style="margin-top:8px; font-size:14px; color:var(--muted);">Pentru a vedea datele de contact, activează contul tău.</p>
+          {% set activate_msg = 'Salut! Vreau să activez contul meu pentru a vedea contactele din Marketplace.
+
+Email: ' ~ current_user.email ~ '
+
+Vreau acces complet la toate funcțiile.' %}
+          <a class="btn wa" href="https://wa.me/{{ wa_phone }}?text={{ activate_msg|urlencode }}" target="_blank" rel="noopener">👉 Activează accesul (25 RON / lună)</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if is_owner and req.client_phone_private %}
+      <div class="detail-card detail-card-private">
+        <p class="detail-section-title">🔒 Doar pentru tine</p>
+        <p class="detail-value"><strong>Telefon persoană pentru care cauți:</strong> {% if client_phone_private_digits %}<a href="tel:{{ client_phone_private_digits }}">{{ client_phone_private }}</a>{% else %}{{ client_phone_private }}{% endif %}</p>
+      </div>
+    {% endif %}
+
+    {% if is_owner %}
+      <div class="detail-card">
+        <p class="detail-section-title">Acțiuni</p>
+        <div class="btn-row">
+          <a class="btn primary" href="{{ url_for('marketplace.edit_request', id=req.id) }}">Editează</a>
+          <form method="post" action="{{ url_for('marketplace.delete_request', id=req.id) }}" style="display:inline;" onsubmit="return confirm('Ștergi această cerere?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn danger">Șterge</button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

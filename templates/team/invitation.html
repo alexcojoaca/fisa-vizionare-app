@@ -1,0 +1,28 @@
+{% extends "base_premium.html" %}
+{% block title %}Invitație echipă – {{ team.name }}{% endblock %}
+{% block head_extra %}<link rel="stylesheet" href="{{ url_for('static', filename='css/team.css') }}" />{% endblock %}
+
+{% block brand_content %}{% endblock %}
+{% block topbar_right %}
+  <div class="topbarNav"><a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a></div>
+{% endblock %}
+
+{% block content %}
+<h1 style="margin:0 0 8px;font-size:1.5rem;font-weight:700;">Invitație în echipă</h1>
+<p class="kicker" style="margin:0 0 24px;">{{ team.name }}</p>
+
+<div class="card">
+  <div class="cardInner">
+    <p style="margin:0 0 20px;font-size:1rem;">Ai fost invitat să faci parte din echipa <strong>{{ team.name }}</strong>.</p>
+    <p style="margin:0 0 24px;color:var(--text-secondary);">Confirmă pentru a primi task-uri și a raporta activitatea.</p>
+    <form method="post" action="{{ url_for('team.invitation_accept') }}" style="display:inline;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn primary">Accept invitația</button>
+    </form>
+    <form method="post" action="{{ url_for('team.invitation_decline') }}" style="display:inline;margin-left:12px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+      <button type="submit" class="btn ghost">Refuz</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

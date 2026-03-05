@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fișe remote – Fișă de vizionare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .premium .remoteItem .meta { color: var(--text-muted); font-size: 0.8125rem; line-height: 1.35; word-break: break-word; }
+    .premium .remoteItem .noteDelete { margin-top: 8px; color: var(--text-muted); font-size: 0.75rem; line-height: 1.35; }
+    .premium .empty { text-align: center; color: var(--text-muted); padding: 24px 12px; }
+    
+    /* Button text visibility */
+    .premium .remoteItem .actions .btn-text-full,
+    .premium .stickyBarInner .btn-text-full { 
+      display: inline;
+    }
+    .premium .remoteItem .actions .btn-text-mobile,
+    .premium .stickyBarInner .btn-text-mobile { 
+      display: none;
+    }
+    
+    /* Mobile optimizations for remote list */
+    @media (max-width: 768px) {
+      .premium .remoteTabs { 
+        gap: 8px; 
+        margin-bottom: 16px;
+      }
+      .premium .remoteTab { 
+        flex: 1; 
+        min-width: 0;
+        padding: 10px 12px;
+        font-size: 0.8125rem;
+        text-align: center;
+      }
+      .premium .remoteToolbar { 
+        margin-top: 16px;
+      }
+      .premium .remoteSearch { 
+        min-width: 0;
+        width: 100%;
+        font-size: 16px; /* Previne zoom pe iOS */
+      }
+      .premium .remoteItem { 
+        padding: 12px;
+        border-left-width: 4px;
+      }
+      .premium .remoteItem .row1 { 
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .premium .remoteItem .main { 
+        width: 100%;
+      }
+      .premium .remoteItem .name { 
+        font-size: 1rem;
+        margin-bottom: 8px;
+      }
+      .premium .remoteItem .meta { 
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+      .premium .remoteItem .meta > div {
+        margin-bottom: 4px;
+      }
+      .premium .remoteItem .chips { 
+        justify-content: flex-start;
+        width: 100%;
+        margin-top: 4px;
+      }
+      .premium .remoteItem .chip { 
+        font-size: 0.8125rem;
+        padding: 6px 12px;
+      }
+      .premium .remoteItem .actions { 
+        flex-direction: column;
+        width: 100%;
+        margin-top: 12px;
+      }
+      .premium .remoteItem .actions .btn { 
+        width: 100%;
+        text-align: center;
+        padding: 12px 16px;
+        font-size: 0.875rem;
+        white-space: normal;
+        word-break: break-word;
+        position: relative;
+      }
+      .premium .remoteItem .actions .btn .btn-text-full,
+      .premium .stickyBarInner .btn .btn-text-full { 
+        display: none;
+      }
+      .premium .remoteItem .actions .btn .btn-text-mobile,
+      .premium .stickyBarInner .btn .btn-text-mobile { 
+        display: inline;
+      }
+      .premium .remoteItem .noteDelete { 
+        font-size: 0.8125rem;
+        margin-top: 10px;
+        line-height: 1.4;
+      }
+      .premium .hint { 
+        font-size: 0.875rem;
+        line-height: 1.5;
+        margin-top: 12px;
+        padding: 0 4px;
+      }
+      .premium .stickyBar { 
+        padding: 10px 16px;
+      }
+      .premium .stickyBarInner { 
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: nowrap;
+      }
+      .premium .stickyBarInner .btn { 
+        flex: 1;
+        min-width: 0;
+        text-align: center;
+        padding: 10px 12px;
+        font-size: 0.8125rem;
+        white-space: nowrap;
+      }
+      .premium .stickySpacer { 
+        height: 60px;
+      }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 480px) {
+      .premium .remoteItem { 
+        padding: 10px;
+      }
+      .premium .remoteItem .name { 
+        font-size: 0.9375rem;
+      }
+      .premium .remoteItem .meta { 
+        font-size: 0.8125rem;
+      }
+      .premium .remoteItem .actions .btn { 
+        padding: 10px 14px;
+        font-size: 0.8125rem;
+      }
+      .premium .stickyBar { 
+        padding: 8px 12px;
+      }
+      .premium .stickyBarInner .btn { 
+        padding: 8px 10px;
+        font-size: 0.75rem;
+      }
+      .premium .stickySpacer { 
+        height: 56px;
+      }
+    }
+  </style>
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+
+  {% endcall %}
+
+    <div class="section">
+      <div class="remoteTabs" role="tablist" aria-label="Alege tipul de document">
+        <button class="remoteTab active" type="button" data-tab="chirie">Chirie</button>
+        <button class="remoteTab" type="button" data-tab="vanzare">Vânzare</button>
+      </div>
+
+      <div class="remoteToolbar">
+        <input id="search" class="remoteSearch" type="search" placeholder="Caută după nume / adresă / status / tip…" />
+      </div>
+
+      <div class="hint" style="color:var(--text-muted);font-size:0.8125rem;margin:10px 0 0;line-height:1.35;">
+        Documentele remote se <b>șterg automat după 3 zile</b> (din aplicație + PDF). Recomandare: descarcă și salvează-le în telefon.
+      </div>
+    </div>
+
+    <!-- CHIRIE LIST -->
+    <div id="panel-chirie">
+      {% if not chirii or chirii|length == 0 %}
+        <div class="section empty">
+          Încă nu ai fișe remote pentru <b>Chirie</b>. Creează una din pagina “Trimite către client”.
+        </div>
+      {% endif %}
+
+      <div id="wrap-chirie">
+        <div class="remoteList">
+          {% for it in (chirii or []) %}
+            <div class="remoteItem"
+                 data-search="{{ (it.viz_nume or '')|lower }} {{ (it.adresa_public or it.adresa_full or '')|lower }} {{ (it.status or '')|lower }} {{ (it.tip_imobil or '')|lower }}"
+                 data-expiry="{{ it.expires_at.isoformat() if it.expires_at else '' }}">
+
+              <div class="row1">
+                <div class="main">
+                  <p class="name">
+                    {{ it.viz_nume if it.viz_nume else "Client (încă nesemnat)" }}
+                  </p>
+
+                  <div class="meta">
+                    <div><b>Tip:</b> {{ it.tip_imobil or "—" }}</div>
+                    <div><b>Adresă:</b> {{ it.adresa_public or "—" }}</div>
+                    <div><b>Data/Ora:</b> {{ it.data_vizionarii or "—" }} {{ it.ora_vizionarii or "" }}</div>
+                    <div><b>Comision:</b> {{ it.comision_procent or "—" }}</div>
+                  </div>
+                </div>
+
+                <div class="chips">
+                  {% if it.status == "signed" %}
+                    <span class="chip ok">Semnat</span>
+                  {% elif it.status == "expired" %}
+                    <span class="chip bad">Expirat</span>
+                  {% else %}
+                    <span class="chip warn">Încă nu a semnat</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="actions">
+                {% if it.status == "signed" %}
+                  <a class="btn primary" href="{{ url_for('pdf_viewer.view_pdf', type='chirie', token=it.public_token, next=url_for('chirie.remote_list')) }}">
+                    <span class="btn-text-full">Vezi PDF</span>
+                    <span class="btn-text-mobile">Vezi PDF</span>
+                  </a>
+                  <a class="btn ghost" href="{{ url_for('chirie.remote_download_pdf', token=it.public_token) }}">
+                    <span class="btn-text-full">Descarcă PDF</span>
+                    <span class="btn-text-mobile">Descarcă</span>
+                  </a>
+                {% else %}
+                  <a class="btn ghost" href="{{ url_for('chirie.remote_public_page', token=it.public_token) }}" target="_blank" rel="noopener">
+                    Deschide link (client)
+                  </a>
+                {% endif %}
+              </div>
+
+              <div class="meta" style="margin-top:10px;">
+                <div class="noteDelete">Notă: după expirare, fișa și PDF-ul se șterg automat.</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- VANZARE LIST -->
+    <div id="panel-vanzare" style="display:none;">
+      {% if not vanzari or vanzari|length == 0 %}
+        <div class="section empty">
+          Încă nu ai fișe remote pentru <b>Vânzare</b>. Creează una din pagina “Trimite către client”.
+        </div>
+      {% endif %}
+
+      <div id="wrap-vanzare">
+        <div class="remoteList">
+          {% for it in (vanzari or []) %}
+            <div class="remoteItem"
+                 data-search="{{ (it.viz_nume or '')|lower }} {{ (it.adresa_public or it.adresa_full or '')|lower }} {{ (it.status or '')|lower }} {{ (it.tip_imobil or '')|lower }}"
+                 data-expiry="{{ it.expires_at.isoformat() if it.expires_at else '' }}">
+
+              <div class="row1">
+                <div class="main">
+                  <p class="name">
+                    {{ it.viz_nume if it.viz_nume else "Client (încă nesemnat)" }}
+                  </p>
+
+                  <div class="meta">
+                    <div><b>Tip:</b> {{ it.tip_imobil or "—" }}</div>
+                    <div><b>Adresă:</b> {{ it.adresa_public or "—" }}</div>
+                    <div><b>Data/Ora:</b> {{ it.data_vizionarii or "—" }} {{ it.ora_vizionarii or "" }}</div>
+                    <div><b>Comision:</b> {{ it.comision_procent or "—" }}</div>
+                  </div>
+                </div>
+
+                <div class="chips">
+                  {% if it.status == "signed" %}
+                    <span class="chip ok">Semnat</span>
+                  {% elif it.status == "expired" %}
+                    <span class="chip bad">Expirat</span>
+                  {% else %}
+                    <span class="chip warn">Încă nu a semnat</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              <div class="actions">
+                {% if it.status == "signed" %}
+                  <a class="btn primary" href="{{ url_for('pdf_viewer.view_pdf', type='vanzare', token=it.public_token, next=url_for('chirie.remote_list')) }}">
+                    <span class="btn-text-full">Vezi PDF</span>
+                    <span class="btn-text-mobile">Vezi PDF</span>
+                  </a>
+                  <a class="btn ghost" href="{{ url_for('vanzare.remote_download_pdf', token=it.public_token) }}">
+                    <span class="btn-text-full">Descarcă PDF</span>
+                    <span class="btn-text-mobile">Descarcă</span>
+                  </a>
+                {% else %}
+                  <a class="btn ghost" href="{{ url_for('vanzare.remote_public_page', token=it.public_token) }}" target="_blank" rel="noopener">
+                    Deschide link (client)
+                  </a>
+                {% endif %}
+              </div>
+
+              <div class="meta" style="margin-top:10px;">
+                <div class="noteDelete">Notă: după expirare, fișa și PDF-ul se șterg automat.</div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="stickyBar">
+      <div class="stickyBarInner">
+        <a class="btn primary" id="btnSend" href="{{ url_for('chirie.remote_agent_page') }}">
+          <span class="btn-text-full">Trimite către client</span>
+          <span class="btn-text-mobile">Trimite</span>
+        </a>
+        <a class="btn ghost" href="{{ url_for('chirie.remote_list') }}">
+          <span class="btn-text-full">Refresh listă</span>
+          <span class="btn-text-mobile">Refresh</span>
+        </a>
+      </div>
+    </div>
+    <div class="stickySpacer"></div>
+  {{ premium_footer() }}
+  </div>
+
+<script>
+(function(){
+  const tabs = Array.from(document.querySelectorAll(".remoteTab"));
+  const panels = {
+    chirie: document.getElementById("panel-chirie"),
+    vanzare: document.getElementById("panel-vanzare")
+  };
+
+  const btnSend = document.getElementById("btnSend");
+  const search = document.getElementById("search");
+
+  function setTab(name){
+    tabs.forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+    Object.keys(panels).forEach(k => panels[k].style.display = (k === name) ? "" : "none");
+
+    // update sticky "send" link based on tab
+    if (btnSend){
+      btnSend.href = (name === "vanzare") ? "{{ url_for('vanzare.remote_agent_page') }}" : "{{ url_for('chirie.remote_agent_page') }}";
+      btnSend.textContent = "Trimite către client";
+    }
+
+    if (search) search.value = "";
+    applyFilter();
+  }
+
+  tabs.forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+
+  function norm(s){ return (s||"").toLowerCase().trim(); }
+
+  function visibleItems(){
+    const active = tabs.find(t => t.classList.contains("active"))?.dataset.tab || "chirie";
+    const panel = panels[active];
+    return Array.from(panel.querySelectorAll(".remoteItem"));
+  }
+
+  function applyFilter(){
+    if (!search) return;
+    const q = norm(search.value);
+    visibleItems().forEach(el => {
+      const hay = norm(el.getAttribute("data-search"));
+      el.style.display = (!q || hay.includes(q)) ? "" : "none";
+    });
+  }
+
+  if (search) search.addEventListener("input", applyFilter);
+  applyFilter();
+})();
+</script>
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

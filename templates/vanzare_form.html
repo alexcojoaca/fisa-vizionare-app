@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Fișă Vânzare</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .hidden { display: none !important; }
+  </style>
+  
+  <!-- Script pentru modal activare acces -->
+  {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+  {% if current_user.is_authenticated %}
+    {% set wa_text = current_user.support_whatsapp_text() %}
+  {% else %}
+    {% set wa_text = 'Salut! Vreau să activez accesul complet la aplicație.' %}
+  {% endif %}
+  
+  <script>
+    var WHATSAPP_PHONE = '{{ wa_phone }}';
+    var WHATSAPP_TEXT = {{ wa_text|tojson }};
+    
+    window.showActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        var whatsappBtn = document.getElementById('activate-whatsapp-btn');
+        
+        if (!modal) {
+          alert('Eroare: Modal-ul nu a fost găsit.');
+          return;
+        }
+        
+        if (whatsappBtn && WHATSAPP_PHONE && WHATSAPP_TEXT) {
+          var encodedText = encodeURIComponent(WHATSAPP_TEXT);
+          whatsappBtn.href = 'https://wa.me/' + WHATSAPP_PHONE + '?text=' + encodedText;
+        }
+        
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        if (document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      } catch (e) {
+        console.error('Eroare la afișarea modalului:', e);
+        alert('Eroare la afișarea modalului. Verifică consola pentru detalii.');
+      }
+    };
+
+    window.closeActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        if (modal) {
+          modal.style.display = 'none';
+          if (document.body) {
+            document.body.style.overflow = '';
+          }
+        }
+      } catch (e) {
+        console.error('Eroare la închiderea modalului:', e);
+      }
+    };
+  </script>
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+
+  {% endcall %}
+
+  <h1 style="margin:0 0 16px;font-size:1.375rem;font-weight:700;letter-spacing:-0.02em;">Fișă de vizionare Vânzare</h1>
+
+  <!-- Toggle Mode -->
+  <div class="toggleBar">
+    <button class="toggleBtn active" id="tabNow" type="button">Semnezi acum</button>
+    <button class="toggleBtn" id="tabRemote" type="button">Trimiți link de semnare către client</button>
+  </div>
+
+  <!-- MODE 1: semnezi acum -->
+  <div class="section" id="modeNow">
+    <form method="POST" id="mainForm" action="{{ url_for('vanzare.form_page') }}">
+      {% if form %}{{ form.hidden_tag() }}{% endif %}
+
+      <div class="formSectionTitle">Vizionare</div>
+
+      <label>{{ form.data_vizionarii.label }}</label>
+      {{ form.data_vizionarii() }}
+      {% for e in form.data_vizionarii.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.ora_vizionarii.label }}</label>
+      {{ form.ora_vizionarii() }}
+      {% for e in form.ora_vizionarii.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div class="formSectionTitle">Client</div>
+
+      <p class="gdpr-note">
+        <strong>Notă GDPR:</strong>
+        Nu solicităm și nu colectăm CNP. Identificarea se face prin nume/date de contact și, opțional,
+        seria + numărul CI (fără CNP). Semnătura clientului pe fișă are valoare probatorie.
+      </p>
+
+      <label>{{ form.nume.label }}</label>
+      {{ form.nume() }}
+      {% for e in form.nume.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.telefon.label }}</label>
+      {{ form.telefon() }}
+      {% for e in form.telefon.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.email.label }}</label>
+      {{ form.email() }}
+      {% for e in form.email.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div class="row2">
+        <div>
+          <label>CI - Serie</label>
+          <input name="ci_serie" id="ci_serie" placeholder="Ex: XR" />
+        </div>
+        <div>
+          <label>CI - Număr</label>
+          <input name="ci_numar" id="ci_numar" placeholder="Ex: 123456" />
+        </div>
+      </div>
+      <p class="muted" style="margin:8px 0 0;">Seria și numărul CI sunt opționale; se folosesc pentru identificare în PDF (fără CNP).</p>
+
+      <div class="formSectionTitle">Imobil</div>
+
+      <label>{{ form.tip_imobil.label }}</label>
+      {{ form.tip_imobil() }}
+      {% for e in form.tip_imobil.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.adresa_locuintei.label }}</label>
+      {{ form.adresa_locuintei() }}
+      {% for e in form.adresa_locuintei.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.comision_procent.label }}</label>
+      {{ form.comision_procent() }}
+      {% for e in form.comision_procent.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div class="formSectionTitle">Semnături</div>
+      <p class="muted" style="margin:0 0 12px;">Poți previzualiza fără semnături. La generare finală, semnează în ambele chenare.</p>
+
+      <div class="row2">
+        <div>
+          <div class="sigLabel">Semnătură Agent</div>
+          <div class="sigWrap">
+            <canvas id="sigCanvasAgent" width="500" height="200"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigAgent">Șterge</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sigLabel">Semnătură Client</div>
+          <div class="sigWrap">
+            <canvas id="sigCanvasVisitor" width="500" height="200"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigVisitor">Șterge</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" name="signature_agent" id="signature_agent">
+      <input type="hidden" name="signature_visitor" id="signature_visitor">
+    </form>
+  </div>
+
+  <!-- MODE 2: remote -->
+  <div class="section hidden" id="modeRemote">
+    <div class="formSectionTitle">Semnare la distanță</div>
+
+    <div class="hint">
+      <p class="hintTitle">Cum funcționează</p>
+      <p class="hintText">
+        Completezi tu detaliile imobilului + comision, semnezi ca agent, iar aplicația generează un link.
+        Îl trimiți clientului pe WhatsApp / e-mail. Clientul își completează datele și semnează, iar PDF-ul se generează instant.
+        Statusul îl vezi în „Lista Remote”.
+      </p>
+    </div>
+
+    <div class="hint" style="margin-top:12px;">
+      <p class="hintTitle">Start rapid</p>
+      <p class="hintText" style="margin-bottom:10px;">
+        Apasă butonul de mai jos ca să intri în modul „Trimiți link de semnare către client”.
+      </p>
+      <a class="btn primary" style="display:inline-flex; justify-content:center; width:100%; text-decoration:none;"
+         href="{{ url_for('vanzare.remote_agent_page') }}">Deschide modul Remote</a>
+    </div>
+
+    <p class="muted" style="margin-top:12px;">
+      După ce ai linkuri generate, le vezi aici:
+      <a href="{{ url_for('chirie.remote_list') }}" style="color:var(--accent);">Lista remote</a>
+    </p>
+  </div>
+  </div>
+
+  <!-- sticky actions -->
+  <div class="stickyBar" id="stickyNow">
+    <div class="stickyBarInner">
+      <button type="button" class="btn ghost" id="btnPreview">Previzualizează DRAFT</button>
+      <button type="button" class="btn primary" id="btnGenerate">Generează PDF</button>
+    </div>
+  </div>
+  <div class="stickySpacer"></div>
+
+<script>
+(function () {
+  const tabNow = document.getElementById("tabNow");
+  const tabRemote = document.getElementById("tabRemote");
+  const modeNow = document.getElementById("modeNow");
+  const modeRemote = document.getElementById("modeRemote");
+  const stickyNow = document.getElementById("stickyNow");
+
+  function showNow(){
+    tabNow.classList.add("active");
+    tabRemote.classList.remove("active");
+    modeNow.classList.remove("hidden");
+    modeRemote.classList.add("hidden");
+    stickyNow.classList.remove("hidden");
+  }
+  function showRemote(){
+    tabRemote.classList.add("active");
+    tabNow.classList.remove("active");
+    modeRemote.classList.remove("hidden");
+    modeNow.classList.add("hidden");
+    stickyNow.classList.add("hidden");
+  }
+  tabNow.addEventListener("click", showNow);
+  tabRemote.addEventListener("click", showRemote);
+
+  (function hideStickyWhenKeyboard() {
+    var kbdHideTimer;
+    document.querySelectorAll("#modeNow input, #modeNow select, #modeNow textarea").forEach(function(el) {
+      el.addEventListener("focus", function() { clearTimeout(kbdHideTimer); document.body.classList.add("kbd"); });
+      el.addEventListener("blur", function() { kbdHideTimer = setTimeout(function() { document.body.classList.remove("kbd"); }, 120); });
+    });
+  })();
+
+  function setupSignature(canvasId, clearBtnId, hiddenInputId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctx.strokeStyle = "#111111";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+
+    let drawing = false;
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: (clientX - rect.left) * (canvas.width / rect.width),
+        y: (clientY - rect.top) * (canvas.height / rect.height)
+      };
+    }
+
+    function start(e) {
+      drawing = true;
+      const p = getPos(e);
+      ctx.beginPath();
+      ctx.moveTo(p.x, p.y);
+      e.preventDefault();
+    }
+
+    function move(e) {
+      if (!drawing) return;
+      const p = getPos(e);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      e.preventDefault();
+    }
+
+    function end() { drawing = false; }
+
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", end);
+
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end, { passive: false });
+    window.addEventListener("touchend", end, { passive: false });
+
+    document.getElementById(clearBtnId).addEventListener("click", function () {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      document.getElementById(hiddenInputId).value = "";
+    });
+
+    return {
+      toDataURL: () => canvas.toDataURL("image/png")
+    };
+  }
+
+  const form = document.getElementById("mainForm");
+  const sigAgent = setupSignature("sigCanvasAgent", "clearSigAgent", "signature_agent");
+  const sigVisitor = setupSignature("sigCanvasVisitor", "clearSigVisitor", "signature_visitor");
+
+  function setSigsForFinal() {
+    document.getElementById("signature_agent").value = sigAgent.toDataURL();
+    document.getElementById("signature_visitor").value = sigVisitor.toDataURL();
+  }
+
+  function clearSigsForPreview() {
+    document.getElementById("signature_agent").value = "";
+    document.getElementById("signature_visitor").value = "";
+  }
+
+  function looksLikeSig(dataUrl){
+    return (dataUrl || "").startsWith("data:image/");
+  }
+
+  document.getElementById("btnGenerate").addEventListener("click", function () {
+    const nume = (document.querySelector('[name="nume"]')?.value || "").trim();
+    const ciSerie = (document.getElementById("ci_serie")?.value || "").trim();
+    const ciNumar = (document.getElementById("ci_numar")?.value || "").trim();
+
+    if (!nume) {
+      alert("Completează numele clientului.");
+      return;
+    }
+
+    setSigsForFinal();
+
+    const sigA = document.getElementById("signature_agent").value || "";
+    const sigV = document.getElementById("signature_visitor").value || "";
+    if (!looksLikeSig(sigA) || !looksLikeSig(sigV)) {
+      alert("Semnăturile sunt obligatorii pentru generarea finală.");
+      return;
+    }
+
+    form.submit();
+  });
+
+  document.getElementById("btnPreview").addEventListener("click", function () {
+    clearSigsForPreview();
+
+    const oldAction = form.action;
+    const oldTarget = form.target;
+
+    form.action = "{{ url_for('vanzare.preview_pdf') }}";
+    form.target = "_blank";
+    form.submit();
+
+    form.action = oldAction;
+    if (oldTarget) form.target = oldTarget; else form.removeAttribute("target");
+  });
+})();
+
+  {% if show_activate_modal %}
+    // Afișează modalul automat când se încarcă pagina
+    document.addEventListener('DOMContentLoaded', function() {
+      window.showActivateModal();
+    });
+  {% endif %}
+</script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+{% include 'partials/assistant_widget.html' %}
+
+<!-- Modal Activare Acces -->
+<div id="activate-access-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; flex-direction:column;">
+  <div onclick="event.stopPropagation();" style="background:#1a1a1a; border-radius:8px; padding:24px; max-width:500px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.3); position:relative; margin:auto;">
+    <h2 style="margin:0 0 16px; font-size:1.25rem; font-weight:700; color:#e5e7eb;">Activează accesul</h2>
+    <p style="margin:0 0 20px; color:#9ca3af; line-height:1.6;">
+      Ai folosit deja accesul gratuit pentru fișă de vizionare vânzare. Această funcție este disponibilă doar pentru conturi active. Contactează suportul pentru a activa accesul complet.
+    </p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      <a id="activate-whatsapp-btn" href="#" target="_blank" rel="noopener" style="flex:1; min-width:200px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px; background:#25D366; color:white; border-radius:12px; text-decoration:none; font-weight:600; transition:background 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+        Contactează suportul
+      </a>
+      <button onclick="window.closeActivateModal()" style="padding:12px 20px; background:#27272a; color:#e5e7eb; border:1px solid #3f3f46; border-radius:6px; font-weight:600; cursor:pointer; transition:background 0.2s;">
+        Închide
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Setup pentru închidere modal
+  document.addEventListener('DOMContentLoaded', function() {
+    var modal = document.getElementById('activate-access-modal');
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+          window.closeActivateModal();
+        }
+      });
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        window.closeActivateModal();
+      }
+    });
+  });
+</script>
+
+{{ premium_footer() }}
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Cererile mele — Fișa de vizionare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .my-summary { background: linear-gradient(180deg, var(--surface) 0%, rgba(255,255,255,.02) 100%); border: 1px solid var(--stroke); border-radius: var(--r-lg); padding: var(--pad-lg); margin-bottom: var(--pad-lg); }
+    .my-summary h2 { margin: 0 0 10px; font-size: 18px; font-weight: 800; }
+    .my-summary p { margin: 0 0 8px; font-size: 14px; color: var(--muted); line-height: 1.5; }
+    .my-summary .stat { font-size: 20px; font-weight: 800; margin: 10px 0 6px; }
+    .my-summary .paid-info { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--stroke); font-size: 13px; color: var(--muted); }
+    .my-card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .my-card-actions a, .my-card-actions button { padding: 8px 14px; border-radius: var(--r-md); font-size: 13px; font-weight: 700; text-decoration: none; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); cursor: pointer; }
+    .my-card-actions a:hover, .my-card-actions button:hover { background: rgba(255,255,255,.06); }
+    .my-card-actions .delete { border-color: rgba(239,68,68,.4); color: #fecaca; }
+    .contact-wa { display: inline-block; margin-top: 12px; padding: 10px 16px; border-radius: var(--r-md); background: rgba(34,197,94,.15); border: 1px solid rgba(34,197,94,.35); color: #86efac; font-weight: 700; font-size: 14px; text-decoration: none; }
+    .contact-wa:hover { background: rgba(34,197,94,.25); }
+  </style>
+</head>
+<body>
+  <div class="mp-topbar">
+    {% include 'marketplace/_mp_header.html' %}
+    <a href="{{ url_for('marketplace.list_requests') }}" class="mp-homebtn" style="margin-right:8px;">← Toate cererile</a>
+    <a href="{{ url_for('marketplace.hub') }}" class="mp-homebtn">Marketplace</a>
+    <a href="{{ url_for('home') }}" class="mp-homebtn">Acasă</a>
+  </div>
+
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Cererile mele</h1>
+      <p>Rezumat sloturi și cereri postate. Poți șterge o cerere și pune alta în loc — îți rămâne slotul liber.</p>
+    </div>
+  </section>
+
+  <div class="search-actions-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="my-summary">
+      <h2>Sloturi cereri</h2>
+      <p>Ai <strong>5 cereri gratuite</strong> la 30 zile. După 30 zile cererile se șterg automat; poți adăuga din nou. Poți șterge o cerere și pune alta în loc — îți rămâne slotul liber.</p>
+      <div class="stat">Folosite: <strong>{{ request_used }}</strong> din <strong>{{ request_limit }}</strong></div>
+      <p class="muted">Mai poți adăuga {{ request_remaining }} cereri.</p>
+      {% if paid_slots > 0 and paid_expires %}
+        <div class="paid-info">
+          Ai <strong>{{ paid_slots }} sloturi plătite</strong> valabile până la {{ paid_expires.strftime('%d.%m.%Y') }}. După expirare, sloturile plătite dispar; poți reactiva un pachet (contactează-ne).
+        </div>
+      {% else %}
+        <div class="paid-info">
+          Pentru mai multe cereri peste cele 5 gratuite, poți achiziționa pachete — contactează-ne.
+        </div>
+      {% endif %}
+      <a class="contact-wa" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! Întrebare despre pachete cereri. User ID: ' ~ current_user.id ~ '. Email: ' ~ current_user.email)|urlencode }}" target="_blank" rel="noopener">Contact WhatsApp</a>
+    </div>
+
+    <div class="mp-actions">
+      {% if request_remaining > 0 %}
+        <a class="mp-action-btn mp-primary" href="{{ url_for('marketplace.new_request') }}">➕ Adaugă cerere</a>
+      {% else %}
+        <a class="mp-action-btn" href="https://wa.me/{{ wa_phone }}?text={{ ('Salut! Doresc pachet cereri. User: ' ~ current_user.id ~ '. Email: ' ~ current_user.email)|urlencode }}" target="_blank" rel="noopener">Mai multe cereri (WhatsApp)</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="marketplace-cards">
+    {% for req in requests_list %}
+      {% set tip_imobil = req.property_type|property_type_label %}
+      {% set tip_cerere = 'Cumpărare' if req.request_type == 'cumparare' else 'Închiriere' %}
+      <div class="req-card" style="display:block;">
+        <div class="badge-row">
+          <span class="badge badge-tip">{{ tip_cerere }}</span>
+          <span class="badge badge-prop">{{ tip_imobil }}</span>
+        </div>
+        <h2 class="title">{{ tip_imobil }}{% if req.rooms %} · {{ req.rooms }} camere{% endif %}</h2>
+        <div class="zones">
+          {% for z in req.zones[:3] %}
+            <span class="zone-chip">{{ z.name|zone_display_name }}</span>
+          {% endfor %}
+          {% if req.zones|length > 3 %}
+            <span class="zone-chip">+{{ req.zones|length - 3 }}</span>
+          {% endif %}
+        </div>
+        <p class="meta">
+          {% if req.budget_min or req.budget_max %}
+            <strong>Buget:</strong> {{ req.budget_min|format_budget if req.budget_min else '—' }} – {{ req.budget_max|format_budget if req.budget_max else '—' }} €
+          {% else %}
+            Buget: la cerere
+          {% endif %}
+          {% if getattr(req, 'plus_tva', False) %}<span style="color:var(--muted);"> · plus TVA</span>{% endif %}
+          {% if req.created_at %}
+            · Postat {{ req.created_at.strftime('%d.%m.%Y') }}
+          {% endif %}
+        </p>
+        <div class="my-card-actions">
+          <a href="{{ url_for('marketplace.detail', id=req.id) }}">Vezi</a>
+          <a href="{{ url_for('marketplace.edit_request', id=req.id) }}">Editează</a>
+          <form method="post" action="{{ url_for('marketplace.delete_request', id=req.id) }}" style="display:inline;" onsubmit="return confirm('Ștergi această cerere? Slotul devine liber.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <button type="submit" class="delete">Șterge</button>
+          </form>
+        </div>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <h3>Nicio cerere</h3>
+        <p>Nu ai cereri în ultimele 30 zile. Adaugă una; ai {{ request_remaining }} sloturi disponibile.</p>
+        {% if request_remaining > 0 %}
+          <a href="{{ url_for('marketplace.new_request') }}" class="mp-action-btn mp-primary" style="margin-top:16px; display:inline-flex;">Adaugă cerere</a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  {% if request_remaining > 0 and requests_list %}
+    <div class="sticky-add">
+      <a class="btn" href="{{ url_for('marketplace.new_request') }}">➕ Adaugă cerere</a>
+    </div>
+  {% endif %}
+
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

@@ -1,0 +1,146 @@
+{% extends "base_premium.html" %}
+{% block title %}Drepturi de contract – Drafturi{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+{% endblock %}
+
+{% block content %}
+  <style>
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 12px;
+      margin-top: 20px;
+    }
+    @media (max-width: 640px) {
+      .templates-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+    .template-card {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .template-card:hover {
+      border-color: var(--border-focus);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .template-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .template-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-sm);
+      background: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.2);
+      color: var(--accent);
+    }
+    .template-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .template-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .template-title {
+      margin: 0 0 4px;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+    }
+    .template-desc {
+      margin: 0;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    .template-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .template-actions .btn {
+      flex: 1;
+      min-width: 0;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+    @media (max-width: 480px) {
+      .template-actions {
+        flex-direction: column;
+      }
+      .template-actions .btn {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <h1 style="margin:0 0 20px;font-size:1.5rem;font-weight:700;letter-spacing:-0.03em;">Drafturi de documente</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="cardInner">
+      <p style="margin:0; font-size:0.875rem; line-height:1.6; color:var(--text-secondary);">
+        Aici poți descărca drafturile de documente: fișe de vizionare și contracte. Documentele sunt disponibile ca fișiere Word (.docx) pentru a le modifica după nevoile tale.
+      </p>
+      <p style="margin:12px 0 0; font-size:0.8125rem; line-height:1.5; color:var(--text-secondary);">
+        💡 <strong>Pe telefon:</strong> Apasă pe butonul "Descarcă Word" și fișierul se va salva în aplicația Files (iPhone) sau Downloads (Android). Poți deschide documentul în Microsoft Word, Google Docs sau alte aplicații de editare.
+      </p>
+    </div>
+  </div>
+
+  <div class="templates-grid">
+    {% for template in templates %}
+      <div class="template-card">
+        <div class="template-header">
+          <div class="template-icon" aria-hidden="true">
+            {% if template.icon == "chirie" %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            {% elif template.icon == "vanzare" %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+            {% elif template.icon == "prestari" %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            {% elif template.icon == "exclusivitate" %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            {% else %}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10"/><path d="M7 11h10"/><path d="M7 15h6"/></svg>
+            {% endif %}
+          </div>
+          <div class="template-info">
+            <h3 class="template-title">{{ template.title }}</h3>
+            <p class="template-desc">{{ template.description }}</p>
+          </div>
+        </div>
+        <div class="template-actions">
+          <a class="btn primary" href="{{ url_for('contract_templates.download_template', template_id=template.id) }}" download style="width: 100%;" target="_blank" rel="noopener">
+             📥 Descarcă Word
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% endblock %}

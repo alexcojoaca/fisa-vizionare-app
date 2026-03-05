@@ -1,0 +1,110 @@
+{% if current_user.is_authenticated %}
+<div id="assistant-root" class="assistant-root" data-csrf="{{ csrf_token() }}" data-base-url="" data-wa-phone="{{ config.get('WHATSAPP_SUPPORT_PHONE', '40764381795') }}" data-page-id="{{ page_id|default('generic') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}" />
+
+  <div class="assistant-bubble-wrap" id="assistant-bubble-wrap">
+    <button type="button" class="assistant-fab" id="assistant-fab" aria-label="Deschide asistentul">
+      <svg class="assistant-fab-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a5 5 0 0 1 5 5v1h1a1 1 0 1 1 0 2h-1v4a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-4H5a1 1 0 1 1 0-2h1v-1a5 5 0 0 1 5-5h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2z" fill="currentColor"/>
+      </svg>
+    </button>
+    <span class="assistant-bubble-tooltip" id="assistant-bubble-tooltip" aria-hidden="true">Te ajut cu ceva?</span>
+  </div>
+
+  <div class="assistant-overlay" id="assistant-overlay" aria-hidden="true">
+    <div class="assistant-panel" id="assistant-panel">
+      <header class="assistant-header">
+        <div class="assistant-header-top">
+          <h2 class="assistant-title">Asistent</h2>
+          <a href="{{ url_for('home') }}" class="assistant-home-btn" aria-label="Acasă">Acasă</a>
+          <button type="button" class="assistant-close" id="assistant-close" aria-label="Închide">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <nav class="assistant-tabs" role="tablist">
+        <button type="button" class="assistant-tab active" data-tab="esti-aici" role="tab" aria-selected="true">Ești aici</button>
+        <button type="button" class="assistant-tab" data-tab="faq" role="tab" aria-selected="false">FAQ</button>
+        <button type="button" class="assistant-tab" data-tab="alerts" role="tab" aria-selected="false">Alerte cereri</button>
+        <button type="button" class="assistant-tab" data-tab="tehnic" role="tab" aria-selected="false">Tehnic</button>
+      </nav>
+
+      <div class="assistant-body">
+        <section class="assistant-tab-panel active" id="panel-esti-aici" role="tabpanel">
+          <p class="assistant-lead" id="assistant-coach-title">Ești aici</p>
+          <p class="assistant-muted" id="assistant-coach-intro"></p>
+          <ul class="assistant-coach-bullets" id="assistant-coach-bullets"></ul>
+          <p class="assistant-muted" id="assistant-coach-notes"></p>
+        </section>
+
+        <section class="assistant-tab-panel" id="panel-faq" role="tabpanel" hidden>
+          <div class="assistant-faq-search-wrap">
+            <input type="search" class="assistant-faq-search" id="assistant-faq-search" placeholder="Caută în FAQ…" aria-label="Caută" />
+          </div>
+          <div class="assistant-faq-chat" id="assistant-faq-chat">
+            <div class="assistant-faq-messages" id="assistant-faq-messages"></div>
+            <div class="assistant-faq-questions" id="assistant-faq-questions"></div>
+          </div>
+        </section>
+
+        <section class="assistant-tab-panel" id="panel-alerts" role="tabpanel" hidden>
+          <p class="assistant-lead">Alerte cereri</p>
+          <p class="assistant-muted">Primești notificare când apar cereri noi care se potrivesc.</p>
+          <div class="assistant-alert-form-wrap" id="assistant-alert-form-wrap">
+            <div class="assistant-form-group">
+              <label>Nume alertă</label>
+              <input type="text" id="alert-name" placeholder="Ex: Sector 3, 2 camere" maxlength="120" />
+            </div>
+            <div class="assistant-form-group">
+              <label>Zone (opțional)</label>
+              <button type="button" class="assistant-zone-btn" id="assistant-alert-zone-pick">Selectează zone</button>
+              <div class="assistant-zone-chips" id="assistant-alert-zone-chips"></div>
+            </div>
+            <div class="assistant-form-row">
+              <div class="assistant-form-group">
+                <label>Buget min (€)</label>
+                <input type="number" id="alert-min-budget" placeholder="Optional" min="0" />
+              </div>
+              <div class="assistant-form-group">
+                <label>Buget max (€)</label>
+                <input type="number" id="alert-max-budget" placeholder="Optional" min="0" />
+              </div>
+            </div>
+            <div class="assistant-form-group">
+              <label>Camere (opțional)</label>
+              <select id="alert-rooms">
+                <option value="">—</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4+</option>
+              </select>
+            </div>
+            <button type="button" class="assistant-btn assistant-btn-primary" id="assistant-alert-save">Salvează alertă</button>
+          </div>
+          <div class="assistant-alerts-list" id="assistant-alerts-list"></div>
+        </section>
+
+        <section class="assistant-tab-panel" id="panel-tehnic" role="tabpanel" hidden>
+          <p class="assistant-lead">Contact tehnic</p>
+          <p class="assistant-muted">Suport WhatsApp: <strong id="assistant-wa-number"></strong></p>
+          <button type="button" class="assistant-btn assistant-btn-primary" id="assistant-wa-open">Deschide WhatsApp</button>
+          <button type="button" class="assistant-btn" id="assistant-wa-copy">Copiază mesaj suport</button>
+        </section>
+      </div>
+
+      <div class="assistant-zone-modal" id="assistant-zone-modal" hidden>
+        <div class="assistant-zone-modal-backdrop" id="assistant-zone-modal-close"></div>
+        <div class="assistant-zone-modal-content">
+          <h3>Selectează zone</h3>
+          <div class="assistant-zone-modal-list" id="assistant-zone-modal-list"></div>
+          <button type="button" class="assistant-btn" id="assistant-zone-modal-done">Gata</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+{% endif %}

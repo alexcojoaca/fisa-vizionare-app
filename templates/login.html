@@ -1,0 +1,43 @@
+{% extends "base_premium.html" %}
+{% block title %}Logare – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('auth.register') }}" class="topbarAuthBtn topbarAuthBtnPrimary">Creează cont</a>
+{% endblock %}
+
+{% block content %}
+  <div class="wrapCentered" style="margin-top:2rem;">
+    <div class="card">
+      <div class="cardInner">
+        <h2 style="margin-top:0;">Logare</h2>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for cat, msg in messages %}
+              <div class="flash">{{ msg }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <label for="email">Email</label>
+          <input id="email" name="email" type="email" placeholder="email@..." autocomplete="email" required />
+
+          <label for="password">Parolă</label>
+          <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Intră</button>
+            <a class="btn ghost" href="{{ url_for('home') }}">Înapoi</a>
+          </div>
+
+          <div style="margin-top:16px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;font-size:0.8125rem;">
+            <a href="{{ url_for('auth.register') }}" style="color:var(--text-secondary);text-decoration:none;">Creează cont</a>
+            <a href="https://wa.me/40764381795?text=Salut!%20Mi-am%20uitat%20parola%20la%20aplicatia%20Fisa%20de%20Vizionare.%0A%0AEmail%20cont:%0AID%20user%20(daca%20stiu):%0ADispozitiv:" target="_blank" rel="noopener" style="color:var(--text-secondary);text-decoration:none;">Ai uitat parola?</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}

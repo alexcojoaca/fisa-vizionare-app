@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Contractul a fost generat</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('contract.form_page') }}" class="topbarBtn">Înapoi la contract</a>
+  {% endcall %}
+
+  <div class="section">
+    <p style="font-size:1.0625rem;font-weight:700;margin:0 0 10px;color:var(--ok);">✓ Succes. PDF-ul e gata.</p>
+    <p class="meta">
+      <b>Chiriaș:</b> {{ meta.client or "-" }}<br>
+      <b>Imobil:</b> {{ meta.adresa or "-" }}
+    </p>
+    <p class="muted" style="margin:12px 0 0;">
+      Tip: apasă „Descarcă PDF” ca să-l salvezi la tine pentru imprimare.
+      Pentru client, trimite pe WhatsApp link-ul de download.
+    </p>
+  </div>
+  </div>
+
+  {% set url_download = request.url_root.rstrip('/') + url_for('contract.download_pdf', doc_id=doc_id) %}
+  {% set msg =
+    "Bună!%0A%0A"
+    ~ "Puteți descărca Fișa de vizionare accesând linkul de mai jos. Dacă folosiți un dispozitiv iOS (iPhone/iPad) și întâmpinați dificultăți, vă rugăm să încercați deschiderea linkului în Google Chrome sau de pe un computer (Windows/PC).%0A%0A"
+    ~ "👉 Descarcă PDF:%0A" ~ url_download ~ "%0A%0A"
+  %}
+
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <a class="btn primary" href="{{ url_for('pdf_viewer.view_pdf', kind='contract', id=doc_id, next=url_for('contract.form_page')) }}">Vezi PDF</a>
+      <a class="btn ghost" href="{{ url_for('contract.download_pdf', doc_id=doc_id) }}">Descarcă PDF</a>
+      <a class="btn wa" href="https://wa.me/?text={{ msg }}" target="_blank" rel="noopener">Trimite pe WhatsApp</a>
+      <a class="btn ghost" href="{{ url_for('contract.form_page') }}">Creează alt contract</a>
+    </div>
+  </div>
+  <div class="stickySpacer"></div>
+
+{% include 'partials/assistant_widget.html' %}
+{{ premium_footer() }}
+</body>
+</html>

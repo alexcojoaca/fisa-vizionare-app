@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Contract Închiriere</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .hidden { display: none !important; }
+
+    .idFieldsBox {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: rgba(255,255,255,.02);
+    }
+    .idFieldsLabel {
+      margin: 0 0 12px !important;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    /* Act de identitate / Animale – clase unice, fără .pill din premium.css */
+    .premium .optionRow {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      align-items: center;
+    }
+    .premium .optionRow .optionBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 7px !important;
+      font-size: 0.8125rem !important;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+      border-radius: 4px !important;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+    .premium .optionRow .optionBtn:hover {
+      border-color: var(--border-focus);
+      background: var(--surface-hover);
+    }
+    .premium .optionRow .optionBtn input[type="checkbox"] {
+      width: 11px !important;
+      height: 11px !important;
+      min-width: 11px !important;
+      min-height: 11px !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      cursor: pointer;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+      border-radius: 1px;
+      box-sizing: border-box;
+    }
+    .premium .optionRow .optionBtn span {
+      flex-shrink: 0;
+      color: inherit;
+      font-size: inherit;
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      .premium .wrap {
+        padding: 16px 16px 64px;
+      }
+      
+      .premium h1 {
+        font-size: 1.125rem;
+        margin-bottom: 16px;
+      }
+      
+      .premium .section {
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      
+      .premium .formSectionTitle {
+        font-size: 0.6875rem;
+        margin: 12px 0 6px;
+      }
+      
+      .premium .optionRow .optionBtn { padding: 3px 6px !important; font-size: 0.75rem !important; gap: 5px; }
+      .premium .optionRow .optionBtn input[type="checkbox"] { width: 10px !important; height: 10px !important; min-width: 10px !important; min-height: 10px !important; }
+      
+      .premium .row2 {
+        flex-direction: column;
+        gap: 16px;
+      }
+      
+      .premium .row2 > div {
+        width: 100%;
+      }
+      
+      .premium label {
+        font-size: 0.8125rem;
+        margin-bottom: 6px;
+      }
+      
+      .premium input,
+      .premium select {
+        padding: 10px 12px;
+        font-size: 0.875rem;
+      }
+      
+      .premium .muted {
+        font-size: 0.75rem;
+        line-height: 1.4;
+      }
+      
+      .premium .sigbox {
+        padding: 12px;
+        min-height: 200px;
+      }
+      
+      .premium .sigbox canvas {
+        min-height: 200px;
+        height: 200px !important;
+      }
+      
+      .premium .row2 {
+        gap: 20px;
+      }
+      
+      .premium .sigActions {
+        margin-top: 8px;
+      }
+      
+      .premium .btnSmall {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+      }
+      
+      .premium .row2 {
+        gap: 16px;
+      }
+      
+      .premium .stickyBar {
+        padding: 10px 16px;
+      }
+      
+      .premium .stickyBarInner {
+        gap: 8px;
+      }
+      
+      .premium .stickyBarInner .btn {
+        padding: 10px 12px;
+        font-size: 0.8125rem;
+        flex: 1;
+      }
+      
+      .premium .stickySpacer {
+        height: 60px;
+      }
+    }
+    
+    /* Extra small screens */
+    @media (max-width: 480px) {
+      .premium .optionRow .optionBtn { padding: 2px 5px !important; font-size: 0.7125rem !important; gap: 4px; }
+      .premium .optionRow .optionBtn input[type="checkbox"] { width: 9px !important; height: 9px !important; min-width: 9px !important; min-height: 9px !important; }
+      
+      .premium .section {
+        padding: 12px;
+      }
+      
+      .premium .sigbox {
+        padding: 10px;
+        min-height: 220px;
+      }
+      
+      .premium .sigbox canvas {
+        min-height: 200px;
+        height: 200px !important;
+      }
+      
+      .premium .stickyBar {
+        padding: 8px 12px;
+      }
+      
+      .premium .stickyBarInner .btn {
+        padding: 8px 10px;
+        font-size: 0.75rem;
+      }
+      
+      .premium .stickySpacer {
+        height: 56px;
+      }
+    }
+    
+  </style>
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+
+  {% endcall %}
+
+  <h1 style="margin:0 0 24px;font-size:1.375rem;font-weight:700;letter-spacing:-0.02em;">Contract de închiriere</h1>
+
+  <form method="POST" id="mainForm" action="{{ url_for('contract.form_page') }}">
+    {% if form %}{{ form.hidden_tag() }}{% endif %}
+
+    <!-- Proprietar -->
+    <div class="section">
+      <div class="formSectionTitle">Proprietar</div>
+      <p class="muted" style="margin:0 0 12px;">Completezi doar ce ai nevoie. Câmpurile pot rămâne goale.</p>
+
+      <label>Nume complet</label>
+      <input name="owner_name" placeholder="Ex: Popescu Ion" />
+
+      <label>Adresă domiciliu</label>
+      <input name="owner_address" placeholder="județ, oraș, Stradă, nr, bloc, ap..." />
+
+      <div class="row2">
+        <div>
+          <label>Telefon</label>
+          <input name="owner_phone" placeholder="07..." />
+        </div>
+        <div>
+          <label>Email</label>
+          <input name="owner_email" placeholder="email@..." />
+        </div>
+      </div>
+
+      <label style="margin-top:14px;">Act de identitate</label>
+      <div class="optionRow">
+        <label class="optionBtn"><input type="checkbox" name="owner_id_type" value="ci"><span>CI / Buletin</span></label>
+        <label class="optionBtn"><input type="checkbox" name="owner_id_type" value="pasaport"><span>Pașaport</span></label>
+      </div>
+
+      <div id="owner_ci_fields" class="idFieldsBox">
+        <p class="idFieldsLabel">Date CI – în PDF: „identificat(ă) cu CI având CNP..., cu numărul...”</p>
+        <div class="row2">
+          <div>
+            <label>CNP</label>
+            <input name="owner_cnp" placeholder="Ex: 1234567890123" />
+          </div>
+          <div>
+            <label>Serie și nr. CI</label>
+            <input name="owner_ci_series" placeholder="Ex: AB 123456" />
+          </div>
+        </div>
+      </div>
+
+      <div id="owner_pass_fields" class="hidden idFieldsBox">
+        <p class="idFieldsLabel">Date pașaport – în PDF: „identificat(ă) cu pașaport cu numărul..., de nationalitate...”</p>
+        <div class="row2">
+          <div>
+            <label>Nr. pașaport</label>
+            <input name="owner_passport_no" placeholder="Ex: A12345678" />
+          </div>
+          <div>
+            <label>Naționalitate</label>
+            <input name="owner_citizenship" placeholder="Ex: română" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chiriaș -->
+    <div class="section">
+      <div class="formSectionTitle">Chiriaș</div>
+
+      <label>Nume complet</label>
+      <input name="tenant_name" placeholder="Ex: Ionescu Maria" />
+
+      <label>Adresă domiciliu</label>
+      <input name="tenant_address" placeholder="județ, oraș, Stradă, nr, bloc, ap..." />
+
+      <div class="row2">
+        <div>
+          <label>Telefon</label>
+          <input name="tenant_phone" placeholder="07..." />
+        </div>
+        <div>
+          <label>Email</label>
+          <input name="tenant_email" placeholder="email@..." />
+        </div>
+      </div>
+
+      <label style="margin-top:14px;">Act de identitate</label>
+      <div class="optionRow">
+        <label class="optionBtn"><input type="checkbox" name="tenant_id_type" value="ci"><span>CI / Buletin</span></label>
+        <label class="optionBtn"><input type="checkbox" name="tenant_id_type" value="pasaport"><span>Pașaport</span></label>
+      </div>
+
+      <div id="tenant_ci_fields" class="idFieldsBox">
+        <p class="idFieldsLabel">Date CI – în PDF: „identificat(ă) cu CI având CNP..., cu numărul...”</p>
+        <div class="row2">
+          <div>
+            <label>CNP</label>
+            <input name="tenant_cnp" placeholder="Ex: 1234567890123" />
+          </div>
+          <div>
+            <label>Serie și nr. CI</label>
+            <input name="tenant_ci_series" placeholder="Ex: AB 123456" />
+          </div>
+        </div>
+      </div>
+
+      <div id="tenant_pass_fields" class="hidden idFieldsBox">
+        <p class="idFieldsLabel">Date pașaport – în PDF: „identificat(ă) cu pașaport cu numărul..., de nationalitate...”</p>
+        <div class="row2">
+          <div>
+            <label>Nr. pașaport</label>
+            <input name="tenant_passport_no" placeholder="Ex: A12345678" />
+          </div>
+          <div>
+            <label>Naționalitate</label>
+            <input name="tenant_citizenship" placeholder="Ex: română" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imobil -->
+    <div class="section">
+      <div class="formSectionTitle">Imobil</div>
+
+      <label>Tip imobil</label>
+      <select name="property_type">
+        <option value="">(alege sau lasă gol)</option>
+        <option value="apartament">Apartament</option>
+        <option value="casa">Casă</option>
+        <option value="spatiu">Spațiu</option>
+      </select>
+
+      <div class="row2">
+        <div>
+          <label>Număr camere</label>
+          <input name="property_rooms" placeholder="Ex: 2" />
+        </div>
+        <div>
+          <label>Suprafață (mp)</label>
+          <input name="property_mp" placeholder="Ex: 55" />
+        </div>
+      </div>
+
+      <label>Adresă completă</label>
+      <input name="property_address" placeholder="județ, oraș, Stradă, nr, bloc, ap..." />
+    </div>
+
+    <!-- Durată și plăți -->
+    <div class="section">
+      <div class="formSectionTitle">Durată și plăți</div>
+
+      <div class="row2">
+        <div>
+          <label>Data încheierii contractului</label>
+          <input type="text" name="date_signed" placeholder="dd.mm.yyyy" inputmode="text" autocorrect="off" autocapitalize="none" spellcheck="false" />
+        </div>
+        <div></div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Data început</label>
+          <input type="text" name="start_date" placeholder="dd.mm.yyyy" inputmode="text" autocorrect="off" autocapitalize="none" spellcheck="false" />
+        </div>
+        <div>
+          <label>Data sfârșit</label>
+          <input type="text" name="end_date" placeholder="dd.mm.yyyy" inputmode="text" autocorrect="off" autocapitalize="none" spellcheck="false" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Durată (luni)</label>
+          <input name="duration_months" placeholder="Ex: 12" />
+        </div>
+        <div>
+          <label>Zi plată chirie (1-31)</label>
+          <input name="pay_day" placeholder="Ex: 5" />
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Chirie lunară</label>
+          <input name="rent_amount" placeholder="Ex: 450" />
+        </div>
+        <div>
+          <label>Monedă</label>
+          <select name="rent_currency">
+            <option value="EUR">EUR</option>
+            <option value="RON">RON</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>Garanție</label>
+          <input name="deposit_amount" placeholder="Ex: 450" />
+        </div>
+        <div>
+          <label>Total achitat la semnare (chirie + garanție)</label>
+          <input name="paid_today_total" placeholder="Ex: 900" />
+        </div>
+      </div>
+
+      <label>Plata în cont (opțional)</label>
+      <p class="muted" style="margin:0 0 12px;">Dacă lași gol, nu apare secțiunea în contract.</p>
+
+      <div class="row2">
+        <div>
+          <label>Nume titular</label>
+          <input name="bank_name" placeholder="Ex: Popescu Ion" />
+        </div>
+        <div>
+          <label>IBAN</label>
+          <input name="bank_iban" placeholder="RO..." />
+        </div>
+      </div>
+
+      <label>SWIFT (opțional)</label>
+      <input name="bank_swift" placeholder="opțional" />
+    </div>
+
+    <!-- Opțiuni -->
+    <div class="section">
+      <div class="formSectionTitle">Opțiuni</div>
+
+      <label>Animale de companie</label>
+      <p class="muted" style="margin:0 0 8px;">Bifează una dacă vrei articol în contract. Dacă nu bifazi, secțiunea nu apare în PDF.</p>
+      <div class="optionRow">
+        <label class="optionBtn"><input type="checkbox" name="pets_allowed" value="yes"><span>Acceptate</span></label>
+        <label class="optionBtn"><input type="checkbox" name="pets_allowed" value="no"><span>Neacceptate</span></label>
+      </div>
+
+      <label>Preaviz (zile)</label>
+      <input name="notice_days" placeholder="Ex: 30" />
+
+      <label>Proces verbal predare/primire</label>
+      <input name="notes" placeholder="ex. Living: canapea, tv... Dormitor: Pat..." />
+    </div>
+
+    <!-- Semnături -->
+    <div class="section">
+      <div class="formSectionTitle">Semnături</div>
+      <p class="muted" style="margin:0 0 12px;">
+        Opțional: poți genera contractul fără semnături (dacă îl printezi și semnați fizic).
+        Dacă semnezi aici, se vor pune automat în PDF.
+      </p>
+
+      <div class="row2">
+        <div>
+          <label style="margin-top:0;">Semnătură Proprietar</label>
+          <div class="sigbox">
+            <canvas id="sigCanvasOwner" width="500" height="200"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigOwner">Șterge</button>
+          </div>
+        </div>
+
+        <div>
+          <label style="margin-top:0;">Semnătură Chiriaș</label>
+          <div class="sigbox">
+            <canvas id="sigCanvasTenant" width="500" height="200"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigTenant">Șterge</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" name="signature_owner" id="signature_owner">
+      <input type="hidden" name="signature_tenant" id="signature_tenant">
+    </div>
+  </form>
+  </div>
+
+  <!-- Sticky buttons -->
+  <div class="stickyBar" id="stickyBar">
+    <div class="stickyBarInner">
+      <button class="btn primary" type="submit" form="mainForm">Generează PDF</button>
+      <button class="btn ghost" type="button" id="btnPreview">Previzualizează DRAFT</button>
+    </div>
+  </div>
+  <div class="stickySpacer"></div>
+
+  <script>
+  (function () {
+    document.querySelectorAll('input').forEach((el) => {
+      const t = (el.getAttribute('type') || '').toLowerCase();
+      if (t === 'hidden' || t === 'checkbox' || t === 'submit' || t === 'button') return;
+      el.setAttribute('type', 'text');
+      el.setAttribute('inputmode', 'text');
+      el.setAttribute('autocomplete', 'off');
+      el.setAttribute('autocorrect', 'off');
+      el.setAttribute('autocapitalize', 'none');
+      el.setAttribute('spellcheck', 'false');
+    });
+
+    // Make checkboxes mutually exclusive (like radio buttons but with checkboxes)
+    function makeCheckboxesExclusive(groupName) {
+      document.querySelectorAll('input[name="'+groupName+'"]').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          if (this.checked) {
+            // Uncheck others in the same group
+            document.querySelectorAll('input[name="'+groupName+'"]').forEach(cb => {
+              if (cb !== this) cb.checked = false;
+            });
+          }
+        });
+      });
+    }
+    
+    // Apply to all checkbox groups
+    makeCheckboxesExclusive('owner_id_type');
+    makeCheckboxesExclusive('tenant_id_type');
+    makeCheckboxesExclusive('pets_allowed');
+    
+    function toggleBlocks(groupName, ciId, passId){
+      const ci = document.getElementById(ciId);
+      const pa = document.getElementById(passId);
+      function apply(){
+        const checked = document.querySelector('input[name="'+groupName+'"]:checked');
+        const v = checked ? checked.value : "";
+        if(v === "pasaport"){
+          ci.classList.add("hidden");
+          pa.classList.remove("hidden");
+        }else{
+          pa.classList.add("hidden");
+          ci.classList.remove("hidden");
+        }
+      }
+      document.querySelectorAll('input[name="'+groupName+'"]').forEach(cb => {
+        cb.addEventListener("change", apply);
+      });
+      apply();
+    }
+    toggleBlocks("owner_id_type","owner_ci_fields","owner_pass_fields");
+    toggleBlocks("tenant_id_type","tenant_ci_fields","tenant_pass_fields");
+
+    var kbdHideTimer;
+    document.querySelectorAll("input, select, textarea").forEach(function(el) {
+      el.addEventListener("focus", function() { clearTimeout(kbdHideTimer); document.body.classList.add("kbd"); });
+      el.addEventListener("blur", function() { kbdHideTimer = setTimeout(function() { document.body.classList.remove("kbd"); }, 120); });
+    });
+
+    function setup(canvasId, clearId, hiddenId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+      ctx.strokeStyle = "#111";
+
+      let drawing = false;
+      let hasInk = false;
+
+      function pos(e){
+        const r = canvas.getBoundingClientRect();
+        const cx = (e.touches ? e.touches[0].clientX : e.clientX) - r.left;
+        const cy = (e.touches ? e.touches[0].clientY : e.clientY) - r.top;
+        return { x: cx * canvas.width / r.width, y: cy * canvas.height / r.height };
+      }
+
+      function start(e){
+        drawing = true;
+        const p = pos(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+        e.preventDefault();
+      }
+      function move(e){
+        if (!drawing) return;
+        const p = pos(e);
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+        hasInk = true;
+        e.preventDefault();
+      }
+      function end(){ drawing = false; }
+
+      canvas.addEventListener("mousedown", start);
+      canvas.addEventListener("mousemove", move);
+      window.addEventListener("mouseup", end);
+
+      canvas.addEventListener("touchstart", start, { passive:false });
+      canvas.addEventListener("touchmove", move, { passive:false });
+      canvas.addEventListener("touchend", end, { passive:false });
+
+      document.getElementById(clearId).addEventListener("click", function(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.fillStyle="#fff";
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+        document.getElementById(hiddenId).value = "";
+        hasInk = false;
+      });
+
+      return () => hasInk ? canvas.toDataURL("image/png") : "";
+    }
+
+    const getOwnerSig  = setup("sigCanvasOwner","clearSigOwner","signature_owner");
+    const getTenantSig = setup("sigCanvasTenant","clearSigTenant","signature_tenant");
+
+    const form = document.getElementById("mainForm");
+
+    form.addEventListener("submit", () => {
+      document.getElementById("signature_owner").value = getOwnerSig();
+      document.getElementById("signature_tenant").value = getTenantSig();
+    });
+
+    document.getElementById("btnPreview").addEventListener("click", () => {
+      document.getElementById("signature_owner").value = "";
+      document.getElementById("signature_tenant").value = "";
+
+      const oldAction = form.action;
+      form.action = "{{ url_for('contract.preview_pdf') }}";
+      form.target = "_blank";
+      form.submit();
+      form.action = oldAction;
+      form.removeAttribute("target");
+    });
+  })();
+  </script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+{% include 'partials/activation_modal.html' %}
+{% include 'partials/assistant_widget.html' %}
+{{ premium_footer() }}
+
+<script>
+// Detectează dacă există flash message sau parametru URL pentru acces limitat și afișează modal-ul
+document.addEventListener('DOMContentLoaded', function() {
+  // Verifică parametrul URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('activation_required') === '1') {
+    const whatsappPhone = "{{ config.WHATSAPP_SUPPORT_PHONE }}";
+    const userEmail = "{{ current_user.email }}";
+    setTimeout(function() {
+      showActivationModal(whatsappPhone, userEmail);
+    }, 500);
+    return;
+  }
+  
+  // Verifică dacă există un flash message de eroare cu textul specific
+  const flashMessages = document.querySelectorAll('.flash.error, .alert-error, [class*="error"]');
+  flashMessages.forEach(function(msg) {
+    const text = msg.textContent || msg.innerText || '';
+    if (text.includes('Acces limitat atins') || text.includes('folosit toate funcțiile gratuite')) {
+      const whatsappPhone = "{{ config.WHATSAPP_SUPPORT_PHONE }}";
+      const userEmail = "{{ current_user.email }}";
+      setTimeout(function() {
+        showActivationModal(whatsappPhone, userEmail);
+      }, 500); // Delay mic pentru a permite flash-ului să apară mai întâi
+    }
+  });
+});
+</script>
+</body>
+</html>

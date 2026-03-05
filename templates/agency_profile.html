@@ -1,0 +1,72 @@
+{% extends "base_premium.html" %}
+{% block title %}Date Agenție – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('menu.menu_home') }}" class="topbarBtn">Meniu</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Date Agenție</h1>
+
+  <div class="card">
+    <div class="cardInner">
+      <p class="kicker">Detalii firmă</p>
+      <form method="POST" id="agencyForm">
+        {{ form.hidden_tag() }}
+
+        <label for="name">{{ form.name.label.text }}</label>
+        {{ form.name(placeholder="Ex: Alpha Imobiliare (SRL se pune automat)", autocomplete="organization") }}
+        {% for e in form.name.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+
+        <label for="hq_address">{{ form.hq_address.label.text }}</label>
+        {{ form.hq_address(placeholder="Ex: Str. Exemplu 10, București") }}
+        {% for e in form.hq_address.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+
+        <div class="row2">
+          <div>
+            <label for="orc_number">{{ form.orc_number.label.text }}</label>
+            {{ form.orc_number(placeholder="Ex: J40/1234/2020") }}
+            {% for e in form.orc_number.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+          </div>
+          <div>
+            <label for="cui">{{ form.cui.label.text }}</label>
+            {{ form.cui(placeholder="Ex: RO12345678") }}
+            {% for e in form.cui.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="row2">
+          <div>
+            <label for="iban">{{ form.iban.label.text }}</label>
+            {{ form.iban(placeholder="Ex: RO49AAAA1B31007593840000") }}
+            {% for e in form.iban.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+          </div>
+          <div>
+            <label for="bank">{{ form.bank.label.text }}</label>
+            {{ form.bank(placeholder="Ex: BCR / BT / ING") }}
+            {% for e in form.bank.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <label for="administrator">{{ form.administrator.label.text }}</label>
+        {{ form.administrator(placeholder="Ex: Popescu Andrei", autocomplete="name") }}
+        {% for e in form.administrator.errors %}<div class="flash" style="margin-top:8px;">{{ e }}</div>{% endfor %}
+
+        <p style="margin:10px 0 0;color:var(--text-muted);font-size:0.8125rem;">Datele salvate aici vor fi completate automat în fișele de vizionare.</p>
+
+        <div class="actions">
+          <button class="btn primary" type="submit">Salvează</button>
+          <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Înapoi</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="stickySpacer"></div>
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Înapoi</a>
+      <a class="btn primary" href="#" onclick="document.getElementById('agencyForm').submit(); return false;">Salvează</a>
+    </div>
+  </div>
+{% endblock %}

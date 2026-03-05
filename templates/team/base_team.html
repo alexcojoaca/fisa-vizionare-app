@@ -1,0 +1,10 @@
+{% extends "base_premium.html" %}
+{% block brand_content %}{% endblock %}
+{% block topbar_right %}
+  <div class="topbarNav">
+    <a href="{{ url_for('team.dashboard') }}" class="topbarBtn">Dashboard</a>
+    <a href="{{ url_for('team.agents_list') }}" class="topbarBtn">Agenți</a>
+    <a href="{{ url_for('team.tasks_list') }}" class="topbarBtn">Task-uri</a>
+    {% if request.endpoint == 'team.dashboard' %}<a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>{% endif %}
+  </div>
+{% endblock %}

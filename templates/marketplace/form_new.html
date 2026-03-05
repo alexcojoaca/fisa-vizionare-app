@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Adaugă cerere — Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .form-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: var(--pad-lg) var(--pad);
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--stroke);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      margin-bottom: var(--pad-lg);
+      transition: all 0.2s;
+    }
+    .back-btn:hover {
+      background: var(--surface2);
+      border-color: var(--primary);
+    }
+    .form-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 var(--pad);
+      line-height: 1.2;
+    }
+    .quota-pill {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      background: rgba(36,209,143,.15);
+      color: var(--success);
+      border: 1px solid rgba(36,209,143,.3);
+      margin-bottom: var(--pad-lg);
+    }
+    .form-card {
+      background: var(--surface);
+      border: 1px solid var(--stroke);
+      border-radius: var(--r-lg);
+      padding: var(--pad-lg);
+      margin-bottom: var(--pad);
+      box-shadow: var(--shadow2);
+    }
+    .form-section-title {
+      margin: 0 0 14px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+    }
+    label {
+      display: block;
+      margin-top: var(--pad);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    label:first-of-type {
+      margin-top: 0;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--stroke);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+      margin-top: 8px;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(79,140,255,.1);
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .poster-type-hint {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+    .err {
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 6px;
+      display: block;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: var(--pad-lg);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: var(--r-md);
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+      border: 1px solid var(--stroke);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      min-height: 48px;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--surface2);
+      border-color: var(--primary);
+      transform: translateY(-1px);
+    }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary2) 100%);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 4px 16px rgba(79,140,255,.3);
+    }
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79,140,255,.4);
+    }
+    .flash {
+      margin-bottom: var(--pad);
+      padding: var(--pad);
+      border-radius: var(--r-md);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .flash.error {
+      border: 1px solid rgba(255,92,124,.35);
+      background: rgba(255,92,124,.1);
+      color: var(--danger);
+    }
+    .flash.success {
+      border: 1px solid rgba(36,209,143,.35);
+      background: rgba(36,209,143,.1);
+      color: var(--success);
+    }
+    .section-collab .checkbox-label,
+    .section-collab .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .section-collab .checkbox-label input,
+    .section-collab .radio-label input {
+      width: auto;
+      margin: 0;
+    }
+    .section-collab .collab-none-wrap,
+    .section-collab .collab-options {
+      margin-top: 12px;
+    }
+    .section-collab .commission-input {
+      width: 100%;
+      max-width: 120px;
+      margin-left: 28px;
+      margin-top: 6px;
+    }
+    .zone-trigger-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-radius: var(--r-md);
+      border: 1px solid var(--stroke);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .zone-trigger-btn:hover {
+      background: var(--surface);
+      border-color: var(--primary);
+    }
+    .zone-chips-wrap {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .zone-chip-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      background: var(--surface2);
+      border: 1px solid var(--stroke);
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="form-wrap">
+    <a class="back-btn" href="{{ url_for('marketplace.list_requests') }}">Listă cereri</a>
+    <h1 class="form-title">Adaugă cerere</h1>
+    <p class="quota-pill">Mai poți posta {{ quota_remaining }} cereri. Cererile expiră după 30 zile de la data publicării.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('marketplace.new_request') }}" id="add-request-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+      <div class="form-card">
+        <p class="form-section-title">Tip cerere & imobil</p>
+        <label for="request_type">Tip cerere *</label>
+        <select id="request_type" name="request_type" required>
+          <option value="">Selectează</option>
+          <option value="cumparare" {{ 'selected' if form.request_type.data == 'cumparare' }}>Cumpărare</option>
+          <option value="inchiriere" {{ 'selected' if form.request_type.data == 'inchiriere' }}>Închiriere</option>
+        </select>
+        {% if form.request_type.errors %}<span class="err">{{ form.request_type.errors[0] }}</span>{% endif %}
+
+        <label for="property_type">Tip proprietate *</label>
+        <select id="property_type" name="property_type" required>
+          <option value="">Selectează</option>
+          <option value="apartament" {{ 'selected' if form.property_type.data == 'apartament' }}>Apartament</option>
+          <option value="casa" {{ 'selected' if form.property_type.data == 'casa' }}>Casă</option>
+          <option value="teren" {{ 'selected' if form.property_type.data == 'teren' }}>Teren</option>
+          <option value="birou" {{ 'selected' if form.property_type.data == 'birou' }}>Birou</option>
+          <option value="spatiu_industrial" {{ 'selected' if form.property_type.data == 'spatiu_industrial' }}>Spațiu industrial</option>
+        </select>
+        {% if form.property_type.errors %}<span class="err">{{ form.property_type.errors[0] }}</span>{% endif %}
+
+        <label for="rooms" id="rooms-label" class="rooms-label">Camere</label>
+        <input type="number" id="rooms" name="rooms" value="{{ form.rooms.data or '' }}" min="1" max="20" placeholder="Ex: 3" />
+      </div>
+
+      <div class="form-card">
+        <p class="form-section-title">Buget</p>
+        <label for="budget_min">Buget minim</label>
+        <input type="text" id="budget_min" name="budget_min" value="{{ form.budget_min.data|format_budget if form.budget_min.data is not none else '' }}" placeholder="Ex: 100.000" inputmode="numeric" />
+        {% if form.budget_min.errors %}<span class="err">{{ form.budget_min.errors[0] }}</span>{% endif %}
+
+        <label for="budget_max">Buget maxim</label>
+        <input type="text" id="budget_max" name="budget_max" value="{{ form.budget_max.data|format_budget if form.budget_max.data is not none else '' }}" placeholder="Ex: 150.000" inputmode="numeric" />
+        {% if form.budget_max.errors %}<span class="err">{{ form.budget_max.errors[0] }}</span>{% endif %}
+
+        <label style="display:flex; align-items:center; gap:10px; margin-top:12px;">
+          <input type="checkbox" name="plus_tva" value="1" style="width:auto;" {{ 'checked' if form.plus_tva.data }} />
+          <span>Buget plus TVA</span>
+        </label>
+      </div>
+
+
+      <div class="form-card">
+        <p class="form-section-title">Zone * — selectează cel puțin una</p>
+        <button type="button" class="zone-trigger-btn js-open-zone-selector"
+          data-form-id="add-request-form"
+          data-container-id="add-zone-inputs"
+          data-input-name="zone_ids"
+          data-count-el="add-zone-count"
+          data-chips-wrap-id="add-zone-chips">
+          Zone <span id="add-zone-count">{{ (form.zone_ids.data or [])|length }}</span>
+        </button>
+        <div id="add-zone-inputs">
+          {% for zid in form.zone_ids.data or [] %}
+            <input type="hidden" name="zone_ids" value="{{ zid }}" />
+          {% endfor %}
+        </div>
+        <div class="zone-chips-wrap" id="add-zone-chips">
+          {% for zid in form.zone_ids.data or [] %}
+            {% set z = zones|selectattr('id', 'equalto', zid)|first %}
+            {% if z %}<span class="zone-chip-tag">{{ z.name|zone_display_name }}</span>{% endif %}
+          {% endfor %}
+        </div>
+        {% if form.zone_ids.errors %}<span class="err">{{ form.zone_ids.errors[0] }}</span>{% endif %}
+      </div>
+
+      <div class="form-card">
+        <p class="form-section-title">Contact</p>
+        <label for="contact_phone">Telefon de contact</label>
+        <input type="tel" id="contact_phone" name="contact_phone" value="{{ form.contact_phone.data or '' }}" placeholder="ex: 07xx xxx xxx" />
+        {% if form.contact_phone.errors %}<span class="err">{{ form.contact_phone.errors[0] }}</span>{% endif %}
+      </div>
+
+      <div class="form-card">
+        <p class="form-section-title">Descriere</p>
+        <label for="description">Descriere</label>
+        <textarea id="description" name="description" placeholder="Detalii suplimentare...">{{ form.description.data or '' }}</textarea>
+        {% if form.description.errors %}<span class="err">{{ form.description.errors[0] }}</span>{% endif %}
+        <label style="display:flex; align-items:center; gap:10px; margin-top:14px;">
+          <input type="checkbox" name="urgent" value="1" style="width:auto;" {{ 'checked' if form.urgent.data }} />
+          <span>Cerere urgentă</span>
+        </label>
+      </div>
+
+      <div class="form-card form-card-private">
+        <p class="form-section-title">Doar pentru tine</p>
+        <p class="form-hint" style="font-size:12px; color:var(--muted); margin:0 0 10px;">Acest câmp îl vzi doar tu. Te ajută să știi pentru cine cauți cererea.</p>
+        <label for="client_phone_private">Nume sau numărul de telefon al persoanei căreia îi cauți</label>
+        <input type="tel" id="client_phone_private" name="client_phone_private" value="{{ form.client_phone_private.data or '' }}" placeholder="ex: 07xx xxx xxx" />
+        {% if form.client_phone_private.errors %}<span class="err">{{ form.client_phone_private.errors[0] }}</span>{% endif %}
+      </div>
+
+      <div class="btn-row">
+        <button type="submit" class="btn primary">Creează cererea</button>
+        <a class="btn" href="{{ url_for('marketplace.list_requests') }}">Anulează</a>
+      </div>
+    </form>
+  </div>
+
+  {% include 'marketplace/_zone_selector.html' %}
+  <script src="{{ url_for('static', filename='js/marketplace.js') }}"></script>
+  <script>
+  (function() {
+    // Hide rooms field when property_type = teren
+    var propertyType = document.getElementById('property_type');
+    var roomsLabel = document.getElementById('rooms-label');
+    var roomsInput = document.getElementById('rooms');
+    function toggleRooms() {
+      var isTeren = propertyType && propertyType.value === 'teren';
+      if (roomsLabel) roomsLabel.style.display = isTeren ? 'none' : 'block';
+      if (roomsInput) {
+        roomsInput.style.display = isTeren ? 'none' : 'block';
+        if (isTeren) roomsInput.value = '';
+      }
+    }
+    if (propertyType) {
+      propertyType.addEventListener('change', toggleRooms);
+      toggleRooms();
+    }
+  })();
+  </script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+{% include 'partials/assistant_widget.html' %}
+</body>
+</html>

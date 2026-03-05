@@ -1,0 +1,44 @@
+{% extends "base_premium.html" %}
+{% block title %}Date Agent – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('menu.menu_home') }}" class="topbarBtn">Meniu</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Date Agent</h1>
+
+  <div class="card">
+    <div class="cardInner">
+      <p class="kicker">Informații</p>
+      <form method="POST">
+        {{ form.hidden_tag() }}
+        <label for="agent_name">{{ form.agent_name.label.text }}</label>
+        {{ form.agent_name(placeholder="Ex: Popescu Ion", autocomplete="name") }}
+        {% for e in form.agent_name.errors %}
+          <div class="flash" style="margin-top:8px;">{{ e }}</div>
+        {% endfor %}
+        
+        <label for="agent_phone" style="margin-top:16px;">{{ form.agent_phone.label.text }}</label>
+        {{ form.agent_phone(placeholder="Ex: 0712345678", autocomplete="tel", type="tel") }}
+        {% for e in form.agent_phone.errors %}
+          <div class="flash" style="margin-top:8px;">{{ e }}</div>
+        {% endfor %}
+        
+        <p style="margin:10px 0 0;color:var(--text-muted);font-size:0.8125rem;">Numele și telefonul agentului vor apărea automat în PDF-uri.</p>
+        <div class="actions">
+          <button class="btn primary" type="submit">Salvează</button>
+          <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Înapoi</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="stickySpacer"></div>
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <a class="btn ghost" href="{{ url_for('menu.menu_home') }}">Înapoi</a>
+      <a class="btn primary" href="#" onclick="document.querySelector('form').submit(); return false;">Salvează</a>
+    </div>
+  </div>
+{% endblock %}

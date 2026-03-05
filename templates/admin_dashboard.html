@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin (Local)</title>
+  <style>
+    :root{
+      --bg:#0a0e16;
+      --card:#0f1419;
+      --card-hover:#151b24;
+      --text:#f1f5f9;
+      --text-soft:#94a3b8;
+      --muted:#64748b;
+      --line:#1e293b;
+      --shadow: 0 4px 24px rgba(0,0,0,.4);
+      --radius: 12px;
+      --radius-sm: 8px;
+
+      --ok:#22c55e;
+      --warn:#f59e0b;
+      --bad:#ef4444;
+      --blue:#3b82f6;
+      --purple:#8b5cf6;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .wrap{ max-width:1680px; margin:0 auto; padding:24px; }
+
+    .topbar{
+      display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between; gap:16px;
+      margin-bottom: 18px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .title h1{ margin:0; font-size: 20px; font-weight: 900; letter-spacing:.2px; }
+    .title p{ margin:6px 0 0; color:var(--muted); font-size:13px; line-height:1.35; }
+
+    .cards{
+      display:grid;
+      grid-template-columns: 1fr;
+      gap:16px;
+      margin-bottom: 20px;
+    }
+    @media(min-width: 900px){
+      .cards{ grid-template-columns: 1fr 1fr; }
+    }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.03));
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .cardInner{ padding:20px; }
+
+    .kpis{
+      display:flex; gap:10px; flex-wrap:wrap;
+    }
+    .kpi{
+      flex: 1 1 140px;
+      padding: 12px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.03);
+    }
+    .kpi .label{ color:var(--muted); font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+    .kpi .value{ font-size:18px; font-weight: 1000; margin-top: 6px; }
+    .kpi.paid{ border-color: rgba(34,197,94,.35); }
+    .kpi.trial{ border-color: rgba(245,158,11,.35); }
+    .kpi.expired{ border-color: rgba(239,68,68,.35); }
+    .kpi.blocked{ border-color: rgba(148,163,184,.25); }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input, select{
+      padding: 12px 12px;
+      border-radius: 12px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      outline:none;
+      font-size: 14px;
+    }
+    input:focus, select:focus{ border-color: rgba(255,255,255,.28); }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      gap:8px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.05);
+      color: var(--text);
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 13px;
+      text-decoration:none;
+      user-select:none;
+      white-space:nowrap;
+    }
+    .btn:hover{ background: rgba(255,255,255,.07); }
+    .btn.primary{
+      background: rgba(229,231,235,.92);
+      color:#0b0f19;
+      border-color: rgba(229,231,235,.55);
+    }
+    .btn.ok{ border-color: rgba(34,197,94,.4); }
+    .btn.warn{ border-color: rgba(245,158,11,.4); }
+    .btn.bad{ border-color: rgba(239,68,68,.4); }
+    .btn.blue{ border-color: rgba(96,165,250,.45); }
+    .btn.purple{ border-color: rgba(167,139,250,.45); }
+
+    .flash{
+      margin-bottom:12px;
+      padding: 12px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      color: var(--text);
+      font-weight: 800;
+      font-size: 13px;
+    }
+    .flash.ok{ border-color: rgba(34,197,94,.35); }
+    .flash.err{ border-color: rgba(239,68,68,.35); }
+
+    table{ width:100%; border-collapse: collapse; margin-top: 10px; }
+    th,td{ padding: 12px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th{ text-align:left; color: var(--muted); font-size: 11px; letter-spacing:.08em; text-transform:uppercase; font-weight:700; }
+    td{ font-size: 13px; }
+
+    /* User cards - premium layout */
+    .user-list{ display:flex; flex-direction:column; gap:12px; }
+    .user-card{
+      display:grid;
+      grid-template-columns: minmax(220px, 1.2fr) 120px 120px minmax(180px, 1fr) minmax(260px, 1.2fr);
+      gap:24px;
+      align-items: start;
+      padding:18px 20px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      transition: border-color .2s, background .2s;
+    }
+    .user-card:hover{ background: var(--card-hover); border-color: rgba(255,255,255,.08); }
+    .user-card-section{ display:flex; flex-direction:column; gap:6px; }
+    .user-card-label{
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .user-card-value{ font-size: 14px; font-weight: 600; color: var(--text); }
+    .user-card-value.muted{ color: var(--text-soft); font-weight: 500; }
+    .user-card-actions{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:8px;
+      align-content: start;
+    }
+    .user-card-actions .btn{ padding: 8px 12px; font-size: 12px; }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      font-weight: 1000;
+      font-size: 12px;
+    }
+    .pill.paid{ border-color: rgba(34,197,94,.35); color:#86efac; }
+    .pill.trial{ border-color: rgba(245,158,11,.35); color:#fcd34d; }
+    .pill.expired{ border-color: rgba(239,68,68,.35); color:#fecaca; }
+    .pill.blocked{ border-color: rgba(148,163,184,.25); color:#cbd5e1; }
+
+    .muted{ color: var(--muted); }
+
+    .actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .actions-group{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .actions-group-label{
+      font-size:11px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      width:100%;
+      margin-bottom:4px;
+    }
+    .btn-group{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    .nav-section{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .nav-section-title{
+      font-size:10px;
+      color:var(--muted);
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .nav-buttons{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .user-actions-panel{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .user-actions-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      align-items:center;
+    }
+    .user-actions-row .label-sm{
+      font-size:11px;
+      color:var(--muted);
+      flex-shrink:0;
+    }
+    .user-identity{ display:flex; align-items:flex-start; gap:12px; }
+    .user-avatar{
+      width:40px; height:40px; border-radius:10px;
+      background: linear-gradient(135deg, rgba(59,130,246,.3), rgba(139,92,246,.3));
+      display:flex; align-items:center; justify-content:center;
+      font-weight:800; font-size:14px; color:var(--text);
+    }
+    .details-toggle{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:8px 12px;
+      color:var(--text);
+      cursor:pointer;
+      font-size:12px;
+      font-weight:700;
+    }
+    .details-toggle:hover{ background:rgba(255,255,255,.06); }
+    .details-content{ margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,.06); }
+
+    .mini{
+      width: 92px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      font-size: 13px;
+    }
+
+    .stack{ display:flex; flex-direction:column; gap:4px; }
+
+    .copyNote{
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    @media(max-width: 1200px){
+      .user-card{ grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width: 900px){
+      .topbar{ flex-direction: column; align-items: stretch; }
+      .nav-buttons{ justify-content: flex-start; }
+      .user-card{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <div class="topbar">
+      <div class="title">
+        <h1>Admin Dashboard</h1>
+        <p>Caută utilizatori, exportă emailuri/telefoane, gestionează abonamente, reset parolă.</p>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Pagini Admin</div>
+        <div class="nav-buttons">
+          <a class="btn purple" href="{{ url_for('admin.admin_marketplace_moderation') }}" title="Moderare cereri cumpărător și oferte vânzător din Marketplace">Moderare Marketplace</a>
+          <a class="btn" href="{{ url_for('admin.admin_offer_quotas') }}" title="Setare limite max anunțuri și cereri per utilizator">Limite Anunțuri/Cereri</a>
+          <a class="btn" href="{{ url_for('admin.admin_clients') }}" title="Gestionare clienți: vizualizare, ștergere conturi și cereri">👤 Clienți</a>
+          <a class="btn" href="{{ url_for('admin.admin_announcements') }}" title="Trimite anunțuri către toți utilizatorii">📢 Anunțuri</a>
+          <a class="btn blue" href="{{ url_for('admin.admin_cleanup') }}" title="Curățare date vechi: remote, cereri, task-uri, dispozitive">Curățare DB</a>
+          <a class="btn" href="/" style="opacity:.85;" title="Înapoi la aplicația principală">← Înapoi</a>
+        </div>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat,msg in messages %}
+          <div class="flash {% if cat=='ok' %}ok{% else %}err{% endif %}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="cards">
+
+      <div class="card">
+        <div class="cardInner">
+          <div class="kpis">
+            <div class="kpi"><div class="label">Total utilizatori</div><div class="value">{{ total }}</div></div>
+            <div class="kpi paid"><div class="label">Plătiți (abonament activ)</div><div class="value">{{ buckets.paid }}</div></div>
+            <div class="kpi expired"><div class="label">Expirați (abonament încheiat)</div><div class="value">{{ buckets.expired }}</div></div>
+            <div class="kpi blocked"><div class="label">Blocați (cont dezactivat)</div><div class="value">{{ buckets.blocked }}</div></div>
+          </div>
+
+          <div class="copyNote" style="margin-top:12px;">
+            Exportările de email sunt în format CSV (a@a.com, b@b.com) — potrivit pentru mail marketing.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="cardInner">
+          <!-- Hidden textareas with email lists -->
+          <textarea id="emails-paid" style="display:none;">{{ emails_paid_text }}</textarea>
+          <textarea id="emails-expired" style="display:none;">{{ emails_expired_text }}</textarea>
+          <textarea id="emails-all" style="display:none;">{{ emails_all_text }}</textarea>
+
+          <!-- Hidden textareas with phone lists (expired/blocked cu prefix +4 România) -->
+          <textarea id="phones-paid" style="display:none;">{{ phones_paid_text }}</textarea>
+          <textarea id="phones-expired" style="display:none;">{{ phones_expired_text }}</textarea>
+          <textarea id="phones-all" style="display:none;">{{ phones_all_text }}</textarea>
+
+          <div class="actions-group" style="margin-bottom:12px;">
+            <div style="flex:1 1 100%;">
+              <div class="actions-group-label">Copiază emailuri (mail marketing)</div>
+              <div class="btn-group">
+                <button class="btn ok" onclick="copyEmails('paid', {{ emails_paid|length }})" title="Emailuri utilizatori cu abonament activ">Plătiți</button>
+                <button class="btn bad" onclick="copyEmails('expired', {{ emails_expired|length }})" title="Emailuri utilizatori cu abonament expirat">Expirați</button>
+                <button class="btn purple" onclick="copyEmails('all', {{ emails_all|length }})" title="Toate emailurile din listă">Toate</button>
+              </div>
+            </div>
+          </div>
+          <div class="actions-group" style="margin-bottom:12px;">
+            <div style="flex:1 1 100%;">
+              <div class="actions-group-label">Copiază telefoane agenți</div>
+              <div class="btn-group">
+                <button class="btn ok" onclick="copyPhones('paid', {{ phones_paid|length }})" title="Telefoane utilizatori plătiți">Plătiți</button>
+                <button class="btn bad" onclick="copyPhones('expired', {{ phones_expired|length }})" title="Telefoane utilizatori expirați (cu prefix +4)">Expirați</button>
+                <button class="btn purple" onclick="copyPhones('all', {{ phones_all|length }})" title="Toate telefoanele din listă">Toate</button>
+              </div>
+            </div>
+          </div>
+          <div class="actions-group">
+            <div style="flex:1 1 100%;">
+              <div class="actions-group-label">Alte acțiuni</div>
+              <div class="btn-group">
+                <a class="btn blue" href="{{ url_for('admin.admin_export_csv', q=q, status=status, access=access) }}" title="Descarcă lista de emailuri ca fișier CSV">⬇️ Export CSV</a>
+                <a class="btn" href="{{ url_for('admin.admin_index') }}" title="Resetează filtrele de căutare">Reset filtre</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toast notification -->
+          <div id="toast" style="display:none; margin-top:10px; padding:10px; border-radius:8px; background:rgba(34,197,94,.15); border:1px solid rgba(34,197,94,.3); color:#86efac; font-size:13px; font-weight:700;"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <div class="cardInner">
+        <div class="actions-group-label" style="margin-bottom:8px;">Căutare utilizatori</div>
+        <form method="GET" class="row">
+          <input name="q" value="{{ q }}" placeholder="ID, email sau nume" style="flex:1 1 280px;" title="Caută după ID numeric, email sau nume" />
+
+          <select name="status" title="Filtrează după status cont: activ / inactiv">
+            <option value="all" {% if status=='all' %}selected{% endif %}>Status: toți</option>
+            <option value="active" {% if status=='active' %}selected{% endif %}>Status: activi</option>
+            <option value="inactive" {% if status=='inactive' %}selected{% endif %}>Status: inactivi</option>
+          </select>
+
+          <select name="access" title="Filtrează după tip acces (abonament)">
+            <option value="all" {% if access=='all' %}selected{% endif %}>Acces: toți</option>
+            <option value="paid" {% if access=='paid' %}selected{% endif %}>Acces: plătiți</option>
+            <option value="expired" {% if access=='expired' %}selected{% endif %}>Acces: expirați</option>
+            <option value="blocked" {% if access=='blocked' %}selected{% endif %}>Acces: blocați</option>
+          </select>
+
+          <button class="btn primary" type="submit">Caută</button>
+
+          {% if not cleanup_mode %}
+          <a class="btn bad" href="{{ url_for('admin.admin_index', q=q, status=status, access=access, cleanup=1) }}" title="Afișează doar utilizatori neplătiți cu cont creat acum > 4 luni — pentru ștergere în masă">Ștergere conturi vechi (&gt;4 luni neplătiți)</a>
+          {% else %}
+          <a class="btn" href="{{ url_for('admin.admin_index', q=q, status=status, access=access) }}" title="Revino la lista normală de utilizatori">Închide mod ștergere</a>
+          {% endif %}
+        </form>
+
+        {% if cleanup_mode %}
+        <!-- Cleanup table: neplătiți > 4 luni -->
+        <div class="cleanup-section" style="margin-top:16px;">
+          <div class="actions-group-label" style="margin-bottom:8px;">Ștergere conturi vechi (neplătiți, cont &gt; 4 luni)</div>
+          <p class="muted" style="margin:0 0 12px; font-size:12px;">Selectează conturile de șters. Acțiunea este definitivă.</p>
+          <form id="cleanup-form-delete-selected" method="POST" action="{{ url_for('admin.admin_cleanup_delete_selected', q=q, status=status, access=access, cleanup=1) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <div class="btn-group" style="margin-bottom:12px;">
+              <button type="button" class="btn bad" onclick="cleanupDeleteSelected()" title="Șterge doar conturile bifate">Șterge selectați</button>
+              <button type="button" class="btn" style="border-color:rgba(239,68,68,.5); color:#fecaca;" onclick="cleanupDeleteAll()" title="Șterge toate conturile din această listă">Șterge toți din listă</button>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th><input type="checkbox" id="cleanup-select-all" onclick="toggleCleanupSelectAll(this)" /></th>
+                  <th>ID</th>
+                  <th>Email</th>
+                  <th>Nume</th>
+                  <th>Creat la</th>
+                  <th>Acces</th>
+                  <th>Până la / Zile</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for u in cleanup_users %}
+                <tr>
+                  <td><input type="checkbox" name="user_ids" value="{{ u.id }}" class="cleanup-row-cb" /></td>
+                  <td><b>#{{ u.id }}</b></td>
+                  <td>{{ u.email }}</td>
+                  <td>{{ u.full_name }}</td>
+                  <td>{{ u.created_at_short }}</td>
+                  <td><span class="pill {{ u.pill_class }}">{{ u.access_source }}</span></td>
+                  <td class="muted">{{ u.access_until }} / {{ u.days_left }} zile</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="muted">Niciun user care să poată fi șters (neplătiți, &gt; 4 luni).</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </form>
+          <form id="cleanup-form-delete-all" method="POST" action="{{ url_for('admin.admin_cleanup_delete_all', q=q, status=status, access=access, cleanup=1) }}" style="display:none;" data-cleanup-count="{{ cleanup_users|length }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          </form>
+        </div>
+        {% else %}
+        <div class="actions-group-label" style="margin:20px 0 12px;">Lista utilizatori</div>
+        <div class="user-list">
+          {% for u in users %}
+          <div class="user-card">
+            <!-- Col 1: Identitate -->
+            <div class="user-card-section">
+              <div class="user-identity">
+                <div class="user-avatar">{% if u.full_name %}{{ u.full_name[0]|upper }}{% else %}?{% endif %}</div>
+                <div>
+                  <div class="user-card-label">Utilizator · ID #{{ u.id }}</div>
+                  <div class="user-card-value">{{ u.full_name }}</div>
+                  <a href="#" onclick="copyOne(this.getAttribute('data-val')); return false;" data-val="{{ u.email }}" class="user-card-value muted" style="font-size:13px;">{{ u.email }}</a>
+                  <div class="user-card-value muted" style="font-size:12px;">{% if u.agent_phone_copy %}<a href="#" onclick="copyOne(this.getAttribute('data-val')); return false;" data-val="{{ u.agent_phone_copy }}">{{ u.agent_phone_display }}</a>{% else %}{{ u.agent_phone_display }}{% endif %} · {{ u.agency_name }}</div>
+                  <div class="user-card-value muted" style="font-size:11px;">Cont creat: {{ u.created_at }}</div>
+                  <a class="btn ok" href="{{ url_for('admin.admin_user_detail', user_id=u.id) }}" style="margin-top:8px;">Profil & pachete</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Col 2: Anunțuri Marketplace -->
+            <div class="user-card-section">
+              <div class="user-card-label">Anunțuri (oferte vânzare)</div>
+              <div class="user-card-value">{{ u.offer_used }} / {{ u.offer_limit }} folosite</div>
+              {% if u.offer_paid_slots > 0 %}
+              <div class="user-card-value muted" style="font-size:11px;">+{{ u.offer_paid_slots }} plătite până {{ u.offer_paid_expires_at }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Col 3: Cereri Marketplace -->
+            <div class="user-card-section">
+              <div class="user-card-label">Cereri (cumpărător)</div>
+              <div class="user-card-value">{{ u.request_used }} / {{ u.request_limit }} folosite</div>
+              {% if u.request_paid_slots > 0 %}
+              <div class="user-card-value muted" style="font-size:11px;">+{{ u.request_paid_slots }} plătite până {{ u.request_paid_expires_at }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Col 4: Acces și status -->
+            <div class="user-card-section">
+              <div class="user-card-label">Abonament</div>
+              <span class="pill {{ u.bucket }}">{{ u.access_label }}</span>
+              <div class="user-card-value muted" style="font-size:12px; margin-top:4px;">Valabil până: {{ u.access_until }}</div>
+              <div class="user-card-value muted" style="font-size:12px;">Zile rămase: {{ u.days_left }}</div>
+              <div class="user-card-value muted" style="font-size:11px;">Cont {% if u.is_active %}activ{% else %}inactiv{% endif %}</div>
+              {% for dev in u.devices_list %}
+              <div class="user-card-value muted" style="font-size:10px;">{{ dev.label }} — {{ dev.last_seen }}</div>
+              {% endfor %}
+              <form method="POST" action="{{ url_for('admin.admin_logout_other_devices', user_id=u.id, q=q, status=status, access=access) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn warn" type="submit" style="margin-top:6px;">Deconectează sesiunile</button>
+              </form>
+            </div>
+
+            <!-- Col 5: Acțiuni -->
+            <div class="user-card-section">
+              <div class="user-card-label">Acțiuni rapide</div>
+              <div class="user-card-actions">
+                {% if u.is_active %}
+                <form method="POST" action="{{ url_for('admin.admin_set_active', user_id=u.id, q=q, status=status, access=access) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="active" value="0">
+                  <button class="btn bad" type="submit">Oprește acces</button>
+                </form>
+                {% else %}
+                <form method="POST" action="{{ url_for('admin.admin_set_active', user_id=u.id, q=q, status=status, access=access) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="active" value="1">
+                  <button class="btn ok" type="submit">Pornește acces</button>
+                </form>
+                {% endif %}
+                <form method="POST" action="{{ url_for('admin.admin_extend_1m', user_id=u.id, q=q, status=status, access=access) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button class="btn" type="submit">+1 lună</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.admin_extend_3m', user_id=u.id, q=q, status=status, access=access) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button class="btn" type="submit">+3 luni</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.admin_extend_6m', user_id=u.id, q=q, status=status, access=access) }}">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button class="btn" type="submit">+6 luni</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.admin_extend_paid', user_id=u.id, q=q, status=status, access=access) }}" style="grid-column: 1 / -1; display:flex; gap:6px;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input class="mini" name="days" placeholder="Zile custom" style="flex:1;" />
+                  <button class="btn blue" type="submit">Aplică</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.admin_reset_free_uses', user_id=u.id, q=q, status=status, access=access) }}" style="grid-column: 1 / -1;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <button class="btn warn" type="submit">Reset vizionări gratuite</button>
+                </form>
+                <form method="POST" action="{{ url_for('admin.admin_reset_password', user_id=u.id, q=q, status=status, access=access) }}" style="grid-column: 1 / -1; display:flex; gap:6px;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input class="mini" name="new_password" placeholder="Parolă nouă" style="flex:1;" />
+                  <button class="btn purple" type="submit">Reset parolă</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="muted" style="margin-top:16px; font-size:12px;">
+          Afișez max 1500 utilizatori. Filtrează pentru rezultate mai rapide.
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function copyTextToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for older browsers
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          document.body.removeChild(textarea);
+          return Promise.resolve();
+        } catch (err) {
+          document.body.removeChild(textarea);
+          return Promise.reject(err);
+        }
+      }
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => {
+        toast.style.display = 'none';
+      }, 3000);
+    }
+
+    function toggleCleanupSelectAll(headerCb) {
+      var rowCbs = document.querySelectorAll('.cleanup-row-cb');
+      rowCbs.forEach(function(cb) { cb.checked = headerCb.checked; });
+    }
+
+    function cleanupDeleteSelected() {
+      var checked = document.querySelectorAll('#cleanup-form-delete-selected .cleanup-row-cb:checked');
+      var n = checked.length;
+      if (n === 0) {
+        alert('Selectează cel puțin un user.');
+        return;
+      }
+      if (!confirm('Ștergi ' + n + ' cont(uri)? Acțiunea este definitivă.')) return;
+      document.getElementById('cleanup-form-delete-selected').submit();
+    }
+
+    function cleanupDeleteAll() {
+      var form = document.getElementById('cleanup-form-delete-all');
+      if (!form) return;
+      var n = parseInt(form.getAttribute('data-cleanup-count') || '0', 10);
+      if (n === 0) {
+        alert('Nu există conturi de șters în listă.');
+        return;
+      }
+      if (!confirm('Ștergi toate cele ' + n + ' conturi din listă? Acțiunea este definitivă.')) return;
+      form.submit();
+    }
+
+    function copyOne(text) {
+      if (!text) return;
+      copyTextToClipboard(text).then(() => showToast('Copiat.')).catch(() => showToast('Eroare la copiere.'));
+    }
+
+    function copyEmails(type, count) {
+      const textareaId = 'emails-' + type;
+      const textarea = document.getElementById(textareaId);
+      if (!textarea) {
+        showToast('Eroare: nu s-au găsit emailuri.');
+        return;
+      }
+
+      const text = textarea.value.trim();
+      if (!text) {
+        showToast('Nu există emailuri de copiat.');
+        return;
+      }
+
+      copyTextToClipboard(text)
+        .then(() => {
+          showToast('Copiat ' + count + ' mail-uri.');
+        })
+        .catch(err => {
+          console.error('Eroare la copiere:', err);
+          showToast('Eroare la copiere în clipboard.');
+        });
+    }
+
+    function copyPhones(type, count) {
+      const textareaId = 'phones-' + type;
+      const textarea = document.getElementById(textareaId);
+      if (!textarea) {
+        showToast('Eroare: nu s-au găsit telefoane.');
+        return;
+      }
+
+      const text = textarea.value.trim();
+      if (!text) {
+        showToast('Nu există numere de telefon de copiat.');
+        return;
+      }
+
+      copyTextToClipboard(text)
+        .then(() => {
+          showToast('Copiat ' + count + ' numere de telefon.');
+        })
+        .catch(err => {
+          console.error('Eroare la copiere:', err);
+          showToast('Eroare la copiere în clipboard.');
+        });
+    }
+  </script>
+</body>
+</html>

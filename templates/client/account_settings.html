@@ -1,0 +1,92 @@
+{% extends "base_premium.html" %}
+{% block title %}Setări cont – Caut un imobil{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.home') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+</a>
+{% endblock %}
+
+{% block topbar_right %}
+<a href="{{ url_for('client.home') }}" class="topbarAuthBtn">Înapoi</a>
+{% endblock %}
+
+{% block content %}
+<div class="wrapCentered" style="max-width: 600px; padding: 2rem 1rem;">
+  <h1 style="font-size: 1.75rem; font-weight: 700; margin-bottom: 2rem;">Setări cont</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash {{ cat }}" style="margin-bottom: 1rem;">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="cardInner">
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Date personale</h2>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="update_profile"/>
+        
+        <label for="full_name">Nume complet</label>
+        <input id="full_name" name="full_name" type="text" value="{{ current_user.full_name }}" required />
+
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" value="{{ current_user.email }}" required />
+
+        <label for="phone">Număr de telefon</label>
+        <input id="phone" name="phone" type="tel" value="{{ current_user.phone or '' }}" required />
+        <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-top: 4px;">
+          Acest număr va fi vizibil pentru agenții care te contactează.
+        </small>
+
+        <div class="actions" style="margin-top: 1.5rem;">
+          <button class="btn primary" type="submit">Salvează modificările</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="cardInner">
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem;">Schimbă parola</h2>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="change_password"/>
+        
+        <label for="current_password">Parola curentă</label>
+        <input id="current_password" name="current_password" type="password" required />
+
+        <label for="new_password">Parola nouă</label>
+        <input id="new_password" name="new_password" type="password" required />
+        <small style="color: var(--text-muted); font-size: 0.8125rem; display: block; margin-top: 4px;">
+          Minim 6 caractere.
+        </small>
+
+        <label for="confirm_password">Confirmă parola nouă</label>
+        <input id="confirm_password" name="confirm_password" type="password" required />
+
+        <div class="actions" style="margin-top: 1.5rem;">
+          <button class="btn primary" type="submit">Schimbă parola</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="border-color: rgba(255, 92, 124, 0.3);">
+    <div class="cardInner">
+      <h2 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #ff5c7c;">Șterge contul</h2>
+      <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+        Dacă ștergi contul, toate datele tale, inclusiv cererile, vor fi șterse definitiv din sistem. Această acțiune nu poate fi anulată.
+      </p>
+      <form method="POST" onsubmit="return confirm('Ești sigur că vrei să ștergi contul? Toate datele tale vor fi șterse definitiv.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="action" value="delete_account"/>
+        <button class="btn" type="submit" style="background: rgba(255, 92, 124, 0.1); border-color: rgba(255, 92, 124, 0.3); color: #ff5c7c;">
+          Șterge contul
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

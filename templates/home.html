@@ -1,0 +1,1460 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <meta name="theme-color" content="#09090b">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="mobile-web-app-capable" content="yes">
+  <!-- iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
+  <!-- SEO -->
+  <title>Fișă de vizionare – PDF + WhatsApp + semnare | pentru agenți imobiliari</title>
+  <meta name="description" content="Generezi fișe de vizionare și contracte (PDF), trimiți pe WhatsApp și semnezi la distanță. Fără hârtii, fără timp pierdut. Aplicație pentru agenți imobiliari." />
+  <meta name="keywords" content="fisa de vizionare, agent imobiliar, pdf, whatsapp, semnatura, contract inchiriere, aplicatie imobiliara" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Fișă de vizionare – PDF + WhatsApp + semnare la distanță" />
+  <meta property="og:description" content="Completezi rapid, generezi PDF, trimiți pe WhatsApp și semnezi. Totul într-o singură aplicație pentru agenți imobiliari." />
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ro_RO" />
+
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Script pentru modal activare acces - trebuie în head pentru a fi disponibil când se execută onclick -->
+  {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+  {% if current_user.is_authenticated %}
+    {% set wa_text = current_user.support_whatsapp_text() %}
+  {% else %}
+    {% set wa_text = 'Salut! Vreau să activez accesul complet la aplicație.' %}
+  {% endif %}
+  
+  <script>
+    // Modal activare acces - funcții globale (definite în head pentru disponibilitate imediată)
+    var WHATSAPP_PHONE = '{{ wa_phone }}';
+    var WHATSAPP_TEXT = {{ wa_text|tojson }};
+    
+    window.showActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        var whatsappBtn = document.getElementById('activate-whatsapp-btn');
+        
+        if (!modal) {
+          alert('Eroare: Modal-ul nu a fost găsit.');
+          return;
+        }
+        
+        // Setează link-ul WhatsApp
+        if (whatsappBtn && WHATSAPP_PHONE && WHATSAPP_TEXT) {
+          var encodedText = encodeURIComponent(WHATSAPP_TEXT);
+          whatsappBtn.href = 'https://wa.me/' + WHATSAPP_PHONE + '?text=' + encodedText;
+        }
+        
+        // Afișează modalul
+        modal.style.display = 'flex';
+        modal.style.flexDirection = 'column';
+        if (document.body) {
+          document.body.style.overflow = 'hidden';
+        }
+      } catch (e) {
+        console.error('Eroare la afișarea modalului:', e);
+        alert('Eroare la afișarea modalului. Verifică consola pentru detalii.');
+      }
+    };
+
+    window.closeActivateModal = function() {
+      try {
+        var modal = document.getElementById('activate-access-modal');
+        if (modal) {
+          modal.style.display = 'none';
+          if (document.body) {
+            document.body.style.overflow = '';
+          }
+        }
+      } catch (e) {
+        console.error('Eroare la închiderea modalului:', e);
+      }
+    };
+  </script>
+
+  <style>
+    /* —— Premium: două culori (alb + accent auriu), rest neutru —— */
+    :root{
+      --bg: #09090b;
+      --surface: #141416;
+      --surface-hover: #18181b;
+      --border: #27272a;
+      --border-focus: #3f3f46;
+      --text: #fafafa;
+      --text-secondary: #a1a1aa;
+      --text-muted: #71717a;
+      --primary: #fafafa;
+      --primary-foreground: #09090b;
+      --accent: #eab308;
+      --accent-muted: #ca9a04;
+      --accent-soft: rgba(234, 179, 8, 0.1);
+      --accent-glow: rgba(234, 179, 8, 0.15);
+      --shadow-sm: 0 4px 12px rgba(0,0,0,.35);
+      --radius: 16px;
+      --radius-sm: 12px;
+      --radius-lg: 24px;
+      --ease: cubic-bezier(0.32, 0.72, 0, 1);
+      --transition: 0.25s var(--ease);
+    }
+
+    *{ box-sizing: border-box; }
+    html{ scroll-behavior: smooth; }
+    body{
+      margin: 0;
+      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -15%, var(--accent-glow), transparent 50%),
+        radial-gradient(ellipse 100% 60% at 50% -20%, rgba(255,255,255,.03), transparent 55%);
+    }
+
+    .wrap{
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 24px 64px;
+      padding-left: max(24px, env(safe-area-inset-left));
+      padding-right: max(24px, env(safe-area-inset-right));
+      padding-bottom: max(64px, env(safe-area-inset-bottom));
+    }
+    @media (min-width: 768px){
+      .wrap{ padding: 32px 40px 80px; padding-left: 40px; padding-right: 40px; padding-bottom: 80px; }
+    }
+
+    /* —— Nav (topbar) —— */
+    .topbar{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 16px 0 24px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      background: rgba(9, 9, 11, 0.85);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 0 rgba(234, 179, 8, 0.06);
+      margin: -24px -24px 0;
+      padding-left: 24px;
+      padding-right: 24px;
+      margin-bottom: 32px;
+    }
+    @media (min-width: 768px){
+      .topbar{ margin: -32px -40px 0; padding-left: 40px; padding-right: 40px; margin-bottom: 48px; }
+    }
+    .brand{
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 380px;
+    }
+    .brand h1{
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin: 0;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    @media (min-width: 600px){
+      .brand h1{ font-size: 1.375rem; }
+    }
+    .brand p{
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      line-height: 1.4;
+      font-weight: 500;
+    }
+    .homeQuickBtns{
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    .homeQuickBtn{
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .homeQuickBtn:hover{
+      background: var(--surface-hover);
+      border-color: var(--border-focus);
+    }
+
+    .topbarRight{
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .chip{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .menuBtn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+    .menuBtn:hover{
+      background: var(--surface);
+      border-color: var(--border-focus);
+    }
+    .menuBtn:active{ transform: scale(0.98); }
+    .menuBtn:focus-visible{ outline: 2px solid var(--accent); outline-offset: 2px; }
+
+    .topbarAuthGroup{
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+    .topbarAuthBtn{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 100px;
+      padding: 10px 16px;
+      min-height: 44px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+    @media (max-width: 380px){
+      .topbarAuthBtn{ min-width: 82px; padding: 8px 12px; font-size: 0.8125rem; }
+    }
+    .topbarAuthBtn:hover{
+      background: var(--surface);
+      border-color: var(--border-focus);
+    }
+    .topbarAuthBtnPrimary{
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+    .topbarAuthBtnPrimary:hover{
+      background: #e5e5e5;
+      border-color: #e5e5e5;
+    }
+    .menuBtnIcon{
+      width: 18px;
+      height: 14px;
+      position: relative;
+      display: block;
+      flex-shrink: 0;
+    }
+    .menuBtnIcon::before,
+    .menuBtnIcon::after{
+      content: '';
+      position: absolute;
+      left: 0;
+      width: 18px;
+      height: 1.5px;
+      background: currentColor;
+      border-radius: 1px;
+    }
+    .menuBtnIcon::before{ top: 0; }
+    .menuBtnIcon::after{ top: 6px; }
+    .menuBtnIcon{ background: linear-gradient(currentColor 0 0) 0 12px/18px 1.5px no-repeat; border-radius: 1px; }
+    @media (min-width: 520px){
+      .menuBtn .menuBtnLabel{ display: inline; }
+    }
+    @media (max-width: 519px){
+      .menuBtn .menuBtnLabel{ display: none; }
+    }
+
+    /* === Dashboard (logged in) === */
+    .grid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px){
+      .grid{ grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
+
+    .card{
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+    }
+    .card:hover{
+      border-color: var(--border-focus);
+      border-left-color: var(--accent);
+      background: var(--surface-hover);
+      box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.08);
+    }
+    .cardInner{
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    @media (min-width: 600px){
+      .cardInner{ padding: 26px; }
+    }
+
+    .cardHead{ display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .titleRow{ display: flex; align-items: center; gap: 16px; }
+
+    .cardIcon{
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      background: var(--accent-soft);
+      border: 1px solid rgba(234, 179, 8, 0.25);
+      flex-shrink: 0;
+    }
+    .cardIcon svg{
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent);
+    }
+
+    .card h2{
+      margin: 0;
+      font-size: 1.0625rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    @media (min-width: 600px){
+      .card h2{ font-size: 1.125rem; }
+    }
+    .card p{
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.5;
+    }
+
+    .btn{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 18px;
+      min-height: 50px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      border: 1px solid var(--border);
+      background: var(--surface-hover);
+      color: var(--text);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .btn:hover{
+      border-color: var(--border-focus);
+      background: var(--border);
+    }
+    .btn:active{ transform: scale(0.99); }
+    .btn.primary{
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+    .btn.primary:hover{
+      background: #e5e5e5;
+      border-color: #e5e5e5;
+    }
+    .btn.primary.gold{
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-muted) 100%);
+      border-color: var(--accent);
+      color: #0a0a0a;
+    }
+    .btn.primary.gold:hover{
+      filter: brightness(1.1);
+      border-color: var(--accent-muted);
+    }
+
+
+    .section{
+      margin-top: 32px;
+      padding: 24px 24px;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+    @media (min-width: 600px){
+      .section{ padding: 28px 32px; }
+    }
+    .section h3{
+      margin: 0 0 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .section p, .section ul{
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+    }
+    .section ul{ padding-left: 1.25rem; }
+
+    .footer{
+      margin-top: 64px;
+      padding: 32px 16px 48px;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+    .footer a{ color: var(--text-secondary); text-decoration: none; transition: color var(--transition); }
+    .footer a:hover{ color: var(--accent); }
+
+    /* ==============================
+       LANDING PAGE — Premium, normal but WOW
+       ============================== */
+
+    .landing{
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding-top: 0;
+    }
+
+    /* —— Hero: centrat, un mesaj clar —— */
+    .hero{
+      text-align: center;
+      padding: 48px 0 56px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    @media (min-width: 768px){
+      .hero{ padding: 72px 0 80px; }
+    }
+
+    .heroKicker{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .pill.accent{
+      border-color: rgba(234, 179, 8, .4);
+      background: var(--accent-soft);
+      color: #fde047;
+    }
+
+    .heroTitle{
+      margin: 0 0 16px;
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.04em;
+      color: var(--text);
+    }
+    @media (min-width: 600px){
+      .heroTitle{ font-size: 2.5rem; }
+    }
+    @media (min-width: 900px){
+      .heroTitle{ font-size: 3rem; }
+    }
+
+    .heroSub{
+      margin: 0 auto 32px;
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.65;
+      max-width: 42ch;
+    }
+    @media (min-width: 600px){
+      .heroSub{ font-size: 1.0625rem; }
+    }
+
+    .ctaRow{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    @media (min-width: 480px){
+      .ctaRow{ flex-direction: row; }
+    }
+
+    .ctaBtn{
+      min-width: 180px;
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 24px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text);
+      transition: border-color var(--transition), background var(--transition), color var(--transition);
+    }
+    .ctaBtn:hover{
+      background: var(--surface);
+      border-color: var(--border-focus);
+    }
+    .ctaBtn:active{ transform: scale(0.99); }
+    .ctaBtn.primary{
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+    .ctaBtn.primary:hover{
+      background: #e5e5e5;
+      border-color: #e5e5e5;
+      color: var(--primary-foreground);
+    }
+    .ctaBtn.primary.gold{
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-muted) 100%);
+      border-color: var(--accent);
+      color: #0a0a0a;
+    }
+    .ctaBtn.primary.gold:hover{
+      filter: brightness(1.1);
+      border-color: var(--accent-muted);
+    }
+
+    /* —— Trust: 3 coloane sub hero —— */
+    .trustRow{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      padding: 40px 0 56px;
+      border-top: 1px solid var(--border);
+    }
+    @media (min-width: 640px){
+      .trustRow{ grid-template-columns: repeat(3, 1fr); padding: 48px 0 64px; }
+    }
+
+    .trustItem{
+      border: 1px solid var(--border);
+      border-top: 2px solid var(--accent);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: center;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .trustItem:hover{ border-color: var(--border-focus); border-top-color: var(--accent); box-shadow: 0 4px 20px var(--accent-glow); }
+    .trustItem b{
+      font-size: 0.9375rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .trustItem span{
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* —— Secțiuni cu titlu —— */
+    .landingSection{
+      padding: 48px 0 56px;
+    }
+    @media (min-width: 768px){
+      .landingSection{ padding: 64px 0 72px; }
+    }
+    .landingSectionTitle{
+      margin: 0 0 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .landingSectionHead{
+      margin: 0 0 40px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--text);
+    }
+    @media (min-width: 600px){
+      .landingSectionHead{ font-size: 1.75rem; }
+    }
+
+    /* —— Feature grid —— */
+    .featureGrid{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 640px){
+      .featureGrid{ grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
+    @media (min-width: 980px){
+      .featureGrid{ grid-template-columns: repeat(3, 1fr); }
+    }
+
+    .feature{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .feature:hover{ border-color: rgba(234, 179, 8, 0.4); box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.1); }
+    .feature .fTop{ display: flex; align-items: center; gap: 14px; }
+    .feature .fIcon{
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      background: var(--accent-soft);
+      flex-shrink: 0;
+    }
+    .feature .fIcon svg{
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent);
+    }
+    .feature h3{
+      margin: 0;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+    .feature p{
+      margin: 0;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+    }
+
+    /* —— Cum funcționează —— */
+    .how{
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media (min-width: 768px){
+      .how{ grid-template-columns: repeat(4, 1fr); }
+    }
+
+    .step{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: flex-start;
+      text-align: left;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    .step:hover{ border-color: rgba(234, 179, 8, 0.35); box-shadow: 0 0 0 1px rgba(234, 179, 8, 0.08); }
+    .stepNum{
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-sm);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      font-size: 0.9375rem;
+      color: #0a0a0a;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-muted) 100%);
+      flex: 0 0 auto;
+    }
+    .step b{
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+    .step span{
+      display: block;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+    }
+
+    /* —— Preț —— */
+    .pricing{
+      border: 1px solid rgba(234, 179, 8, 0.25);
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 560px;
+      margin: 0 auto;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+    @media (min-width: 600px){
+      .pricing{ padding: 40px 40px; }
+    }
+
+    .priceRow{
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .priceRow h3{
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      max-width: 28ch;
+    }
+    .priceTag{
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .priceTag .big{ font-size: 1.75rem; letter-spacing: -0.03em; }
+    .priceTag .small{ font-size: 0.8125rem; color: var(--text-muted); font-weight: 600; }
+
+    .pricing ul{
+      margin: 0;
+      padding-left: 1.25rem;
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.75;
+    }
+
+    .divider{
+      height: 1px;
+      background: var(--border);
+      margin: 0;
+    }
+
+    /* —— Suport —— */
+    .supportBox{
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .supportBox h3{ margin: 0; font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+
+    .supportRow{
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    @media (min-width: 640px){
+      .supportRow{ flex-direction: row; }
+    }
+
+    .supportBtn{
+      flex: 1;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 16px 20px;
+      border-radius: var(--radius-sm);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9375rem;
+      border: 1px solid var(--border);
+      background: var(--surface-hover);
+      color: var(--text);
+      transition: border-color var(--transition), background var(--transition);
+    }
+    .supportBtn:hover{
+      border-color: var(--border-focus);
+      background: var(--border);
+    }
+    .supportBtn.whatsapp{
+      background: var(--primary);
+      border-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+    .supportBtn.whatsapp:hover{ background: #e5e5e5; border-color: #e5e5e5; }
+
+    /* —— Landing: buton slim Descarcă (jos, fin) —— */
+    .landing-download-wrap{
+      display: flex;
+      justify-content: center;
+      margin: 32px 0 48px;
+      padding: 0 16px;
+    }
+    .btn-download-slim{
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 24px;
+      min-height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+    }
+    .btn-download-slim:hover{
+      color: var(--text);
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+    .btn-download-slim:active{ transform: scale(0.98); }
+
+    .muted{
+      color: var(--text-secondary);
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body data-page-id="{{ page_id|default('generic') }}">
+  <div class="wrap">
+    <div class="topbar">
+      <div class="brand">
+        <h1>Fișă de vizionare</h1>
+        {% if current_user.is_authenticated %}
+          <div class="homeQuickBtns">
+            <a href="{{ url_for('marketplace.hub') }}" class="homeQuickBtn">Marketplace</a>
+            <a href="{{ url_for('team.index') }}" class="homeQuickBtn">Echipă</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="topbarRight">
+        {% if current_user.is_authenticated %}
+          <a href="{{ url_for('menu.menu_home') }}" class="menuBtn" title="Meniu" aria-label="Meniu">
+            <span class="menuBtnIcon" aria-hidden="true"></span>
+            <span class="menuBtnLabel">Meniu</span>
+          </a>
+        {% else %}
+          <div class="topbarAuthGroup">
+            <a href="{{ url_for('auth.login') }}" class="topbarAuthBtn">Logare</a>
+            <a href="{{ url_for('auth.register') }}" class="topbarAuthBtn topbarAuthBtnPrimary">Creează cont</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if not current_user.is_authenticated %}
+
+    <!-- =========================
+         LANDING PAGE (GUEST)
+         ========================= -->
+    <div class="landing">
+
+      <section class="hero">
+        <div class="heroKicker">
+          <span class="pill">Fișe & contracte</span>
+          <span class="pill accent">Gândită pentru teren</span>
+        </div>
+        <h2 class="heroTitle">
+          Tot ce ai nevoie ca agent<br>direct la tine pe telefon
+        </h2>
+        <p class="heroSub">
+          Fișe de vizionare pentru vânzare și închiriere, contracte, semnături digitale și colaborări între agenți plus lead-uri gratuite – toate direct de pe telefon. Fără CRM-uri greoaie, fără hârtii, totul simplu și rapid exact când ești pe teren și ai nevoie să fi rapid.
+        </p>
+        <div class="ctaRow">
+          <a class="ctaBtn primary gold" href="{{ url_for('auth.register') }}">
+            Începe acum
+          </a>
+          <a class="ctaBtn" href="{{ url_for('auth.login') }}">
+            Logare
+          </a>
+        </div>
+      </section>
+
+      <div class="trustRow">
+        <div class="trustItem">
+          <b>Corecte gata de folosit</b>
+          <span>Contracte de închiriere, fișe de vizionare, contracte de exclusivitate, contracte de prestări servicii și alte documente esențiale, ușor de completat și personalizat. Totul digital, pe telefon, rapid și organizat, dar gata de print oricând ai nevoie.</span>
+        </div>
+        <div class="trustItem">
+          <b>Marketplace de colaborări între agenți + Lead-uri de la clienți</b>
+          <span>Găsești cereri și oferte publicate de alți agenți, dar și cereri directe de la clienți care caută activ imobile. Publică-ți ofertele, transformă concurența în parteneriate profitabile, contactează lead-urile potrivite și închide tranzacții mai rapid.</span>
+        </div>
+        <div class="trustItem">
+          <b>Echipă & Performanță</b>
+          <span>Gestionează-ți mai bine activitatea, organizează-ți sarcinile și crește-ți productivitatea, având mereu la vedere rata de conversie și evoluția ta.
+
+Modul dedicat echipelor permite managerului să creeze echipa, să adauge agenți, să atribuie task-uri și să urmărească performanța fiecăruia: vizionări, tranzacții și volume generate. Agenții completează raportul zilnic, iar totul rămâne centralizat și ușor de analizat.</span>
+        </div>
+      </div>
+
+      <section class="landingSection">
+        <p class="landingSectionTitle">Ce oferă aplicația?</p>
+        <h3 class="landingSectionHead">Tot ce ai nevoie!</h3>
+      <div class="featureGrid">
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg></div>
+            <h3>Fișe de vizionare (chirie și vânzare)</h3>
+          </div>
+          <p>Completezi datele, generezi PDF și trimiți pe WhatsApp. Semnare pe loc sau link la distanță. Fără hârtii.</p>
+        </div>
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10"/><path d="M7 11h10"/><path d="M7 15h6"/></svg></div>
+            <h3>Contracte (închiriere și prestări servicii)</h3>
+          </div>
+          <p>Contract de închiriere și documente prestări servicii. Export PDF. </p>
+        </div>
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg></div>
+            <h3>Semnare la distanță</h3>
+          </div>
+          <p>Generezi un link de semnare pe care îl trimiți clientului. Clientul poate citi fișa de vizionare (chirie sau vânzare) direct pe telefonul lui și o poate semna online, rapid și simplu.</p>
+        </div>
+
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+            <h3>Marketplace (cereri și oferte) + Lead-uri de la clienți</h3>
+          </div>
+          <p>Cereri și anunțuri între agenți. Filtre zonă, buget, camere. Colaborări și potriviri. Primești și notificări când cererile clienților se potrivesc cu ofertele tale – lead-uri directe pentru deal-uri noi.</p>
+        </div>
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <h3>To-Do (task-uri și vizionări)</h3>
+          </div>
+          <p>Ai un To-Do List integrat unde îți poți organiza task-urile zilnice: vizionări, deadline-uri, follow-up-uri și alte lucruri importante. Setezi priorități, notezi ce ai de făcut și ții totul sub control, direct din aplicație.</p>
+        </div>
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <h3>Echipă & Performanță</h3>
+          </div>
+          <p>Modul pentru echipe: manager creează echipa, adaugă agenți (confirmare din aplicație), dă task-uri și urmărește performanța (vizionări, deal-uri, sumă). Agenții completează raport zilnic.</p>
+        </div>
+        <div class="feature">
+          <div class="fTop">
+            <div class="fIcon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></div>
+            <h3>Asistent personal</h3>
+          </div>
+          <p>Ghid pe fiecare pagină, întrebări frecvente și notificări. Răspunsuri rapide, fără blocaje.</p>
+        </div>
+      </div>
+      </section>
+
+      <section class="landingSection">
+        <p class="landingSectionTitle">Tot ce ai nevoie ca agent imobiliar, gândit pentru teren: rapid, digital și fără complicații.</p>
+        <h3 class="landingSectionHead"></h3>
+      <div class="how">
+        <div class="step">
+          <div class="stepNum">1</div>
+          <b>Totul se întâmplă direct pe telefon</b>
+          <span>Creezi fișe de vizionare pentru vânzare și închiriere, completezi documente și gestionezi tot procesul imobiliar direct din telefon, exact când ești pe teren. Fără laptop, fără dosare, fără pierdere de timp.</span>
+        </div>
+        <div class="step">
+          <div class="stepNum">2</div>
+          <b>Contracte simple, corecte și gata de folosit</b>
+          <span>Contracte de închiriere, contracte de prestări servicii și alte documente esențiale, ușor de completat și de personalizat. Totul digital, dar gata de print atunci când ai nevoie.</span>
+        </div>
+        <div class="step">
+          <div class="stepNum">3</div>
+          <b>Marketplace de colaborări între agenți + Lead-uri de la clienți</b>
+          <span>Găsești cereri și oferte publicate de alți agenți, vezi rapid potrivirile și inițiezi colaborări reale. Adaugă cererile clienților tăi, publică ofertele tale și transformă concurența în parteneriate și bani. Primești și lead-uri directe de la clienți care caută imobile – sistemul te notifică automat când cererile lor se potrivesc cu ofertele tale, astfel poți contacta clienții și închide deal-uri noi.</span>
+        </div>
+        <div class="step">
+          <div class="stepNum">4</div>
+          <b>Semnături digitale</b>
+          <span>Clientul semnează direct de pe telefonul lui sau de pe telefonul tău, chiar la fața locului. Documentele se salvează automat atât la tine, cât și la client, indiferent de dispozitivul folosit pentru semnare, împreună cu semnătura acestuia, având valoare legală. Totul este clar, trasabil și te poate ajuta inclusiv în situații juridice sau în instanță, dacă este necesar.</span>
+        </div>
+      </div>
+      </section>
+
+      <section class="landingSection">
+        <p class="landingSectionTitle">Preț</p>
+        <h3 class="landingSectionHead">Începe cu acces gratuit</h3>
+      <section class="pricing">
+        <div class="priceRow">
+          <h3>Poți testa aplicația gratuit, iar după perioada de probă abonamentul este de</h3>
+          <div class="priceTag">
+            <span class="big">12 €</span>
+            <span class="small">/ lună</span>
+          </div>
+        </div>
+
+        <p class="muted">
+          Un cost mic comparativ cu timpul pierdut, haosul hârtiilor și riscul de a pierde un comision. Practic, îți recuperezi investiția dintr-o singură situație evitată.
+        </p>
+
+        <div class="divider"></div>
+
+        <ul>
+          <li>Fișe de vizionare (chirie + vânzare)</li>
+          <li>Contracte (închiriere + prestări servicii)</li>
+          <li>Semnătură la distanță (link pentru client)</li>
+          <li>Marketplace (cereri și oferte între agenți)</li>
+          <li>To-Do (task-uri, calendar)</li>
+          <li>Asistent (ghid pe pagină + Întreabă)</li>
+        </ul>
+
+        <div class="ctaRow">
+          <a class="ctaBtn primary gold" href="{{ url_for('auth.register') }}">
+            Începe acum
+          </a>
+        </div>
+      </section>
+      </section>
+
+      <section class="supportBox">
+        <h3>Suport & contact</h3>
+        <p class="muted">
+          Ai întrebări, ai nevoie de activare sau ai rămas blocat la ceva? Scrie direct și rezolvăm rapid.
+        </p>
+
+        <div class="supportRow">
+          <!-- 40764381795 -->
+          <a class="supportBtn whatsapp" href="https://wa.me/40764381795?text=Salut!%20Am%20nevoie%20de%20ajutor%20la%20Fi%C8%99%C4%83%20de%20vizionare.%20Email%3A%20%5Bscrie%20aici%5D">
+            WhatsApp suport
+          </a>
+
+          <a class="supportBtn" href="{{ url_for('auth.login') }}">
+            Login
+          </a>
+        </div>
+      </section>
+
+      <div class="landing-download-wrap">
+        <button type="button" class="btn-download-slim" onclick="window.openInstallAppModal && window.openInstallAppModal()">
+          Descarcă
+        </button>
+      </div>
+
+    </div>
+    {% include 'partials/install_app_modal.html' %}
+
+    {% else %}
+
+    <!-- =========================
+         DASHBOARD (LOGAT)
+         All users are agents - full access to all features.
+         ========================= -->
+
+    {% if current_user.is_authenticated and not current_user.is_active_account() %}
+    <!-- Mesaj perioadă testare gratuită -->
+    <div class="card" style="margin-bottom:24px; background:linear-gradient(135deg, rgba(234,179,8,0.12) 0%, rgba(234,179,8,0.08) 100%); border:1px solid rgba(234,179,8,0.35); border-left:3px solid var(--accent);">
+      <div class="cardInner" style="padding:20px;">
+        <div style="display:flex; align-items:flex-start; gap:14px; flex-wrap:wrap;">
+          <div style="flex-shrink:0; width:32px; height:32px; display:grid; place-items:center; border-radius:var(--radius-sm); background:rgba(234,179,8,0.2); border:1px solid rgba(234,179,8,0.3);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px; color:var(--accent);">
+              <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+            </svg>
+          </div>
+          <div style="flex:1; min-width:0;">
+            <h3 style="margin:0 0 10px; font-size:1.0625rem; font-weight:700; letter-spacing:-0.02em; color:var(--accent);">Perioadă de testare gratuită</h3>
+            <p style="margin:0 0 18px; font-size:0.875rem; line-height:1.6; color:var(--text-secondary);">
+              În perioada de testare gratuită poți utiliza următoarea funcție:
+            </p>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 16px; background:var(--surface); border-radius:var(--radius-sm); border:1px solid var(--border); flex-wrap:wrap;">
+                <span style="font-size:0.9375rem; font-weight:600; color:var(--text); flex:1; min-width:200px;">Fișă de vizionare CHIRIE</span>
+                <span style="font-size:0.875rem; font-weight:700; padding:6px 12px; border-radius:999px; white-space:nowrap; {% if current_user.free_rental_viewing_used %}background:rgba(239,68,68,0.15); color:#fecaca; border:1px solid rgba(239,68,68,0.3);{% else %}background:rgba(33,192,122,0.15); color:#86efac; border:1px solid rgba(33,192,122,0.3);{% endif %}">
+                  {% if current_user.free_rental_viewing_used %}1/1 (folosit){% else %}0/1 (disponibil){% endif %}
+                </span>
+              </div>
+            </div>
+            <div style="padding-top:16px; border-top:1px solid rgba(234,179,8,0.2);">
+              <p style="margin:0; font-size:0.875rem; line-height:1.65; color:var(--text-secondary);">
+                <b style="color:var(--text);">Restul funcțiilor</b> (Marketplace, Prestări Servicii, To-Do, Contracte, etc.) sunt accesibile doar în conturile active. 
+                <a href="https://wa.me/{{ config.WHATSAPP_SUPPORT_PHONE|default('40764381795') }}?text={{ current_user.support_whatsapp_text()|urlencode }}" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:none; font-weight:600; border-bottom:1px solid rgba(234,179,8,0.4); transition:border-color 0.2s;">Contactează suportul</a> pentru a activa accesul complet.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Agent: toate fișele, contracte, to-do -->
+    <div class="grid">
+
+      <!-- FIȘĂ CHIRIE -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              </div>
+              <div>
+                <h2>Fișă Chirie</h2>
+                <p>Vizionare pentru închiriere (PDF + WhatsApp + semnare la distanță)</p>
+              </div>
+            </div>
+          </div>
+          <a class="btn primary" href="{{ url_for('chirie.form_page') }}">
+            Creează fișa
+          </a>
+        </div>
+      </div>
+
+      <!-- FIȘĂ VÂNZARE -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              </div>
+              <div>
+                <h2>Fișă Vânzare</h2>
+                <p>Vizionare pentru vânzare (PDF + WhatsApp).</p>
+              </div>
+            </div>
+          </div>
+          <a class="btn primary" href="{{ url_for('vanzare.form_page') }}">
+            Creează fișa
+          </a>
+        </div>
+      </div>
+
+      <!-- CONTRACT ÎNCHIRIERE -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h10"/><path d="M7 11h10"/><path d="M7 15h6"/></svg>
+              </div>
+              <div>
+                <h2>Contract Închiriere</h2>
+                <p>Generezi contract complet.</p>
+              </div>
+            </div>
+          </div>
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+            <a class="btn primary" href="{{ url_for('contract.form_page') }}">
+              Creează contractul
+            </a>
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Creează contractul
+            </a>
+          {% endif %}
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Creează contractul
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- CONTRACT PRESTĂRI SERVICII -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </div>
+              <div>
+                <h2>Contract Prestări Servicii</h2>
+                <p>Contract de prestări servicii imobiliare.</p>
+              </div>
+            </div>
+          </div>
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+            <a class="btn primary" href="{{ url_for('prestari.form_page') }}">
+              Creează contractul
+            </a>
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Creează contractul
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ECHIPĂ & PERFORMANȚĂ -->
+      {% if is_team_manager or has_team %}
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <h2>Echipă & Performanță</h2>
+                <p>{% if is_team_manager %}Dashboard, agenți, task-uri, rapoarte.{% else %}Echipa mea, raport zilnic, task-uri de la manager.{% endif %}</p>
+              </div>
+            </div>
+          </div>
+          <a class="btn primary" href="{{ url_for('team.index') }}">
+            {% if unread_team_tasks %}Ai {{ unread_team_tasks }} task nou de la manager · {% endif %}Deschide
+          </a>
+        </div>
+      </div>
+      {% else %}
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              </div>
+              <div>
+                <h2>Echipă & Performanță</h2>
+                <p>Creează echipa ta și gestionează agenții, task-uri și performanța.</p>
+              </div>
+            </div>
+          </div>
+          <a class="btn primary" href="{{ url_for('team.index') }}">
+            Creează echipă
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- TO-DO / TASK-URI -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              </div>
+              <div>
+                <h2>To-Do / Task-uri</h2>
+                <p>Task-uri și deadline-uri. Calendar, priorități, status.</p>
+              </div>
+            </div>
+          </div>
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+            <a class="btn primary" href="{{ url_for('todo.list_tasks') }}">
+              Deschide To-Do
+            </a>
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Deschide To-Do
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- MARKETPLACE -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+              </div>
+              <div>
+                <h2>Marketplace</h2>
+                <p>Cereri și oferte între agenți. Colaborări, potriviri, tranzacții.</p>
+              </div>
+            </div>
+          </div>
+          {% if not current_user.is_authenticated or not current_user.is_active_account() %}
+            <p class="meta" style="margin-bottom: 12px; font-size: 0.875rem; color: var(--text-muted);">
+              3 agenți au reușit în ultima săptămână 3 colaborări încheiate cu succes.
+            </p>
+          {% endif %}
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+            <a class="btn primary" href="{{ url_for('marketplace.hub') }}">
+              Deschide Marketplace
+            </a>
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Deschide Marketplace
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- DREPTURI DE CONTRACT -->
+      <div class="card">
+        <div class="cardInner">
+          <div class="cardHead">
+            <div class="titleRow">
+              <div class="cardIcon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></svg>
+              </div>
+              <div>
+                <h2>Drafturi de documente</h2>
+                <p>Drafturi de fișe de vizionare și contracte. Descărcare Word (.docx) pentru editare.</p>
+              </div>
+            </div>
+          </div>
+          {% if current_user.is_authenticated and current_user.is_active_account() %}
+            <a class="btn primary" href="{{ url_for('contract_templates.list_templates') }}">
+              Deschide drafturi
+            </a>
+          {% else %}
+            <a class="btn primary disabled" href="#" onclick="event.preventDefault(); window.showActivateModal(); return false;">
+              Deschide draft-uri
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section">
+      <h3>Ghid rapid</h3>
+
+      <ul style="margin:0; padding-left:18px; line-height:1.6; color:var(--text-secondary); font-size:13px;">
+        <li>Completează datele tale și ale agenției din <b>Meniu</b> (buton în colțul din dreapta sus) – apar automat pe fișe și contracte</li>
+        <li>Generezi fișe de vizionare și contracte instant (PDF)</li>
+        <li>Semnătură electronică inclusă + share rapid către client</li>
+        <li>Pentru ajutor sau activare abonament, contactează <b>suportul</b></li>
+        <li>Aceste fișe de vizionare sunt documente asumate de părți și pot constitui mijloc de probă, conform legislației în vigoare, în cazul unor dispute privind tranzacția imobiliară.</li>
+      </ul>
+    </div>
+    {% endif %}
+
+    <div class="footer">
+      © 2026 Fișă de Vizionare · Versiunea 1.1<br>
+      <a href="/despre">Despre</a> · <a href="/termeni">Termeni</a> · <a href="/confidentialitate">Confidențialitate</a> · <a href="/plati">Plăți</a>
+    </div>
+
+  </div>
+{% include 'partials/assistant_widget.html' %}
+  
+  <!-- Modal Activare Acces -->
+  <div id="activate-access-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; width:100vw; height:100vh; background:rgba(0,0,0,0.75); z-index:99999; align-items:center; justify-content:center; padding:20px; overflow-y:auto; flex-direction:column;">
+    <div onclick="event.stopPropagation();" style="background:#1a1a1a; border-radius:8px; padding:24px; max-width:500px; width:100%; box-shadow:0 8px 32px rgba(0,0,0,0.3); position:relative; margin:auto;">
+      <h2 style="margin:0 0 16px; font-size:1.25rem; font-weight:700; color:#e5e7eb;">Activează accesul</h2>
+      <p style="margin:0 0 20px; color:#9ca3af; line-height:1.6;">
+        Această funcție este disponibilă doar pentru conturi active. Contactează suportul pentru a activa accesul complet.
+      </p>
+      <div style="display:flex; gap:12px; flex-wrap:wrap;">
+        <a id="activate-whatsapp-btn" href="#" target="_blank" rel="noopener" style="flex:1; min-width:200px; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 20px; background:#25D366; color:white; border-radius:12px; text-decoration:none; font-weight:600; transition:background 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+          Contactează suportul
+        </a>
+        <button onclick="window.closeActivateModal()" style="padding:12px 20px; background:#27272a; color:#e5e7eb; border:1px solid #3f3f46; border-radius:6px; font-weight:600; cursor:pointer; transition:background 0.2s;">
+          Închide
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Setup pentru închidere modal (după ce DOM-ul e gata)
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal = document.getElementById('activate-access-modal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === modal) {
+            window.closeActivateModal();
+          }
+        });
+      }
+
+      // Închidere modal cu Escape
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+          window.closeActivateModal();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

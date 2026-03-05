@@ -1,0 +1,65 @@
+{% extends "base_premium.html" %}
+{% block title %}Politica de Confidențialitate – Fișă de vizionare{% endblock %}
+
+{% block topbar_right %}
+  <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 24px;font-size:1.5rem;font-weight:700;">Politica de Confidențialitate (GDPR)</h1>
+
+  <div class="card">
+    <div class="cardInner contentCard">
+      <p class="muted">Ultima actualizare: {{ last_updated }}<br>Contact: <b>{{ support_email }}</b></p>
+      <div class="divider"></div>
+      <h2>1. Cine suntem</h2>
+      <p>Această Politică descrie modul în care sunt prelucrate datele personale în cadrul Serviciului. Operatorul de date: <b>Alexandru Cojoacă</b>. Contact: <b>{{ support_email }}</b>.</p>
+      <h2>2. Ce date prelucrăm</h2>
+      <h3>2.1 Date de cont</h3>
+      <ul>
+        <li>Nume complet</li>
+        <li>Email</li>
+        <li>Parolă (stocată sub formă de hash; nu stocăm parola în clar)</li>
+        <li>Informații despre acces (trial/abonament: date de expirare, status activ/inactiv)</li>
+      </ul>
+      <h3>2.2 Date introduse pentru generarea documentelor</h3>
+      <p>În funcție de formular, pot fi prelucrate date precum: nume, telefon, email, adresă, CNP (dacă utilizatorul îl introduce), date despre imobil, comision, precum și semnături grafice (dacă sunt folosite). Operatorul platformei nu prelucrează, nu stochează și nu utilizează aceste date în niciun scop propriu. Responsabilitatea privind introducerea, gestionarea și protejarea datelor revine exclusiv utilizatorului.</p>
+      <h3>2.3 Date tehnice</h3>
+      <ul>
+        <li>Log-uri tehnice (ex: erori, accesări, protecție anti-abuz)</li>
+        <li>Identificatori de sesiune/cookie pentru autentificare</li>
+        <li>Identificatori de dispozitiv (dacă este activă limitarea dispozitivelor)</li>
+      </ul>
+      <h2>3. Scopuri și temeiuri legale</h2>
+      <ul>
+        <li><b>Furnizarea serviciului</b> (executarea contractului): creare cont, autentificare, generare documente PDF.</li>
+        <li><b>Securitate și prevenirea abuzurilor</b> (interes legitim): protejarea conturilor și a infrastructurii.</li>
+        <li><b>Suport</b> (interes legitim / executare contract): asistență tehnică, gestionarea solicitărilor.</li>
+        <li><b>Obligații legale</b>: păstrarea unor evidențe, dacă este cazul (facturare etc.).</li>
+      </ul>
+      <h2>4. Cui divulgăm datele</h2>
+      <p>Nu vindem datele personale. Putem divulga date către furnizori strict necesari operării (ex: hosting, baze de date), în condiții de confidențialitate și securitate. De asemenea, putem divulga dacă avem obligație legală.</p>
+      <h2>5. Transferuri internaționale</h2>
+      <p>Infrastructura poate implica furnizori din UE sau din afara UE. Dacă există transferuri în afara SEE, acestea se vor face cu garanții adecvate (ex: clauze contractuale standard), conform GDPR.</p>
+      <h2>6. Perioada de stocare</h2>
+      <p>Păstrăm datele cât timp este necesar pentru funcționarea Serviciului, suport, securitate și obligații legale. Utilizatorul poate solicita ștergerea contului; unele date pot fi păstrate dacă legea impune (ex: evidențe contabile).</p>
+      <h2>7. Securitate</h2>
+      <p>Aplicăm măsuri rezonabile de securitate (hash pentru parole, control acces, limitare sesiuni etc.). Totuși, niciun sistem nu poate garanta securitate absolută; utilizatorul trebuie să folosească parole puternice și să protejeze dispozitivele.</p>
+      <h2>8. Drepturile tale</h2>
+      <ul>
+        <li>Acces la date</li>
+        <li>Rectificare</li>
+        <li>Ștergere (în condițiile legii)</li>
+        <li>Restricționare</li>
+        <li>Portabilitate</li>
+        <li>Opoziție (pentru prelucrări bazate pe interes legitim)</li>
+        <li>Plângere la autoritatea competentă (ANSPDCP)</li>
+      </ul>
+      <p>Pentru exercitarea drepturilor, contactează: <b>{{ support_email }}</b>.</p>
+      <h2>9. Cookie-uri</h2>
+      <p>Serviciul folosește cookie-uri / storage necesare autentificării și funcționării (ex: sesiune). Putem folosi și cookie-uri tehnice pentru securitate.</p>
+      <h2>10. Actualizări ale politicii</h2>
+      <p>Putem actualiza această Politică. Versiunea curentă este publicată pe această pagină.</p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  {% include 'partials/google_analytics.html' %}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=overlays-content" />
+  <meta name="theme-color" content="#070B18" />
+  <title>Anunț #{{ offer.id }} — Marketplace</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marketplace.css') }}" />
+  <style>
+    .detail-wrap { max-width: 720px; margin: 0 auto; padding: var(--pad-lg) var(--pad); }
+    .back-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--r-md); border: 1px solid var(--stroke); background: var(--surface); color: var(--text); text-decoration: none; font-weight: 700; font-size: 14px; margin-bottom: var(--pad-lg); }
+    .back-btn:hover { background: var(--surface2); border-color: var(--primary); }
+    .detail-hero { background: linear-gradient(135deg, var(--surface) 0%, rgba(79,140,255,.06) 100%); border: 1px solid var(--stroke); border-radius: var(--r-lg); padding: var(--pad-lg); margin-bottom: var(--pad); box-shadow: var(--shadow2); }
+    .detail-hero h1 { margin: 0 0 8px; font-size: 24px; font-weight: 800; line-height: 1.25; color: var(--text); }
+    .detail-hero .meta { margin: 0; font-size: 13px; color: var(--muted); }
+    .detail-hero .price-block { margin-top: 16px; font-size: 22px; font-weight: 800; color: var(--primary); }
+    .detail-card { background: var(--surface); border: 1px solid var(--stroke); border-radius: var(--r-lg); padding: var(--pad-lg); margin-bottom: var(--pad); box-shadow: var(--shadow2); }
+    .detail-section-title { margin: 0 0 12px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .detail-value { margin: 0; font-size: 15px; line-height: 1.7; color: var(--text); white-space: pre-wrap; }
+    .zone-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .zone-chips span { padding: 6px 12px; border-radius: var(--r-sm); font-size: 13px; background: var(--surface2); border: 1px solid var(--stroke); color: var(--muted); }
+    .spec-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .spec-item { padding: 12px; background: var(--bg); border-radius: var(--r-md); border: 1px solid var(--stroke); }
+    .spec-item .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 4px; }
+    .spec-item .val { font-size: 16px; font-weight: 700; color: var(--text); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; border-radius: var(--r-md); font-weight: 700; font-size: 14px; cursor: pointer; border: 1px solid var(--stroke); background: var(--surface); color: var(--text); text-decoration: none; }
+    .btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .btn.danger { border-color: rgba(239,68,68,.4); color: #fecaca; }
+    .contact-locked { padding: var(--pad); border-radius: var(--r-md); background: var(--surface2); border: 1px solid var(--stroke); margin-top: 12px; }
+    .contact-cta-text { margin: 0; font-size: 14px; color: var(--muted); }
+    .desc-text { margin: 0; font-size: 15px; line-height: 1.75; color: var(--text); white-space: pre-wrap; }
+    .desc-text.collapsed { max-height: 10.5em; overflow: hidden; display: block; }
+    .desc-toggle { margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--primary); cursor: pointer; background: none; border: none; padding: 0; text-decoration: underline; }
+    .desc-toggle:hover { color: var(--primary2); }
+    .price-negotiable { font-size: 14px; color: var(--muted); margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="detail-wrap">
+    <a class="back-btn" href="{{ url_for('marketplace.list_offers') }}">Listă anunțuri</a>
+
+    {% set tip_imobil = offer.property_type|property_type_label %}
+    {% set tip_oferta = 'Vânzare' if offer.request_type == 'cumparare' else 'Închiriere' %}
+    {% set pret = offer.price if offer.price is not none else (offer.budget_min if offer.budget_min is not none else offer.budget_max) %}
+
+    <div class="detail-hero">
+      <h1>{{ tip_imobil }}{% if offer.rooms %} · {{ offer.rooms }} camere{% endif %}</h1>
+      <p class="meta">
+        {% if has_active_access and offer.user %}
+          Anunț postat la data {{ offer.created_at.strftime('%d.%m.%Y') }} de {{ offer.user.full_name }}
+        {% else %}
+          {{ tip_oferta }} · {{ offer.created_at.strftime('%d.%m.%Y %H:%M') }}
+        {% endif %}
+      </p>
+      <div class="price-block">
+        {% if pret is not none %}
+          {{ pret|format_budget }} €
+        {% else %}
+          Preț la cerere
+        {% endif %}
+        {% if offer.price_negotiable %}<p class="price-negotiable">Preț negociabil</p>{% endif %}
+        {% if getattr(offer, 'plus_tva', False) %}<p class="price-negotiable">Plus TVA</p>{% endif %}
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <p class="detail-section-title">{{ 'Zonă' if offer.zones|length == 1 else 'Zone' }}</p>
+      <div class="zone-chips">
+        {% for z in offer.zones %}
+          <span>{{ z.name|zone_display_name }}</span>
+        {% endfor %}
+        {% if not offer.zones %}<span>–</span>{% endif %}
+      </div>
+    </div>
+
+    {% if offer.rooms or offer.surface_totala or offer.surface_utila or offer.anul_constructiei or offer.nr_locuri_parcare or (offer.etaj and offer.property_type != 'casa') %}
+      <div class="detail-card">
+        <p class="detail-section-title">Caracteristici</p>
+        <div class="spec-grid">
+          {% if offer.rooms %}
+            <div class="spec-item"><div class="label">Camere</div><div class="val">{{ offer.rooms }}</div></div>
+          {% endif %}
+          {% if offer.surface_utila is not none %}
+            <div class="spec-item"><div class="label">Suprafață utilă</div><div class="val">{{ (offer.surface_utila|string).replace('.', ',') }} m²</div></div>
+          {% endif %}
+          {% if offer.surface_totala is not none %}
+            <div class="spec-item"><div class="label">Suprafață totală</div><div class="val">{{ (offer.surface_totala|string).replace('.', ',') }} m²</div></div>
+          {% endif %}
+          {% if offer.surface_balcon is not none %}
+            <div class="spec-item"><div class="label">Balcon</div><div class="val">{{ (offer.surface_balcon|string).replace('.', ',') }} m²</div></div>
+          {% endif %}
+          {% if offer.surface_terasa is not none %}
+            <div class="spec-item"><div class="label">Terasă</div><div class="val">{{ (offer.surface_terasa|string).replace('.', ',') }} m²</div></div>
+          {% endif %}
+          {% if offer.surface_curte is not none %}
+            <div class="spec-item"><div class="label">Curte</div><div class="val">{{ (offer.surface_curte|string).replace('.', ',') }} m²</div></div>
+          {% endif %}
+          {% if offer.etaj and offer.property_type != 'casa' %}
+            <div class="spec-item"><div class="label">Etaj</div><div class="val">{{ offer.etaj.replace('P','Parter').replace(',', ', ') }}</div></div>
+          {% endif %}
+          {% if offer.nr_etaje_cladire %}
+            <div class="spec-item"><div class="label">Etaje clădire</div><div class="val">{{ offer.nr_etaje_cladire }}</div></div>
+          {% endif %}
+          {% if offer.anul_constructiei %}
+            <div class="spec-item"><div class="label">An construcție</div><div class="val">{{ offer.anul_constructiei }}</div></div>
+          {% endif %}
+          {% if offer.nr_locuri_parcare is not none %}
+            <div class="spec-item"><div class="label">Locuri parcare</div><div class="val">{{ offer.nr_locuri_parcare }}</div></div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if offer.offers_commission and offer.commission_value %}
+      <div class="detail-card">
+        <p class="detail-section-title">Comision</p>
+        <p class="detail-value">Oferă comision: <strong>{{ offer.commission_value }}</strong></p>
+      </div>
+    {% endif %}
+
+    {% if offer.description %}
+      <div class="detail-card" id="desc-card">
+        <p class="detail-section-title">Descriere</p>
+        <p class="desc-text collapsed" id="desc-text">{{ offer.description }}</p>
+        <button type="button" class="desc-toggle" id="desc-toggle" aria-expanded="false" style="display:none;">Vezi mai mult</button>
+      </div>
+    {% endif %}
+
+    <div class="detail-card">
+      <p class="detail-section-title">Contact (contactează agentul pentru colaborare, imagini sau alte detalii)</p>
+      <div class="contact-locked">
+        {% if can_view_contact_phone and contact_phone %}
+          <p class="detail-value"><strong>Telefon:</strong> <a href="tel:{{ contact_phone_digits }}" style="color:var(--primary); text-decoration:none; font-weight:600;">{{ contact_phone }}</a></p>
+        {% else %}
+          <p class="contact-cta-text">🔒 Disponibil doar pentru conturi active</p>
+          <p style="margin-top:8px; font-size:14px; color:var(--muted);">Pentru a vedea datele de contact, activează contul tău.</p>
+          {% set activate_msg = 'Salut! Vreau să activez contul meu pentru a vedea contactele din Marketplace.
+
+Email: ' ~ current_user.email ~ '
+
+Vreau acces complet la toate funcțiile.' %}
+          <a class="btn primary" href="https://wa.me/{{ wa_phone }}?text={{ activate_msg|urlencode }}" target="_blank" rel="noopener">👉 Activează accesul (25 RON / lună)</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if is_owner and offer.owner_name_private %}
+      <div class="detail-card detail-card-private">
+        <p class="detail-section-title">Doar pentru tine</p>
+        <p class="detail-value"><strong>Proprietar:</strong> {{ offer.owner_name_private }}</p>
+      </div>
+    {% endif %}
+
+    {% if is_owner %}
+      <div class="detail-card">
+        <p class="detail-section-title">Acțiuni</p>
+        <div class="btn-row">
+          <a class="btn primary" href="{{ url_for('marketplace.edit_offer', id=offer.id) }}">Editează anunțul</a>
+          <form method="post" action="{{ url_for('marketplace.delete_offer', id=offer.id) }}" style="display:inline;" onsubmit="return confirm('Ștergi acest anunț?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn danger">Șterge</button>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  {% if offer.description %}
+  <script>
+  (function() {
+    var desc = document.getElementById('desc-text');
+    var btn = document.getElementById('desc-toggle');
+    if (!desc || !btn) return;
+    if (desc.scrollHeight > desc.clientHeight) {
+      btn.style.display = 'inline-block';
+      btn.addEventListener('click', function() {
+        var expanded = desc.classList.toggle('collapsed');
+        btn.setAttribute('aria-expanded', !expanded);
+        btn.textContent = expanded ? 'Vezi mai mult' : 'Vezi mai puțin';
+      });
+    }
+  })();
+  </script>
+  {% endif %}
+  {% include 'partials/assistant_widget.html' %}
+</body>
+</html>

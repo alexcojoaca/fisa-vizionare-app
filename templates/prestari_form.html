@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#09090b" />
+  <title>Contract Prestări Servicii</title>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/premium.css') }}" />
+  <style>
+    .hidden { display: none !important; }
+  </style>
+</head>
+
+<body class="premium">
+  <div class="wrap">
+  {% from 'partials/premium_bar_footer.html' import premium_topbar, premium_footer %}
+  {% call premium_topbar() %}
+    <a href="{{ url_for('home') }}" class="topbarBtn">Acasă</a>
+
+  {% endcall %}
+
+  <h1 style="margin:0 0 16px;font-size:1.375rem;font-weight:700;letter-spacing:-0.02em;">Contract Prestări Servicii</h1>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat,msg in messages %}
+      <div class="flash {{ cat }}" style="margin-bottom:16px;">{{ msg }}</div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="section">
+    <form method="POST" id="mainForm">
+      {{ form.hidden_tag() }}
+
+      <div class="formSectionTitle">Beneficiar</div>
+
+      <label>{{ form.beneficiar_tip.label }}</label>
+      {{ form.beneficiar_tip() }}
+      {% for e in form.beneficiar_tip.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.beneficiar_nume.label }}</label>
+      {{ form.beneficiar_nume() }}
+      {% for e in form.beneficiar_nume.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div id="cnpField" class="hidden">
+        <label>{{ form.beneficiar_cnp.label }}</label>
+        {{ form.beneficiar_cnp() }}
+        {% for e in form.beneficiar_cnp.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div id="cuiField" class="hidden">
+        <label>{{ form.beneficiar_cui.label }}</label>
+        {{ form.beneficiar_cui() }}
+        {% for e in form.beneficiar_cui.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="row2">
+        <div>
+          <label>{{ form.beneficiar_telefon.label }}</label>
+          {{ form.beneficiar_telefon() }}
+          {% for e in form.beneficiar_telefon.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+        <div>
+          <label>{{ form.beneficiar_email.label }}</label>
+          {{ form.beneficiar_email() }}
+          {% for e in form.beneficiar_email.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <label>{{ form.beneficiar_adresa.label }}</label>
+      {{ form.beneficiar_adresa() }}
+      {% for e in form.beneficiar_adresa.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div class="formSectionTitle">Obiect contract (Art. 1)</div>
+
+      <label>{{ form.tip_tranzactie.label }}</label>
+      {{ form.tip_tranzactie() }}
+      {% for e in form.tip_tranzactie.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.imobil_tip.label }}</label>
+      {{ form.imobil_tip() }}
+      {% for e in form.imobil_tip.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <label>{{ form.imobil_adresa.label }}</label>
+      {{ form.imobil_adresa() }}
+      {% for e in form.imobil_adresa.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+
+      <div class="formSectionTitle">Preț / Comision (Art. 3)</div>
+
+      <div class="row2">
+        <div>
+          <label>{{ form.currency.label }}</label>
+          {{ form.currency() }}
+          {% for e in form.currency.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+        <div>
+          <label>{{ form.comision_tva.label }}</label>
+          {{ form.comision_tva() }}
+          {% for e in form.comision_tva.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+      <div>
+        <label>{{ form.comision.label }}</label>
+        {{ form.comision() }}
+        {% for e in form.comision.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="formSectionTitle">Nr. contract și dată</div>
+
+      <div class="row2">
+        <div>
+          <label>{{ form.nr_contract.label }}</label>
+          {{ form.nr_contract() }}
+          {% for e in form.nr_contract.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+        <div>
+          <label>{{ form.data_contractului.label }}</label>
+          {{ form.data_contractului() }}
+          {% for e in form.data_contractului.errors %}<div class="formErr">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="formSectionTitle">Semnături</div>
+      <p class="muted" style="margin:0 0 12px;">
+        Ambele semnături sunt opționale — poți genera și descărca PDF-ul și fără semnături. Dacă nu semnezi, linia de semnătură va rămâne goală în PDF.
+      </p>
+
+      <div class="row2">
+        <div>
+          <div class="sigLabel">Semnătură Beneficiar</div>
+          <div class="sigWrap">
+            <canvas id="sigCanvasBeneficiar"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigBeneficiar">Șterge semnătura</button>
+          </div>
+        </div>
+
+        <div>
+          <div class="sigLabel">Semnătură Agent / Prestator</div>
+          <div class="sigWrap">
+            <canvas id="sigCanvasAgent"></canvas>
+          </div>
+          <div class="sigActions">
+            <button type="button" class="btn btnSmall" id="clearSigAgent">Șterge semnătura</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="hidden" name="signature_beneficiar" id="signature_beneficiar">
+      <input type="hidden" name="signature_agent" id="signature_agent">
+    </form>
+  </div>
+  </div>
+
+  <div class="stickyBar">
+    <div class="stickyBarInner">
+      <button type="button" class="btn ghost" id="btnPreview" title="Deschide previzualizarea contractului în tab nou">
+        Previzualizare contract
+      </button>
+      <button type="submit" form="mainForm" class="btn primary" id="btnFinalize">
+        Semnează și generează PDF
+      </button>
+
+    </div>
+  </div>
+  <div class="stickySpacer"></div>
+
+<script>
+(function () {
+  const beneficiarTip = document.getElementById("beneficiar_tip");
+  const cnpField = document.getElementById("cnpField");
+  const cuiField = document.getElementById("cuiField");
+
+  function updateBeneficiarFields() {
+    const tip = beneficiarTip.value;
+    if (tip === "pf") {
+      cnpField.classList.remove("hidden");
+      cuiField.classList.add("hidden");
+    } else if (tip === "pj") {
+      cnpField.classList.add("hidden");
+      cuiField.classList.remove("hidden");
+    }
+  }
+
+  beneficiarTip.addEventListener("change", updateBeneficiarFields);
+  updateBeneficiarFields();
+
+  function setupSignature(canvasId, clearBtnId, hiddenInputId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+    const hiddenInput = document.getElementById(hiddenInputId);
+    const clearBtn = document.getElementById(clearBtnId);
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 3);
+
+    function resizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width * dpr);
+      const h = Math.round(rect.height * dpr);
+      if (canvas.width !== w || canvas.height !== h) {
+        canvas.width = w;
+        canvas.height = h;
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    function getPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const clientX = e.clientX != null ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const clientY = e.clientY != null ? e.clientY : (e.touches && e.touches[0] ? e.touches[0].clientY : 0);
+      const x = (clientX - rect.left) * (canvas.width / rect.width);
+      const y = (clientY - rect.top) * (canvas.height / rect.height);
+      return { x: x, y: y };
+    }
+
+    function initCanvas() {
+      requestAnimationFrame(function() { resizeCanvas(); });
+    }
+    initCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    let isDrawing = false;
+    let lastX = 0, lastY = 0;
+
+    function startDrawing(e) {
+      e.preventDefault();
+      isDrawing = true;
+      const p = getPos(e);
+      lastX = p.x; lastY = p.y;
+      if (e.target && e.target.setPointerCapture && e.pointerId != null) e.target.setPointerCapture(e.pointerId);
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+    }
+
+    function draw(e) {
+      if (!isDrawing) return;
+      e.preventDefault();
+      const p = getPos(e);
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 2 * dpr;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      lastX = p.x; lastY = p.y;
+      try { hiddenInput.value = canvas.toDataURL("image/png"); } catch (err) {}
+    }
+
+    function stopDrawing(e) {
+      if (e.type === "pointerup" && e.target && e.target.releasePointerCapture && e.pointerId != null) e.target.releasePointerCapture(e.pointerId);
+      if (isDrawing) {
+        isDrawing = false;
+        try { hiddenInput.value = canvas.toDataURL("image/png"); } catch (err) {}
+      }
+      e.preventDefault();
+    }
+
+    function clearSignature() {
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      hiddenInput.value = "";
+    }
+
+    if (canvas.addEventListener) {
+      canvas.addEventListener("pointerdown", startDrawing, { passive: false });
+      canvas.addEventListener("pointermove", draw, { passive: false });
+      canvas.addEventListener("pointerup", stopDrawing, { passive: false });
+      canvas.addEventListener("pointerleave", stopDrawing, { passive: false });
+    }
+    canvas.addEventListener("touchstart", function(e) { if (e.touches.length) startDrawing(e); }, { passive: false });
+    canvas.addEventListener("touchmove", function(e) { if (isDrawing) { e.preventDefault(); draw(e); } }, { passive: false });
+    canvas.addEventListener("touchend", stopDrawing, { passive: false });
+    canvas.addEventListener("touchcancel", stopDrawing, { passive: false });
+
+    clearBtn.addEventListener("click", clearSignature);
+  }
+
+  setupSignature("sigCanvasBeneficiar", "clearSigBeneficiar", "signature_beneficiar");
+  setupSignature("sigCanvasAgent", "clearSigAgent", "signature_agent");
+
+  (function hideStickyWhenKeyboard() {
+    var kbdHideTimer;
+    document.querySelectorAll(".section input, .section select, .section textarea").forEach(function(el) {
+      el.addEventListener("focus", function() { clearTimeout(kbdHideTimer); document.body.classList.add("kbd"); });
+      el.addEventListener("blur", function() { kbdHideTimer = setTimeout(function() { document.body.classList.remove("kbd"); }, 120); });
+    });
+  })();
+
+  document.getElementById("btnPreview").addEventListener("click", function () {
+    var form = document.getElementById("mainForm");
+    var action = form.action;
+    var target = form.target;
+    form.action = "{{ url_for('prestari.preview_pdf') }}";
+    form.target = "_blank";
+    form.submit();
+    form.action = action;
+    form.target = target;
+  });
+
+  document.getElementById("btnFinalize").addEventListener("click", function (e) {
+    var sigBen = document.getElementById("signature_beneficiar").value.trim();
+    var sigAgent = document.getElementById("signature_agent").value.trim();
+    if (!sigBen && !sigAgent) {
+      if (!confirm("Nu ai semnat niciunul dintre câmpurile de semnătură. Contractul va fi generat cu linii de semnătură goale. Continui?")) {
+        e.preventDefault();
+        return false;
+      }
+    }
+  });
+})();
+</script>
+  <script src="{{ url_for('static', filename='js/form-errors-scroll.js') }}"></script>
+{% include 'partials/assistant_widget.html' %}
+{{ premium_footer() }}
+</body>
+</html>

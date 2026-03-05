@@ -1,0 +1,228 @@
+{% extends "base_premium.html" %}
+{% block title %}Contul meu – Caut un imobil{% endblock %}
+
+{% block brand_content %}
+<a href="{{ url_for('client.home') }}" style="color:inherit;text-decoration:none;">
+  <h1>Caut un imobil</h1>
+</a>
+{% endblock %}
+
+{% block topbar_right %}
+<div style="display: flex; align-items: center; gap: 12px;">
+  {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+  {% set wa_text = 'Salut! Am o întrebare despre platforma "Caut un imobil".' %}
+  <a href="https://wa.me/{{ wa_phone }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener" class="topbarAuthBtn" style="font-size: 0.875rem;">Suport</a>
+  <a href="{{ url_for('client.account_settings') }}" class="topbarAuthBtn" style="font-size: 0.875rem;">Cont</a>
+  <a href="{{ url_for('client.logout') }}" class="topbarAuthBtn">Ieșire</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+  .client-home-header {
+    margin-bottom: 32px;
+  }
+  .client-home-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 12px;
+    color: var(--text);
+  }
+  .client-home-header p {
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .add-request-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 24px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.1s;
+    margin-bottom: 32px;
+  }
+  .add-request-btn:hover {
+    background: #fbbf24;
+  }
+  .add-request-btn:active {
+    transform: scale(0.98);
+  }
+  .add-request-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .quota-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+  .quota-info strong {
+    color: var(--text);
+  }
+  .requests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .request-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .request-card:hover {
+    border-color: var(--border-focus);
+    background: var(--surface-hover);
+  }
+  .request-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .request-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--text);
+  }
+  .request-meta {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+  }
+  .request-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .request-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+  }
+  .empty-state h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--text);
+  }
+  .empty-state p {
+    margin: 0 0 24px;
+  }
+</style>
+
+<div class="wrapCentered">
+  <div class="client-home-header">
+    <h2>Cererile mele</h2>
+    <p>Gestionează cererile tale și vezi câte vizualizări au primit.</p>
+  </div>
+
+
+  {% if not can_create_more %}
+  <div class="quota-info">
+    ⚠️ <strong>Ai atins limita de 2 cereri pe lună.</strong> Poți publica o cerere nouă luna viitoare sau șterge una dintre cererile existente.
+  </div>
+  {% else %}
+  <div class="quota-info">
+    📊 Ai publicat <strong>{{ requests_this_month }}/2</strong> cereri în luna aceasta.
+  </div>
+  {% endif %}
+
+  <a href="{{ url_for('client.new_request') }}" class="add-request-btn" {% if not can_create_more %}style="opacity: 0.5; cursor: not-allowed; pointer-events: none;"{% endif %}>
+    ➕ Adaugă cerere nouă
+  </a>
+
+  {% if requests %}
+  <div class="requests-list">
+    {% for req in requests %}
+    <div class="request-card">
+      <div class="request-header">
+        <div>
+          <h3 class="request-title">
+            {{ req.request_type|title }} – {{ req.property_type|title }}
+          </h3>
+          {% if req.zones %}
+          <p style="margin: 8px 0 0; color: var(--text-secondary); font-size: 0.875rem;">
+            Zone: {{ req.zones|map(attribute='name')|join(', ') }}
+          </p>
+          {% endif %}
+        </div>
+      </div>
+      <div class="request-meta">
+        <span>👁️ {{ req.view_count }} vizualizări</span>
+        <span>📅 Creată: {{ req.created_at.strftime('%d.%m.%Y') }}</span>
+        {% if req.budget_min or req.budget_max %}
+        <span>💰 Buget: 
+          {% if req.budget_min %}{{ req.budget_min|format_budget }}{% endif %}
+          {% if req.budget_min and req.budget_max %} - {% endif %}
+          {% if req.budget_max %}{{ req.budget_max|format_budget }}{% endif %} €
+        </span>
+        {% endif %}
+        {% if req.client_no_commission %}
+        <span style="color: var(--accent); font-weight: 600;">⚠️ Nu ofer comision</span>
+        {% elif req.client_offers_commission %}
+        <span style="color: var(--accent);">✅ Ofer comision: {{ req.client_commission_value or '' }}</span>
+        {% endif %}
+      </div>
+      {% if req.description %}
+      <p style="margin-top: 12px; color: var(--text-secondary); font-size: 0.875rem; line-height: 1.5;">
+        {{ req.description[:200] }}{% if req.description|length > 200 %}...{% endif %}
+      </p>
+      {% endif %}
+      <div class="request-actions">
+        <a href="{{ url_for('client.edit_request', request_id=req.id) }}" class="btn ghost" style="font-size: 0.875rem;">
+          Editează
+        </a>
+        <form method="POST" action="{{ url_for('client.delete_request', request_id=req.id) }}" style="display: inline;" onsubmit="return confirm('Ești sigur că vrei să ștergi această cerere?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          <button type="submit" class="btn ghost" style="font-size: 0.875rem; color: var(--text-muted);">
+            Șterge
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>Nu ai cereri active</h3>
+    <p>Publică prima ta cerere pentru a începe să primești oferte de la agenți.</p>
+    {% if can_create_more %}
+    <a href="{{ url_for('client.new_request') }}" class="btn primary">Adaugă prima cerere</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Buton suport în partea de jos -->
+  <div style="margin-top: 48px; padding: 20px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); text-align: center;">
+    <strong style="color: var(--text); font-size: 1rem; display: block; margin-bottom: 8px;">Ai întrebări sau ai nevoie de ajutor?</strong>
+    <p style="margin: 0 0 16px; color: var(--text-secondary); font-size: 0.875rem;">Echipa noastră este aici să te ajute.</p>
+    {% set wa_phone = config.WHATSAPP_SUPPORT_PHONE|default("40764381795") %}
+    {% set wa_text = 'Salut! Am o întrebare despre platforma "Caut un imobil".' %}
+    <a href="https://wa.me/{{ wa_phone }}?text={{ wa_text|urlencode }}" target="_blank" rel="noopener" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
+      Contactează suportul
+    </a>
+  </div>
+</div>
+{% endblock %}

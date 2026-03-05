@@ -1,0 +1,86 @@
+{% if current_user.is_authenticated and current_user.is_agent %}
+<div id="asistent-root" class="asistent-root" data-csrf="{{ csrf_token() }}" data-base-url="{{ request.url_root.rstrip('/') }}" data-wa-phone="{{ config.get('WHATSAPP_SUPPORT_PHONE', '40764381795') }}" data-page-id="{{ page_id|default('generic') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/assistant.css') }}" />
+
+  <div class="asistent-bubble-wrap" id="asistent-bubble-wrap">
+    <div class="asistent-bubble-msg-badge" id="asistent-bubble-msg-badge" hidden>Ai primit un mesaj</div>
+    <button type="button" class="asistent-fab" id="asistent-fab" aria-label="Deschide asistentul">
+      <svg class="asistent-fab-icon" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <!-- Robotel: cap rotund, doi ochi, zâmbet -->
+        <circle class="asistent-icon-head" cx="18" cy="18" r="13" fill="currentColor"/>
+        <ellipse class="asistent-icon-eye" cx="13" cy="15.5" rx="2.8" ry="3.2" fill="#0a0a0a"/>
+        <ellipse class="asistent-icon-eye" cx="23" cy="15.5" rx="2.8" ry="3.2" fill="#0a0a0a"/>
+        <path class="asistent-icon-mouth" d="M13 22 Q18 26 23 22" stroke="#0a0a0a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+        <rect class="asistent-icon-antenna" x="16.5" y="4" width="1.5" height="5" rx="0.8" fill="currentColor"/>
+        <circle class="asistent-icon-antenna-dot" cx="18" cy="3" r="1.5" fill="currentColor"/>
+      </svg>
+    </button>
+    <div class="asistent-bubble-tooltip-wrap" id="asistent-bubble-tooltip-wrap" hidden aria-hidden="true">
+      <span class="asistent-bubble-tooltip">Te ajut cu ceva?</span>
+      <span class="asistent-tooltip-tasks" id="asistent-tooltip-tasks"></span>
+      <span class="asistent-tooltip-arrow"></span>
+    </div>
+  </div>
+
+  <div class="asistent-overlay" id="asistent-overlay" aria-hidden="true">
+    <div class="asistent-backdrop" id="asistent-backdrop"></div>
+    <div class="asistent-panel" id="asistent-panel">
+      <header class="asistent-header">
+        <h2 class="asistent-title">Asistent</h2>
+        <button type="button" class="asistent-close" id="asistent-close" aria-label="Închide">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+
+      <nav class="asistent-tabs" role="tablist">
+        <button type="button" class="asistent-tab active" data-tab="ghid" role="tab">Ghid pagină</button>
+        <button type="button" class="asistent-tab asistent-tab-astazi" id="asistent-tab-astazi" data-tab="astazi" role="tab" hidden>Ce am de făcut azi</button>
+        <button type="button" class="asistent-tab asistent-tab-colaborari" id="asistent-tab-colaborari" data-tab="colaborari" role="tab">Posibile colaborări</button>
+        <button type="button" class="asistent-tab" data-tab="intreaba" role="tab">Întreabă</button>
+      </nav>
+
+      <div class="asistent-body">
+        <div class="asistent-notifications-block" id="asistent-notifications-block" hidden>
+          <!-- Anunțuri + expirare: populat din JS -->
+        </div>
+        <section class="asistent-tab-panel active" id="panel-ghid" role="tabpanel">
+          <h3 class="asistent-guide-title" id="asistent-guide-title">Se încarcă…</h3>
+          <p class="asistent-guide-intro" id="asistent-guide-intro"></p>
+          <ul class="asistent-guide-bullets" id="asistent-guide-bullets"></ul>
+          <div class="asistent-tip-block" id="asistent-tip-block">
+            <strong>Sfat rapid:</strong> <span id="asistent-tip-text"></span>
+          </div>
+        </section>
+
+        <section class="asistent-tab-panel" id="panel-astazi" role="tabpanel" hidden>
+          <div class="asistent-astazi-chat" id="asistent-astazi-chat">
+            <div class="asistent-astazi-messages" id="asistent-astazi-messages"></div>
+            <a href="{{ url_for('todo.list_tasks') }}" class="asistent-astazi-link">Vezi toate task-urile</a>
+          </div>
+        </section>
+
+        <section class="asistent-tab-panel" id="panel-colaborari" role="tabpanel" hidden>
+          <div class="asistent-colaborari-chat" id="asistent-colaborari-chat">
+            <p class="asistent-muted" id="asistent-colaborari-loading">Se încarcă…</p>
+            <div class="asistent-colaborari-messages" id="asistent-colaborari-messages"></div>
+            <a href="{{ url_for('marketplace.hub') }}" class="asistent-colaborari-link">Marketplace</a>
+          </div>
+        </section>
+
+        <section class="asistent-tab-panel" id="panel-intreaba" role="tabpanel" hidden>
+          <div class="asistent-faq-search-wrap">
+            <input type="search" class="asistent-faq-search" id="asistent-faq-search" placeholder="Caută întrebări…" aria-label="Caută" />
+          </div>
+          <div class="asistent-faq-list" id="asistent-faq-list"></div>
+          <div class="asistent-faq-chat" id="asistent-faq-chat" hidden>
+            <div class="asistent-faq-messages" id="asistent-faq-messages"></div>
+            <button type="button" class="asistent-back" id="asistent-faq-back">← Înapoi la listă</button>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='js/assistant.js') }}"></script>
+{% endif %}

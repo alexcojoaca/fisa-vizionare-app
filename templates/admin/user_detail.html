@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin – User #{{ u.id }}</title>
+  <style>
+    :root { --bg:#0b0f19; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --line:#1f2937; --radius: 14px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 18px 14px 60px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .title { margin: 0; font-size: 20px; font-weight: 900; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 13px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; }
+    .btn:hover { background: rgba(255,255,255,.08); }
+    .btn.ok { border-color: rgba(34,197,94,.4); color: #86efac; }
+    .btn.blue { border-color: rgba(96,165,250,.45); color: #93c5fd; }
+    .btn.purple { border-color: rgba(167,139,250,.45); color: #c4b5fd; }
+    .card { background: rgba(17,24,39,.85); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; }
+    .flash { margin-bottom: 14px; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; }
+    .flash.ok { border: 1px solid rgba(34,197,94,.35); background: rgba(34,197,94,.1); color: #86efac; }
+    .flash.error { border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.1); color: #fecaca; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px; border-bottom: 1px solid var(--line); text-align: left; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .stack { display: flex; flex-direction: column; gap: 6px; }
+    .pill { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .pill.paid { border: 1px solid rgba(34,197,94,.4); color: #86efac; }
+    .pill.warn { border: 1px solid rgba(245,158,11,.4); color: #fcd34d; }
+
+    /* Secțiune evidentă: Adaugă pachete */
+    .add-packages { background: linear-gradient(135deg, rgba(34,197,94,.12) 0%, rgba(96,165,250,.08) 100%); border: 1px solid rgba(34,197,94,.35); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+    .add-packages h2 { margin: 0 0 6px; font-size: 15px; font-weight: 800; color: #86efac; text-transform: uppercase; letter-spacing: .04em; }
+    .add-packages .sub { margin: 0 0 16px; font-size: 13px; color: var(--muted); }
+    .pkg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .pkg-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 12px; border-radius: 12px; border: 2px solid rgba(34,197,94,.4); background: rgba(17,24,39,.9); color: #86efac; cursor: pointer; font-weight: 800; transition: transform .15s, box-shadow .15s; }
+    .pkg-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(34,197,94,.2); background: rgba(34,197,94,.15); }
+    .pkg-btn .slots { font-size: 22px; line-height: 1.2; }
+    .pkg-btn .price { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .pkg-btn .label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .pkg-section { margin-bottom: 24px; }
+    .pkg-section:last-child { margin-bottom: 0; }
+    .pkg-section h3 { margin: 0 0 12px; font-size: 14px; font-weight: 700; color: var(--text); }
+    .pkg-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .pkg-actions form { display: inline-block; }
+    .btn-reset { border-color: rgba(239,68,68,.4); color: #fecaca; }
+    .btn-reset:hover { background: rgba(239,68,68,.1); }
+    .stat-row { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 14px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+    .stat-item { font-size: 14px; }
+    .stat-item strong { color: #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1 class="title">User #{{ u.id }} — {{ u.full_name }}</h1>
+      <a class="btn" href="{{ url_for('admin.admin_index') }}">← Dashboard</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ 'ok' if cat == 'ok' else 'error' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+      <div class="stack">
+        <div><strong>Email:</strong> {{ u.email }}</div>
+        <div class="muted">Agenție: {{ agency_name }}</div>
+        <div class="muted">Acces: {{ u.access_source() }} — Până la: {{ u.access_until() and u.access_until().strftime('%d.%m.%Y') or '-' }}</div>
+      </div>
+    </div>
+
+    <!-- Secțiune evidentă: Adaugă pachete anunțuri + cereri -->
+    <div class="add-packages">
+      <h2>➕ Adaugă sloturi (pachete)</h2>
+      <p class="sub">Alege un pachet și apasă pe buton — se adaugă la sloturile existente, valabile 30 zile.</p>
+
+      <div class="pkg-section">
+        <h3>📦 Anunțuri (oferte)</h3>
+        <div class="stat-row">
+          <span class="stat-item">Folosite: <strong>{{ offer_used }}</strong> / <strong>{{ offer_limit }}</strong></span>
+          <span class="stat-item">Sloturi plătite active: <strong>{{ offer_paid_slots }}</strong></span>
+          <span class="stat-item muted">Expiră: {{ offer_paid_expires_at_fmt }}</span>
+        </div>
+        <div class="pkg-grid">
+          {% for slots, price in offer_packages %}
+            <form method="post" action="{{ url_for('admin.admin_activate_offer_package', user_id=u.id) }}" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <input type="hidden" name="slots" value="{{ slots }}"/>
+              <button type="submit" class="pkg-btn">
+                <span class="slots">+{{ slots }}</span>
+                <span class="price">{{ price }} lei</span>
+                <span class="label">anunțuri</span>
+              </button>
+            </form>
+          {% endfor %}
+        </div>
+        {% if offer_paid_slots > 0 %}
+          <div class="pkg-actions">
+            <form method="post" action="{{ url_for('admin.admin_reset_offer_paid_slots', user_id=u.id) }}" onsubmit="return confirm('Reseți toate sloturile plătite anunțuri?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn btn-reset">Resetează sloturi plătite anunțuri</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="pkg-section" style="margin-top:20px; padding-top:20px; border-top:1px solid rgba(255,255,255,.08);">
+        <h3>📋 Cereri</h3>
+        <div class="stat-row">
+          <span class="stat-item">Folosite: <strong>{{ request_used }}</strong> / <strong>{{ request_limit }}</strong></span>
+          <span class="stat-item">Sloturi plătite active: <strong>{{ request_paid_slots }}</strong></span>
+          <span class="stat-item muted">Expiră: {{ request_paid_expires_at_fmt }}</span>
+        </div>
+        <div class="pkg-grid">
+          {% for slots, price in request_packages %}
+            <form method="post" action="{{ url_for('admin.admin_activate_request_package', user_id=u.id) }}" style="margin:0;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <input type="hidden" name="slots" value="{{ slots }}"/>
+              <button type="submit" class="pkg-btn" style="border-color: rgba(96,165,250,.5); color: #93c5fd;">
+                <span class="slots">+{{ slots }}</span>
+                <span class="price">{{ price }} lei</span>
+                <span class="label">cereri</span>
+              </button>
+            </form>
+          {% endfor %}
+        </div>
+        {% if request_paid_slots > 0 %}
+          <div class="pkg-actions">
+            <form method="post" action="{{ url_for('admin.admin_reset_request_paid_slots', user_id=u.id) }}" onsubmit="return confirm('Reseți toate sloturile plătite cereri?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button type="submit" class="btn btn-reset">Resetează sloturi plătite cereri</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px; font-size:16px;">Anunțurile userului (ultimele 30 zile)</h2>
+      <table>
+        <thead><tr><th>ID</th><th>Tip</th><th>Imobil</th><th>Preț</th><th>Creat</th><th></th></tr></thead>
+        <tbody>
+          {% for o in offers %}
+          <tr>
+            <td>#{{ o.id }}</td>
+            <td>{{ o.request_type or '-' }}</td>
+            <td>{{ o.property_type or '-' }}</td>
+            <td>{{ o.price or o.budget_max or '-' }}</td>
+            <td class="muted">{{ o.created_at.strftime('%d.%m.%Y') if o.created_at else '-' }}</td>
+            <td><a class="btn" href="{{ url_for('marketplace.detail_offer', id=o.id) }}" target="_blank">Vezi</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="muted">Niciun anunț în ultimele 30 zile.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px; font-size:16px;">Cererile userului (ultimele 30 zile)</h2>
+      <table>
+        <thead><tr><th>ID</th><th>Tip</th><th>Imobil</th><th>Buget</th><th>Creat</th><th></th></tr></thead>
+        <tbody>
+          {% for r in requests_list %}
+          <tr>
+            <td>#{{ r.id }}</td>
+            <td>{{ r.request_type or '-' }}</td>
+            <td>{{ r.property_type or '-' }}</td>
+            <td>{{ r.budget_min or '-' }} – {{ r.budget_max or '-' }}</td>
+            <td class="muted">{{ r.created_at.strftime('%d.%m.%Y') if r.created_at else '-' }}</td>
+            <td><a class="btn" href="{{ url_for('marketplace.detail', id=r.id) }}" target="_blank">Vezi</a></td>
+          </tr>
+          {% else %}
+          <tr><td colspan="6" class="muted">Nicio cerere în ultimele 30 zile.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 10px; font-size:16px;">Limite override (opțional)</h2>
+      <p class="muted" style="margin:0 0 10px; font-size:13px;">Setare limită maximă anunțuri/cereri (gol = 3 gratuit + plătite / 5 gratuit + plătite).</p>
+      <a class="btn purple" href="{{ url_for('admin.admin_offer_quotas') }}?email={{ u.email|urlencode }}">Deschide Limite Marketplace pentru acest user</a>
+    </div>
+  </div>
+</body>
+</html>

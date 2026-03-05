@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin – Curățare bază de date</title>
+  <style>
+    :root { --bg:#0b0f19; --card:#111827; --muted:#9ca3af; --text:#e5e7eb; --line:#1f2937; --radius: 14px; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: linear-gradient(180deg, #0b0f19 0%, #0b1022 100%); color: var(--text); }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 18px 14px 60px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .title { margin: 0; font-size: 20px; font-weight: 900; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px; text-decoration: none; font-weight: 900; font-size: 13px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; }
+    .btn:hover { background: rgba(255,255,255,.08); }
+    .btn.primary { border-color: rgba(34,197,94,.4); background: rgba(34,197,94,.1); color: #86efac; }
+    .btn.primary:hover { background: rgba(34,197,94,.18); }
+    .btn.danger { border-color: rgba(239,68,68,.4); color: #fecaca; }
+    .btn.danger:hover { background: rgba(239,68,68,.12); }
+    .card { background: rgba(17,24,39,.85); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; margin-bottom: 14px; }
+    .flash { margin-bottom: 14px; padding: 12px; border-radius: 12px; font-weight: 800; font-size: 13px; }
+    .flash.ok { border: 1px solid rgba(34,197,94,.35); background: rgba(34,197,94,.1); color: #86efac; }
+    .flash.error { border: 1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.1); color: #fecaca; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid rgba(255,255,255,.07); vertical-align: top; text-align: left; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; }
+    .chk { margin-right: 8px; }
+    .toggle-row { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05); display: flex; align-items: center; gap: 10px; }
+    .toggle-row:last-child { border-bottom: none; }
+    .dry-result { background: rgba(96,165,250,.08); border: 1px solid rgba(96,165,250,.3); border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 13px; }
+    .dry-result strong { color: #93c5fd; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <h1 class="title">Curățare bază de date (Cleaner)</h1>
+      <div style="display: flex; gap: 8px;">
+        <a class="btn" href="{{ url_for('admin.admin_cleanup_users_inactive') }}">Utilizatori inactivi</a>
+        <a class="btn" href="{{ url_for('admin.admin_cleanup_runs_csv') }}">Export CSV raport</a>
+        <a class="btn" href="{{ url_for('admin.admin_index') }}">← Dashboard</a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ 'ok' if cat == 'ok' else 'error' }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <div class="card">
+      <h3 style="margin: 0 0 14px; font-size: 15px;">Categorii de curățare</h3>
+      <form method="post" id="cleanupForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <div class="toggle-row">
+          <input type="checkbox" name="remote_expired" value="1" id="chk_remote" class="chk" checked />
+          <label for="chk_remote">{{ categories.get('remote_expired', 'Remote expirate') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="buyer_request" value="1" id="chk_buyer" class="chk" checked />
+          <label for="chk_buyer">{{ categories.get('buyer_request', 'Cereri marketplace > 30 zile') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="task_completed" value="1" id="chk_task" class="chk" checked />
+          <label for="chk_task">{{ categories.get('task_completed', 'Task-uri completate > 30 zile') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="assistant_usage" value="1" id="chk_usage" class="chk" checked />
+          <label for="chk_usage">{{ categories.get('assistant_usage', 'Assistant usage vechi') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="user_device" value="1" id="chk_device" class="chk" checked />
+          <label for="chk_device">{{ categories.get('user_device', 'Device-uri inactive > 180 zile') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="device_trial" value="1" id="chk_trial" class="chk" />
+          <label for="chk_trial">{{ categories.get('device_trial', 'Device trial vechi > 365 zile (opțional)') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="team_task_assignment_done" value="1" id="chk_team_assignment" class="chk" checked />
+          <label for="chk_team_assignment">{{ categories.get('team_task_assignment_done', 'TeamTaskAssignment DONE > 90 zile') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="daily_activity" value="1" id="chk_daily_activity" class="chk" checked />
+          <label for="chk_daily_activity">{{ categories.get('daily_activity', 'DailyActivity > 90 zile') }}</label>
+        </div>
+        <div class="toggle-row">
+          <input type="checkbox" name="team_task_old_7_days" value="1" id="chk_team_task_old" class="chk" checked />
+          <label for="chk_team_task_old">{{ categories.get('team_task_old_7_days', 'TeamTask mai vechi de 7 zile') }}</label>
+        </div>
+        <div style="margin-top: 14px; display: flex; gap: 10px;">
+          <button type="submit" formaction="{{ url_for('admin.admin_cleanup_dry_run') }}" class="btn primary">Dry-run (doar simulare)</button>
+          <button type="submit" formaction="{{ url_for('admin.admin_cleanup_run') }}" class="btn danger" onclick="return confirm('Execuți curățarea reală? Se vor șterge definitiv datele.');">Rulează curățarea</button>
+        </div>
+      </form>
+
+      {% if dry_run_result %}
+      <div class="dry-result">
+        <strong>Rezultat dry-run:</strong> s-ar șterge {{ dry_run_result.total_deleted }} rânduri în total.
+        {% if dry_run_result.details %}
+        <pre style="margin: 10px 0 0; font-size: 12px; overflow-x: auto;">{{ dry_run_result.details | tojson(indent=2) }}</pre>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 14px; font-size: 15px;">Istoric rulări (ultimele 20)</h3>
+      {% if last_success %}
+      <p style="color: var(--muted); font-size: 12px; margin: 0 0 10px;">Ultima rulare reușită: {{ last_success.strftime('%d.%m.%Y %H:%M') }} UTC</p>
+      {% endif %}
+      {% if runs %}
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Mod</th>
+            <th>Status</th>
+            <th>Detalii</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in runs %}
+          <tr>
+            <td>{{ r.ran_at.strftime('%d.%m.%Y %H:%M') if r.ran_at else '-' }}</td>
+            <td>{{ r.mode or '-' }}</td>
+            <td>{{ 'OK' if r.ok else 'Eroare' }}</td>
+            <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">{{ (r.details_json or '')[:80] }}{% if r.error_text %} {{ r.error_text[:50] }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p style="margin: 0; color: var(--muted);">Nu există rulări înregistrate.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
